@@ -21,7 +21,7 @@ func makeTemplateTheOldWay() *cf.Template {
 			Timeout: cf.Integer(30),
 		},
 		CrossZone: cf.Bool(true),
-		HealthCheck: &cf.ElasticLoadBalancingHealthCheck{
+		HealthCheck: &cf.ElasticLoadBalancingLoadBalancerHealthCheck{
 			HealthyThreshold:   cf.String("2"),
 			Interval:           cf.String("60"),
 			Target:             cf.String("HTTP:80/"),

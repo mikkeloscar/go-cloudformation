@@ -35,18 +35,26 @@ func (s ApiGatewayAccount) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-apikey.html
 type ApiGatewayApiKey struct {
+	// An AWS Marketplace customer identifier to use when integrating with
+	// the AWS SaaS Marketplace.
+	CustomerId *StringExpr `json:"CustomerId,omitempty"`
+
 	// A description of the purpose of the API key.
 	Description *StringExpr `json:"Description,omitempty"`
 
 	// Indicates whether the API key can be used by clients.
 	Enabled *BoolExpr `json:"Enabled,omitempty"`
 
+	// Specifies whether the key identifier is distinct from the created API
+	// key value.
+	GenerateDistinctId *BoolExpr `json:"GenerateDistinctId,omitempty"`
+
 	// A name for the API key. If you don't specify a name, AWS
 	// CloudFormation generates a unique physical ID and uses that ID for the
 	// API key name. For more information, see Name Type.
 	Name *StringExpr `json:"Name,omitempty"`
 
-	// A list of stages to associated with this API key.
+	// A list of stages to associate with this API key.
 	StageKeys *APIGatewayApiKeyStageKeyList `json:"StageKeys,omitempty"`
 }
 
@@ -59,10 +67,15 @@ func (s ApiGatewayApiKey) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-authorizer.html
 type ApiGatewayAuthorizer struct {
-	// The credentials required for the authorizer. To specify an AWS
-	// Identity and Access Management (IAM) role that API Gateway assumes,
-	// specify the role's Amazon Resource Name (ARN). To use resource-based
-	// permissions on the AWS Lambda (Lambda) function, specify null.
+	// An optional customer-defined field that's used in Swagger imports and
+	// exports without functional impact.
+	AuthType *StringExpr `json:"AuthType,omitempty"`
+
+	// The credentials that are required for the authorizer. To specify an
+	// AWS Identity and Access Management (IAM) role that API Gateway
+	// assumes, specify the role's Amazon Resource Name (ARN). To use
+	// resource-based permissions on the AWS Lambda (Lambda) function,
+	// specify null.
 	AuthorizerCredentials *StringExpr `json:"AuthorizerCredentials,omitempty"`
 
 	// The time-to-live (TTL) period, in seconds, that specifies how long API
@@ -74,8 +87,8 @@ type ApiGatewayAuthorizer struct {
 
 	// The authorizer's Uniform Resource Identifier (URI). If you specify
 	// TOKEN for the authorizer's Type property, specify a Lambda function
-	// URI, which has the form arn:aws:apigateway:region:lambda:path/path.
-	// The path usually has the form
+	// URI that has the form arn:aws:apigateway:region:lambda:path/path. The
+	// path usually has the form
 	// /2015-03-31/functions/LambdaFunctionARN/invocations.
 	AuthorizerUri *StringExpr `json:"AuthorizerUri,omitempty"`
 
@@ -100,10 +113,10 @@ type ApiGatewayAuthorizer struct {
 	// A list of the Amazon Cognito user pool Amazon Resource Names (ARNs) to
 	// associate with this authorizer. For more information, see Use Amazon
 	// Cognito Your User Pool in the API Gateway Developer Guide.
-	ProviderARNs *StringListExpr `json:"ProviderARNs,omitempty"`
+	ProviderARNs interface{} `json:"ProviderARNs,omitempty"`
 
-	// The ID of the RestApi resource in which API Gateway creates the
-	// authorizer.
+	// The ID of the RestApi resource that API Gateway creates the authorizer
+	// in.
 	RestApiId *StringExpr `json:"RestApiId,omitempty"`
 
 	// The type of authorizer:
@@ -120,10 +133,11 @@ func (s ApiGatewayAuthorizer) CfnResourceType() string {
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-basepathmapping.html
 type ApiGatewayBasePathMapping struct {
 	// The base path name that callers of the API must provide in the URL
-	// after the domain name.
+	// after the domain name. If you specify this property, it can't be an
+	// empty string.
 	BasePath *StringExpr `json:"BasePath,omitempty"`
 
-	// The name of a DomainName resource.
+	// The domain name of a DomainName resource.
 	DomainName *StringExpr `json:"DomainName,omitempty"`
 
 	// The name of the API.
@@ -174,6 +188,99 @@ func (s ApiGatewayDeployment) CfnResourceType() string {
 	return "AWS::ApiGateway::Deployment"
 }
 
+// ApiGatewayDocumentationPart represents AWS::ApiGateway::DocumentationPart
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-documentationpart.html
+type ApiGatewayDocumentationPart struct {
+	// The location of the API entity that the documentation applies to.
+	Location *APIGatewayDocumentationPartLocation `json:"Location,omitempty"`
+
+	// The documentation content map of the targeted API entity.
+	Properties *StringExpr `json:"Properties,omitempty"`
+
+	// The identifier of the targeted API entity.
+	RestApiId *StringExpr `json:"RestApiId,omitempty"`
+}
+
+// CfnResourceType returns AWS::ApiGateway::DocumentationPart to implement the ResourceProperties interface
+func (s ApiGatewayDocumentationPart) CfnResourceType() string {
+	return "AWS::ApiGateway::DocumentationPart"
+}
+
+// ApiGatewayDocumentationVersion represents AWS::ApiGateway::DocumentationVersion
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-documentationversion.html
+type ApiGatewayDocumentationVersion struct {
+	// The description of the API documentation snapshot.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// The version identifier of the API documentation snapshot.
+	DocumentationVersion *StringExpr `json:"DocumentationVersion,omitempty"`
+
+	// The identifier of the targeted API entity.
+	RestApiId *StringExpr `json:"RestApiId,omitempty"`
+}
+
+// CfnResourceType returns AWS::ApiGateway::DocumentationVersion to implement the ResourceProperties interface
+func (s ApiGatewayDocumentationVersion) CfnResourceType() string {
+	return "AWS::ApiGateway::DocumentationVersion"
+}
+
+// ApiGatewayDomainName represents AWS::ApiGateway::DomainName
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-domainname.html
+type ApiGatewayDomainName struct {
+	// The reference to an AWS-managed certificate for use by the
+	// edge-optimized endpoint for this domain name. AWS Certificate Manager
+	// is the only supported source. For requirements and additional
+	// information about setting up certificates, see Get Certificates Ready
+	// in AWS Certificate Manager in the API Gateway Developer Guide.
+	CertificateArn *StringExpr `json:"CertificateArn,omitempty"`
+
+	// The custom domain name for your API in Amazon API Gateway.
+	DomainName *StringExpr `json:"DomainName,omitempty"`
+
+	// A list of the endpoint types of the domain name.
+	EndpointConfiguration *APIGatewayDomainNameEndpointConfiguration `json:"EndpointConfiguration,omitempty"`
+
+	// The reference to an AWS-managed certificate for use by the regional
+	// endpoint for the domain name. AWS Certificate Manager is the only
+	// supported source.
+	RegionalCertificateArn interface{} `json:"RegionalCertificateArn,omitempty"`
+}
+
+// CfnResourceType returns AWS::ApiGateway::DomainName to implement the ResourceProperties interface
+func (s ApiGatewayDomainName) CfnResourceType() string {
+	return "AWS::ApiGateway::DomainName"
+}
+
+// ApiGatewayGatewayResponse represents AWS::ApiGateway::GatewayResponse
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-gatewayresponse.html
+type ApiGatewayGatewayResponse struct {
+	// The response parameters (paths, query strings, and headers) for the
+	// response. Duplicates not allowed.
+	ResponseParameters interface{} `json:"ResponseParameters,omitempty"`
+
+	// The response templates for the response. Duplicates not allowed.
+	ResponseTemplates interface{} `json:"ResponseTemplates,omitempty"`
+
+	// The response type. For valid values, see GatewayResponse in the API
+	// Gateway API Reference.
+	ResponseType interface{} `json:"ResponseType,omitempty"`
+
+	// The identifier of the targeted API entity.
+	RestApiId interface{} `json:"RestApiId,omitempty"`
+
+	// The HTTP status code for the response.
+	StatusCode interface{} `json:"StatusCode,omitempty"`
+}
+
+// CfnResourceType returns AWS::ApiGateway::GatewayResponse to implement the ResourceProperties interface
+func (s ApiGatewayGatewayResponse) CfnResourceType() string {
+	return "AWS::ApiGateway::GatewayResponse"
+}
+
 // ApiGatewayMethod represents AWS::ApiGateway::Method
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-method.html
@@ -189,27 +296,34 @@ type ApiGatewayMethod struct {
 	// this property, specify CUSTOM for the AuthorizationType property.
 	AuthorizerId *StringExpr `json:"AuthorizerId,omitempty"`
 
-	// The HTTP method that clients will use to call this method.
+	// The HTTP method that clients use to call this method.
 	HttpMethod *StringExpr `json:"HttpMethod,omitempty"`
 
-	// The back-end system that the method calls when it receives a request.
+	// The backend system that the method calls when it receives a request.
 	Integration *APIGatewayMethodIntegration `json:"Integration,omitempty"`
 
 	// The responses that can be sent to the client who calls the method.
 	MethodResponses *APIGatewayMethodMethodResponseList `json:"MethodResponses,omitempty"`
 
-	// The resources used for the response's content type. Specify response
-	// models as key-value pairs (string-to-string map), with a content type
-	// as the key and a Model resource name as the value.
+	// A friendly operation name for the method. For example, you can assign
+	// the OperationName of ListPets for the GET /pets method.
+	OperationName *StringExpr `json:"OperationName,omitempty"`
+
+	// The resources that are used for the response's content type. Specify
+	// response models as key-value pairs (string-to-string mapping), with a
+	// content type as the key and a Model resource name as the value.
 	RequestModels interface{} `json:"RequestModels,omitempty"`
 
-	// Request parameters that API Gateway accepts. Specify request
-	// parameters as key-value pairs (string-to-Boolean map), with a source
-	// as the key and a Boolean as the value. The Boolean specifies whether a
-	// parameter is required. A source must match the following format
+	// The request parameters that API Gateway accepts. Specify request
+	// parameters as key-value pairs (string-to-Boolean mapping), with a
+	// source as the key and a Boolean as the value. The Boolean specifies
+	// whether a parameter is required. A source must match the format
 	// method.request.location.name, where the location is querystring, path,
 	// or header, and name is a valid, unique parameter name.
 	RequestParameters interface{} `json:"RequestParameters,omitempty"`
+
+	// The ID of the associated request validator.
+	RequestValidatorId *StringExpr `json:"RequestValidatorId,omitempty"`
 
 	// The ID of an API Gateway resource. For root resource methods, specify
 	// the RestApi root resource ID, such as { "Fn::GetAtt": ["MyRestApi",
@@ -236,7 +350,7 @@ type ApiGatewayModel struct {
 	// A description that identifies this model.
 	Description *StringExpr `json:"Description,omitempty"`
 
-	// A name for the mode. If you don't specify a name, AWS CloudFormation
+	// A name for the model. If you don't specify a name, AWS CloudFormation
 	// generates a unique physical ID and uses that ID for the model name.
 	// For more information, see Name Type.
 	Name *StringExpr `json:"Name,omitempty"`
@@ -252,6 +366,29 @@ type ApiGatewayModel struct {
 // CfnResourceType returns AWS::ApiGateway::Model to implement the ResourceProperties interface
 func (s ApiGatewayModel) CfnResourceType() string {
 	return "AWS::ApiGateway::Model"
+}
+
+// ApiGatewayRequestValidator represents AWS::ApiGateway::RequestValidator
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-requestvalidator.html
+type ApiGatewayRequestValidator struct {
+	// The name of this request validator.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The identifier of the targeted API entity.
+	RestApiId *StringExpr `json:"RestApiId,omitempty"`
+
+	// Indicates whether to validate the request body according to the
+	// configured schema for the targeted API and method.
+	ValidateRequestBody *BoolExpr `json:"ValidateRequestBody,omitempty"`
+
+	// Indicates whether to validate request parameters.
+	ValidateRequestParameters *BoolExpr `json:"ValidateRequestParameters,omitempty"`
+}
+
+// CfnResourceType returns AWS::ApiGateway::RequestValidator to implement the ResourceProperties interface
+func (s ApiGatewayRequestValidator) CfnResourceType() string {
+	return "AWS::ApiGateway::RequestValidator"
 }
 
 // ApiGatewayResource represents AWS::ApiGateway::Resource
@@ -280,13 +417,20 @@ func (s ApiGatewayResource) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-restapi.html
 type ApiGatewayRestApi struct {
+	// The list of binary media types that are supported by the RestApi
+	// resource, such as image/png or application/octet-stream. By default,
+	// RestApi supports only UTF-8-encoded text payloads. For more
+	// information, see Enable Support for Binary Payloads in API Gateway in
+	// the API Gateway Developer Guide. Duplicates are not allowed.
+	BinaryMediaTypes interface{} `json:"BinaryMediaTypes,omitempty"`
+
 	// An OpenAPI specification that defines a set of RESTful APIs in the
-	// JSON format. For YAML templates, you can also specify the
+	// JSON format. For YAML templates, you can also provide the
 	// specification in the YAML format.
 	Body interface{} `json:"Body,omitempty"`
 
 	// The Amazon Simple Storage Service (Amazon S3) location that points to
-	// a OpenAPI file, which defines a set of RESTful APIs in JSON or YAML
+	// an OpenAPI file, which defines a set of RESTful APIs in JSON or YAML
 	// format.
 	BodyS3Location *APIGatewayRestApiS3Location `json:"BodyS3Location,omitempty"`
 
@@ -296,15 +440,18 @@ type ApiGatewayRestApi struct {
 	// A description of the purpose of this API Gateway RestApi resource.
 	Description *StringExpr `json:"Description,omitempty"`
 
-	// If a warning occurs while API Gateway is creating the RestApi
-	// resource, indicates whether to roll back the resource.
+	// A list of the endpoint types of the API.
+	EndpointConfiguration *APIGatewayRestApiEndpointConfiguration `json:"EndpointConfiguration,omitempty"`
+
+	// Indicates whether to roll back the resource if a warning occurs while
+	// API Gateway is creating the RestApi resource.
 	FailOnWarnings *BoolExpr `json:"FailOnWarnings,omitempty"`
 
 	// A name for the API Gateway RestApi resource.
 	Name *StringExpr `json:"Name,omitempty"`
 
 	// Custom header parameters for the request.
-	Parameters *StringListExpr `json:"Parameters,omitempty"`
+	Parameters *StringExpr `json:"Parameters,omitempty"`
 }
 
 // CfnResourceType returns AWS::ApiGateway::RestApi to implement the ResourceProperties interface
@@ -332,6 +479,9 @@ type ApiGatewayStage struct {
 	// A description of the stage's purpose.
 	Description *StringExpr `json:"Description,omitempty"`
 
+	// The version identifier of the API documentation snapshot.
+	DocumentationVersion *StringExpr `json:"DocumentationVersion,omitempty"`
+
 	// Settings for all methods in the stage.
 	MethodSettings *APIGatewayStageMethodSettingList `json:"MethodSettings,omitempty"`
 
@@ -339,10 +489,10 @@ type ApiGatewayStage struct {
 	RestApiId *StringExpr `json:"RestApiId,omitempty"`
 
 	// The name of the stage, which API Gateway uses as the first path
-	// segment in the invoke Uniform Resource Identifier (URI).
+	// segment in the invoked Uniform Resource Identifier (URI).
 	StageName *StringExpr `json:"StageName,omitempty"`
 
-	// A map (string to string map) that defines the stage variables, where
+	// A map (string-to-string map) that defines the stage variables, where
 	// the variable name is the key and the variable value is the value.
 	// Variable names are limited to alphanumeric characters. Values must
 	// match the following regular expression: [A-Za-z0-9-._~:/?#&amp;=,]+.
@@ -412,10 +562,11 @@ type ApplicationAutoScalingScalableTarget struct {
 	// target during a scaling activity.
 	MinCapacity *IntegerExpr `json:"MinCapacity,omitempty"`
 
-	// The unique resource identifier to associate with this scalable target.
-	// For more information, see the ResourceId parameter for the
+	// The resource identifier to associate with this scalable target. This
+	// string consists of the resource type and unique identifier. For more
+	// information, see the ResourceId parameter for the
 	// RegisterScalableTarget action in the Application Auto Scaling API
-	// Reference.
+	// Reference, or see the ScalableTarget examples.
 	ResourceId *StringExpr `json:"ResourceId,omitempty"`
 
 	// The Amazon Resource Name (ARN) of an AWS Identity and Access
@@ -423,13 +574,17 @@ type ApplicationAutoScalingScalableTarget struct {
 	// your scalable target.
 	RoleARN *StringExpr `json:"RoleARN,omitempty"`
 
-	// The scalable dimension associated with the scalable target. Specify
-	// the service namespace, resource type, and scaling property, such as
-	// ecs:service:DesiredCount for the desired task count of an Amazon EC2
-	// Container Service service. For valid values, see the ScalableDimension
-	// content for the ScalingPolicy data type in the Application Auto
-	// Scaling API Reference.
+	// The scalable dimension that's associated with the scalable target.
+	// Specify the service namespace, resource type, and scaling
+	// property—for example, ecs:service:DesiredCount for the desired task
+	// count of an Amazon Elastic Container Service service. For valid
+	// values, see the ScalableDimension content for the ScalingPolicy data
+	// type in the Application Auto Scaling API Reference.
 	ScalableDimension *StringExpr `json:"ScalableDimension,omitempty"`
+
+	// The scheduled actions for the scalable target. Duplicates aren't
+	// allowed.
+	ScheduledActions *ApplicationAutoScalingScalableTargetScheduledActionList `json:"ScheduledActions,omitempty"`
 
 	// The AWS service namespace of the scalable target. For a list of
 	// service namespaces, see AWS Service Namespaces in the AWS General
@@ -449,9 +604,7 @@ type ApplicationAutoScalingScalingPolicy struct {
 	// A name for the scaling policy.
 	PolicyName *StringExpr `json:"PolicyName,omitempty"`
 
-	// An Application Auto Scaling policy type. For valid values, see the
-	// PolicyType parameter for the PutScalingPolicy action in the
-	// Application Auto Scaling API Reference.
+	// An Application Auto Scaling policy type.
 	PolicyType *StringExpr `json:"PolicyType,omitempty"`
 
 	// The unique resource identifier for the scalable target that this
@@ -480,6 +633,9 @@ type ApplicationAutoScalingScalingPolicy struct {
 	// A step policy that configures when Application Auto Scaling scales
 	// resources up or down, and by how much.
 	StepScalingPolicyConfiguration *ApplicationAutoScalingScalingPolicyStepScalingPolicyConfiguration `json:"StepScalingPolicyConfiguration,omitempty"`
+
+	// Configures a target tracking scaling policy.
+	TargetTrackingScalingPolicyConfiguration *ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfiguration `json:"TargetTrackingScalingPolicyConfiguration,omitempty"`
 }
 
 // CfnResourceType returns AWS::ApplicationAutoScaling::ScalingPolicy to implement the ResourceProperties interface
@@ -487,12 +643,34 @@ func (s ApplicationAutoScalingScalingPolicy) CfnResourceType() string {
 	return "AWS::ApplicationAutoScaling::ScalingPolicy"
 }
 
+// AthenaNamedQuery represents AWS::Athena::NamedQuery
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-athena-namedquery.html
+type AthenaNamedQuery struct {
+	// A brief description of the query.
+	Description interface{} `json:"Description,omitempty"`
+
+	// The SQL query statements that comprise the query.
+	QueryString interface{} `json:"QueryString,omitempty"`
+
+	// The database to which the query belongs.
+	Database interface{} `json:"Database,omitempty"`
+
+	// The plain-language name of the query.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::Athena::NamedQuery to implement the ResourceProperties interface
+func (s AthenaNamedQuery) CfnResourceType() string {
+	return "AWS::Athena::NamedQuery"
+}
+
 // AutoScalingAutoScalingGroup represents AWS::AutoScaling::AutoScalingGroup
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-group.html
 type AutoScalingAutoScalingGroup struct {
 	// Contains a list of availability zones for the group.
-	AvailabilityZones *StringListExpr `json:"AvailabilityZones,omitempty"`
+	AvailabilityZones interface{} `json:"AvailabilityZones,omitempty"`
 
 	// The number of seconds after a scaling activity is completed before any
 	// further scaling activities can start.
@@ -516,25 +694,31 @@ type AutoScalingAutoScalingGroup struct {
 	InstanceId *StringExpr `json:"InstanceId,omitempty"`
 
 	// Specifies the name of the associated
-	// AWS::AutoScaling::LaunchConfiguration.
+	// AWS::AutoScaling::LaunchConfiguration resource.
 	LaunchConfigurationName *StringExpr `json:"LaunchConfigurationName,omitempty"`
+
+	// The lifecycle hooks for the group, which specify actions to perform
+	// when Auto Scaling launches or terminates instances. For more
+	// information, see Auto Scaling Lifecycle Hooks in the Auto Scaling User
+	// Guide.
+	LifecycleHookSpecificationList *AutoScalingAutoScalingGroupLifecycleHookSpecificationList `json:"LifecycleHookSpecificationList,omitempty"`
 
 	// A list of Classic load balancers associated with this Auto Scaling
 	// group. To specify Application load balancers, use TargetGroupARNs.
-	LoadBalancerNames *StringListExpr `json:"LoadBalancerNames,omitempty"`
+	LoadBalancerNames interface{} `json:"LoadBalancerNames,omitempty"`
 
 	// The maximum size of the Auto Scaling group.
 	MaxSize *StringExpr `json:"MaxSize,omitempty"`
 
 	// Enables the monitoring of group metrics of an Auto Scaling group.
-	MetricsCollection *AutoScalingMetricsCollectionList `json:"MetricsCollection,omitempty"`
+	MetricsCollection *AutoScalingAutoScalingGroupMetricsCollectionList `json:"MetricsCollection,omitempty"`
 
 	// The minimum size of the Auto Scaling group.
 	MinSize *StringExpr `json:"MinSize,omitempty"`
 
 	// An embedded property that configures an Auto Scaling group to send
 	// notifications when specified events take place.
-	NotificationConfigurations *AutoScalingNotificationConfigurationsList `json:"NotificationConfigurations,omitempty"`
+	NotificationConfigurations *AutoScalingAutoScalingGroupNotificationConfigurationList `json:"NotificationConfigurations,omitempty"`
 
 	// The name of an existing cluster placement group into which you want to
 	// launch your instances. A placement group is a logical grouping of
@@ -542,21 +726,23 @@ type AutoScalingAutoScalingGroup struct {
 	// multiple Availability Zones and a placement group.
 	PlacementGroup *StringExpr `json:"PlacementGroup,omitempty"`
 
-	// The tags you want to attach to this resource.
-	Tags *AutoScalingTagsList `json:"Tags,omitempty"`
+	// The Auto Scaling tags to attach to this resource. For more information
+	// about Auto Scaling tags, see Tagging Auto Scaling Groups and Amazon
+	// EC2 Instances in the Auto Scaling User Guide.
+	Tags *AutoScalingAutoScalingGroupTagPropertyList `json:"Tags,omitempty"`
 
 	// A list of Amazon Resource Names (ARN) of target groups to associate
 	// with the Auto Scaling group.
-	TargetGroupARNs *StringListExpr `json:"TargetGroupARNs,omitempty"`
+	TargetGroupARNs interface{} `json:"TargetGroupARNs,omitempty"`
 
 	// A policy or a list of policies that are used to select the instances
 	// to terminate. The policies are executed in the order that you list
 	// them.
-	TerminationPolicies *StringListExpr `json:"TerminationPolicies,omitempty"`
+	TerminationPolicies interface{} `json:"TerminationPolicies,omitempty"`
 
 	// A list of subnet identifiers of Amazon Virtual Private Cloud (Amazon
 	// VPCs).
-	VPCZoneIdentifier *StringListExpr `json:"VPCZoneIdentifier,omitempty"`
+	VPCZoneIdentifier interface{} `json:"VPCZoneIdentifier,omitempty"`
 }
 
 // CfnResourceType returns AWS::AutoScaling::AutoScalingGroup to implement the ResourceProperties interface
@@ -585,7 +771,7 @@ type AutoScalingLaunchConfiguration struct {
 
 	// The IDs of one or more security groups for the VPC that you specified
 	// in the ClassicLinkVPCId property.
-	ClassicLinkVPCSecurityGroups *StringListExpr `json:"ClassicLinkVPCSecurityGroups,omitempty"`
+	ClassicLinkVPCSecurityGroups interface{} `json:"ClassicLinkVPCSecurityGroups,omitempty"`
 
 	// Specifies whether the launch configuration is optimized for EBS I/O.
 	// This optimization provides dedicated throughput to Amazon EBS and an
@@ -663,7 +849,8 @@ type AutoScalingLifecycleHook struct {
 	AutoScalingGroupName *StringExpr `json:"AutoScalingGroupName,omitempty"`
 
 	// The action the Auto Scaling group takes when the lifecycle hook
-	// timeout elapses or if an unexpected failure occurs.
+	// timeout elapses or if an unexpected failure occurs. Valid values are
+	// CONTINUE (default) and ABANDON.
 	DefaultResult *StringExpr `json:"DefaultResult,omitempty"`
 
 	// The amount of time that can elapse before the lifecycle hook times
@@ -733,10 +920,10 @@ type AutoScalingScalingPolicy struct {
 	// property replaces the MinAdjustmentStep property.
 	MinAdjustmentMagnitude *IntegerExpr `json:"MinAdjustmentMagnitude,omitempty"`
 
-	// An Auto Scaling policy type. You can specify SimpleScaling or
-	// StepScaling. By default, AWS CloudFormation specifies SimpleScaling.
-	// For more information, see Scaling Policy Types in the Auto Scaling
-	// User Guide.
+	// An Auto Scaling policy type. You can specify SimpleScaling,
+	// StepScaling, or TargetTrackingScaling. By default, AWS CloudFormation
+	// specifies SimpleScaling. For more information, see Scaling Policy
+	// Types in the Auto Scaling User Guide.
 	PolicyType *StringExpr `json:"PolicyType,omitempty"`
 
 	// The number of instances by which to scale. The AdjustmentType property
@@ -753,6 +940,9 @@ type AutoScalingScalingPolicy struct {
 	// A set of adjustments that enable you to scale based on the size of the
 	// alarm breach.
 	StepAdjustments *AutoScalingScalingPolicyStepAdjustmentsList `json:"StepAdjustments,omitempty"`
+
+	// Configures a target tracking scaling policy.
+	TargetTrackingConfiguration *AutoScalingScalingPolicyTargetTrackingConfiguration `json:"TargetTrackingConfiguration,omitempty"`
 }
 
 // CfnResourceType returns AWS::AutoScaling::ScalingPolicy to implement the ResourceProperties interface
@@ -768,7 +958,8 @@ type AutoScalingScheduledAction struct {
 	AutoScalingGroupName *StringExpr `json:"AutoScalingGroupName,omitempty"`
 
 	// The number of Amazon EC2 instances that should be running in the Auto
-	// Scaling group.
+	// Scaling group. At least one of MaxSize, MinSize, or DesiredCapacity
+	// must be specified.
 	DesiredCapacity *IntegerExpr `json:"DesiredCapacity,omitempty"`
 
 	// The time in UTC for this schedule to end. For example,
@@ -776,9 +967,13 @@ type AutoScalingScheduledAction struct {
 	EndTime time.Time `json:"EndTime,omitempty"`
 
 	// The maximum number of Amazon EC2 instances in the Auto Scaling group.
+	// At least one of MaxSize, MinSize, or DesiredCapacity must be
+	// specified.
 	MaxSize *IntegerExpr `json:"MaxSize,omitempty"`
 
 	// The minimum number of Amazon EC2 instances in the Auto Scaling group.
+	// At least one of MaxSize, MinSize, or DesiredCapacity must be
+	// specified.
 	MinSize *IntegerExpr `json:"MinSize,omitempty"`
 
 	// The time in UTC when recurring future actions will start. You specify
@@ -795,6 +990,87 @@ type AutoScalingScheduledAction struct {
 // CfnResourceType returns AWS::AutoScaling::ScheduledAction to implement the ResourceProperties interface
 func (s AutoScalingScheduledAction) CfnResourceType() string {
 	return "AWS::AutoScaling::ScheduledAction"
+}
+
+// BatchComputeEnvironment represents AWS::Batch::ComputeEnvironment
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-batch-computeenvironment.html
+type BatchComputeEnvironment struct {
+	// The type of the compute environment.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// The service role associated with the compute environment that allows
+	// AWS Batch to make calls to AWS API operations on your behalf.
+	ServiceRole *StringExpr `json:"ServiceRole,omitempty"`
+
+	// The name of the compute environment.
+	ComputeEnvironmentName *StringExpr `json:"ComputeEnvironmentName,omitempty"`
+
+	// The compute resources defined for the compute environment.
+	ComputeResources *BatchComputeEnvironmentComputeResources `json:"ComputeResources,omitempty"`
+
+	// The state of the compute environment. The valid values are ENABLED or
+	// DISABLED. An ENABLED state indicates that you can register instances
+	// with the compute environment and that the associated instances can
+	// accept jobs.
+	State *StringExpr `json:"State,omitempty"`
+}
+
+// CfnResourceType returns AWS::Batch::ComputeEnvironment to implement the ResourceProperties interface
+func (s BatchComputeEnvironment) CfnResourceType() string {
+	return "AWS::Batch::ComputeEnvironment"
+}
+
+// BatchJobDefinition represents AWS::Batch::JobDefinition
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-batch-jobdefinition.html
+type BatchJobDefinition struct {
+	// The type of job definition.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// Default parameters or parameter substitution placeholders that are set
+	// in the job definition. Parameters are specified as a key-value pair
+	// mapping.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// The name of the job definition.
+	JobDefinitionName *StringExpr `json:"JobDefinitionName,omitempty"`
+
+	// An object with various properties specific to container-based jobs.
+	ContainerProperties *BatchJobDefinitionContainerProperties `json:"ContainerProperties,omitempty"`
+
+	// The retry strategy to use for failed jobs that are submitted with this
+	// job definition.
+	RetryStrategy *BatchJobDefinitionRetryStrategy `json:"RetryStrategy,omitempty"`
+}
+
+// CfnResourceType returns AWS::Batch::JobDefinition to implement the ResourceProperties interface
+func (s BatchJobDefinition) CfnResourceType() string {
+	return "AWS::Batch::JobDefinition"
+}
+
+// BatchJobQueue represents AWS::Batch::JobQueue
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-batch-jobqueue.html
+type BatchJobQueue struct {
+	// The compute environments that are attached to the job queue and the
+	// order in which job placement is preferred. Compute environments are
+	// selected for job placement in ascending order.
+	ComputeEnvironmentOrder *BatchJobQueueComputeEnvironmentOrderList `json:"ComputeEnvironmentOrder,omitempty"`
+
+	// The status of the job queue (for example, CREATING or VALID).
+	State *StringExpr `json:"State,omitempty"`
+
+	// The priority of the job queue.
+	Priority *IntegerExpr `json:"Priority,omitempty"`
+
+	// The name of the job queue.
+	JobQueueName *StringExpr `json:"JobQueueName,omitempty"`
+}
+
+// CfnResourceType returns AWS::Batch::JobQueue to implement the ResourceProperties interface
+func (s BatchJobQueue) CfnResourceType() string {
+	return "AWS::Batch::JobQueue"
 }
 
 // CertificateManagerCertificate represents AWS::CertificateManager::Certificate
@@ -818,7 +1094,7 @@ type CertificateManagerCertificate struct {
 	// ACM certificate. For example, you can add www.example.net to a
 	// certificate for the www.example.com domain name so that users can
 	// reach your site by using either name.
-	SubjectAlternativeNames *StringListExpr `json:"SubjectAlternativeNames,omitempty"`
+	SubjectAlternativeNames interface{} `json:"SubjectAlternativeNames,omitempty"`
 
 	// An arbitrary set of tags (key–value pairs) for this ACM certificate.
 	Tags []ResourceTag `json:"Tags,omitempty"`
@@ -827,6 +1103,38 @@ type CertificateManagerCertificate struct {
 // CfnResourceType returns AWS::CertificateManager::Certificate to implement the ResourceProperties interface
 func (s CertificateManagerCertificate) CfnResourceType() string {
 	return "AWS::CertificateManager::Certificate"
+}
+
+// Cloud9EnvironmentEC2 represents AWS::Cloud9::EnvironmentEC2
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloud9-environmentec2.html
+type Cloud9EnvironmentEC2 struct {
+	// Any AWS CodeCommit source code repositories to be cloned into the
+	// development environment.
+	Repositories *Cloud9EnvironmentEC2RepositoryList `json:"Repositories,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the environment owner. If this value
+	// is not specified, the ARN defaults to this environment's creator.
+	OwnerArn interface{} `json:"OwnerArn,omitempty"`
+
+	// The description of the environment to create.
+	Description interface{} `json:"Description,omitempty"`
+
+	// The number of minutes until the running instance is shut down after
+	// the environment has last been used.
+	AutomaticStopTimeMinutes interface{} `json:"AutomaticStopTimeMinutes,omitempty"`
+
+	// The type of instance to host the environment on (for example,
+	// t2.micro).
+	InstanceType interface{} `json:"InstanceType,omitempty"`
+
+	// The name of the environment to create.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::Cloud9::EnvironmentEC2 to implement the ResourceProperties interface
+func (s Cloud9EnvironmentEC2) CfnResourceType() string {
+	return "AWS::Cloud9::EnvironmentEC2"
 }
 
 // CloudFormationAuthentication represents AWS::CloudFormation::Authentication
@@ -838,7 +1146,7 @@ type CloudFormationAuthentication struct {
 
 	// A comma-delimited list of Amazon S3 buckets to be associated with the
 	// S3 authentication credentials.
-	Buckets *StringListExpr `json:"buckets,omitempty"`
+	Buckets interface{} `json:"buckets,omitempty"`
 
 	// Specifies the password for basic authentication.
 	Password *StringExpr `json:"password,omitempty"`
@@ -855,7 +1163,7 @@ type CloudFormationAuthentication struct {
 	// URIs and any more specific URI. For example, if you specify
 	// http://www.example.com, the authorization will also apply to
 	// http://www.example.com/test.
-	Uris *StringListExpr `json:"uris,omitempty"`
+	Uris interface{} `json:"uris,omitempty"`
 
 	// Specifies the user name for basic authentication.
 	Username *StringExpr `json:"username,omitempty"`
@@ -921,11 +1229,11 @@ func (s CloudFormationInterface) CfnResourceType() string {
 type CloudFormationStack struct {
 	// A list of existing Amazon SNS topics where notifications about stack
 	// events are sent.
-	NotificationARNs *StringListExpr `json:"NotificationARNs,omitempty"`
+	NotificationARNs interface{} `json:"NotificationARNs,omitempty"`
 
 	// The set of parameters passed to AWS CloudFormation when this nested
 	// stack is created.
-	Parameters *CloudFormationStackParameters `json:"Parameters,omitempty"`
+	Parameters *StackParameters `json:"Parameters,omitempty"`
 
 	// An arbitrary set of tags (key–value pairs) to describe this stack.
 	Tags []ResourceTag `json:"Tags,omitempty"`
@@ -1000,11 +1308,45 @@ func (s CloudFormationWaitConditionHandle) CfnResourceType() string {
 type CloudFrontDistribution struct {
 	// The distribution's configuration information.
 	DistributionConfig *CloudFrontDistributionConfig `json:"DistributionConfig,omitempty"`
+
+	// An arbitrary set of tags (key–value pairs) to associate with a
+	// CloudFront distribution.
+	Tags interface{} `json:"Tags,omitempty"`
 }
 
 // CfnResourceType returns AWS::CloudFront::Distribution to implement the ResourceProperties interface
 func (s CloudFrontDistribution) CfnResourceType() string {
 	return "AWS::CloudFront::Distribution"
+}
+
+// CloudFrontCloudFrontOriginAccessIdentity represents AWS::CloudFront::CloudFrontOriginAccessIdentity
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudfront-cloudfrontoriginaccessidentity.html
+type CloudFrontCloudFrontOriginAccessIdentity struct {
+	// The configuration of the CloudFront origin access identity.
+	CloudFrontOriginAccessIdentityConfig *CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfig `json:"CloudFrontOriginAccessIdentityConfig,omitempty"`
+}
+
+// CfnResourceType returns AWS::CloudFront::CloudFrontOriginAccessIdentity to implement the ResourceProperties interface
+func (s CloudFrontCloudFrontOriginAccessIdentity) CfnResourceType() string {
+	return "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+}
+
+// CloudFrontStreamingDistribution represents AWS::CloudFront::StreamingDistribution
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudfront-streamingdistribution.html
+type CloudFrontStreamingDistribution struct {
+	// Information about the configuration of the RMTP streaming
+	// distribution.
+	StreamingDistributionConfig *CloudFrontStreamingDistributionStreamingDistributionConfig `json:"StreamingDistributionConfig,omitempty"`
+
+	// Key-value tags to assign to this streaming distribution.
+	Tags *CloudFrontStreamingDistributionTagList `json:"Tags,omitempty"`
+}
+
+// CfnResourceType returns AWS::CloudFront::StreamingDistribution to implement the ResourceProperties interface
+func (s CloudFrontStreamingDistribution) CfnResourceType() string {
+	return "AWS::CloudFront::StreamingDistribution"
 }
 
 // CloudTrailTrail represents AWS::CloudTrail::Trail
@@ -1027,6 +1369,9 @@ type CloudTrailTrail struct {
 	// For more information, see CreateTrail in the AWS CloudTrail API
 	// Reference.
 	EnableLogFileValidation *BoolExpr `json:"EnableLogFileValidation,omitempty"`
+
+	// Configures logging for management and data events.
+	EventSelectors *CloudTrailTrailEventSelectorList `json:"EventSelectors,omitempty"`
 
 	// Indicates whether the trail is publishing events from global services,
 	// such as IAM, to the log files. By default, AWS CloudFormation sets
@@ -1063,6 +1408,10 @@ type CloudTrailTrail struct {
 
 	// An arbitrary set of tags (key–value pairs) for this trail.
 	Tags []ResourceTag `json:"Tags,omitempty"`
+
+	// The name of the trail. For constraint information, see CreateTrail in
+	// the AWS CloudTrail API Reference.
+	TrailName *StringExpr `json:"TrailName,omitempty"`
 }
 
 // CfnResourceType returns AWS::CloudTrail::Trail to implement the ResourceProperties interface
@@ -1074,18 +1423,19 @@ func (s CloudTrailTrail) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cw-alarm.html
 type CloudWatchAlarm struct {
-	// Indicates whether or not actions should be executed during any changes
-	// to the alarm's state.
+	// Indicates whether actions should be executed during changes to the
+	// CloudWatch alarm's state.
 	ActionsEnabled *BoolExpr `json:"ActionsEnabled,omitempty"`
 
 	// The list of actions to execute when this alarm transitions into an
-	// ALARM state from any other state. Each action is specified as an
-	// Amazon Resource Number (ARN). For more information about creating
-	// alarms and the actions you can specify, see Creating Amazon CloudWatch
-	// Alarms in the Amazon CloudWatch User Guide.
-	AlarmActions *StringListExpr `json:"AlarmActions,omitempty"`
+	// ALARM state from any other state. Specify each action as an Amazon
+	// Resource Name (ARN). For more information about creating alarms and
+	// the actions that you can specify, see PutMetricAlarm in the Amazon
+	// CloudWatch API Reference and Creating Amazon CloudWatch Alarms in the
+	// Amazon CloudWatch User Guide.
+	AlarmActions interface{} `json:"AlarmActions,omitempty"`
 
-	// The description for the alarm.
+	// The description of the alarm.
 	AlarmDescription *StringExpr `json:"AlarmDescription,omitempty"`
 
 	// A name for the alarm. If you don't specify a name, AWS CloudFormation
@@ -1094,40 +1444,49 @@ type CloudWatchAlarm struct {
 	AlarmName *StringExpr `json:"AlarmName,omitempty"`
 
 	// The arithmetic operation to use when comparing the specified Statistic
-	// and Threshold. The specified Statistic value is used as the first
-	// operand.
+	// and Threshold. AWS CloudFormation uses the value of Statistic as the
+	// first operand.
 	ComparisonOperator *StringExpr `json:"ComparisonOperator,omitempty"`
 
-	// The dimensions for the alarm's associated metric.
+	// The dimensions of the metric for the alarm.
 	Dimensions *CloudWatchMetricDimensionList `json:"Dimensions,omitempty"`
+
+	// Used only for alarms that are based on percentiles. Specifies whether
+	// to evaluate the data and potentially change the alarm state if there
+	// are too few data points to be statistically significant.
+	EvaluateLowSampleCountPercentile *StringExpr `json:"EvaluateLowSampleCountPercentile,omitempty"`
 
 	// The number of periods over which data is compared to the specified
 	// threshold.
 	EvaluationPeriods *IntegerExpr `json:"EvaluationPeriods,omitempty"`
 
-	// The list of actions to execute when this alarm transitions into an
-	// INSUFFICIENT_DATA state from any other state. Each action is specified
-	// as an Amazon Resource Number (ARN). Currently the only action
-	// supported is publishing to an Amazon SNS topic or an Amazon Auto
-	// Scaling policy.
-	InsufficientDataActions *StringListExpr `json:"InsufficientDataActions,omitempty"`
+	// The percentile statistic for the metric. Specify a value between p0.0
+	// and p100.
+	ExtendedStatistic *StringExpr `json:"ExtendedStatistic,omitempty"`
 
-	// The name for the alarm's associated metric. For more information about
-	// the metrics that you can specify, see Amazon CloudWatch Namespaces,
-	// Dimensions, and Metrics Reference in the Amazon CloudWatch User Guide.
+	// The list of actions to execute when this alarm transitions into an
+	// INSUFFICIENT_DATA state. Specify each action as an Amazon Resource
+	// Number (ARN). Currently, the only action supported is publishing to an
+	// Amazon SNS topic or an Auto Scaling policy.
+	InsufficientDataActions interface{} `json:"InsufficientDataActions,omitempty"`
+
+	// The name of the metric associated with the alarm. For more information
+	// about the metrics that you can specify, see Amazon CloudWatch
+	// Namespaces, Dimensions, and Metrics Reference in the Amazon CloudWatch
+	// User Guide.
 	MetricName *StringExpr `json:"MetricName,omitempty"`
 
-	// The namespace for the alarm's associated metric.
+	// The namespace of the metric that is associated with the alarm.
 	Namespace *StringExpr `json:"Namespace,omitempty"`
 
 	// The list of actions to execute when this alarm transitions into an OK
-	// state from any other state. Each action is specified as an Amazon
-	// Resource Number (ARN). Currently the only action supported is
-	// publishing to an Amazon SNS topic or an Amazon Auto Scaling policy.
-	OKActions *StringListExpr `json:"OKActions,omitempty"`
+	// state. Specify each action as an Amazon Resource Number (ARN).
+	// Currently, the only action supported is publishing to an SNS topic or
+	// an Auto Scaling policy.
+	OKActions interface{} `json:"OKActions,omitempty"`
 
-	// The time over which the specified statistic is applied. You must
-	// specify a time in seconds that is also a multiple of 60.
+	// The time over which the specified statistic is applied. Specify time
+	// in seconds, in multiples of 60.
 	Period *IntegerExpr `json:"Period,omitempty"`
 
 	// The statistic to apply to the alarm's associated metric.
@@ -1136,13 +1495,40 @@ type CloudWatchAlarm struct {
 	// The value against which the specified statistic is compared.
 	Threshold interface{} `json:"Threshold,omitempty"`
 
-	// The unit for the alarm's associated metric.
+	// Sets how this alarm is to handle missing data points. If
+	// TreatMissingData is omitted, the default behavior of missing is used.
+	// For more information, see PutMetricAlarm in the Amazon CloudWatch API
+	// Reference and Configuring How CloudWatch Alarms Treats Missing Data in
+	// the Amazon CloudWatch User Guide.
+	TreatMissingData *StringExpr `json:"TreatMissingData,omitempty"`
+
+	// The unit for the metric that is associated with the alarm.
 	Unit *StringExpr `json:"Unit,omitempty"`
 }
 
 // CfnResourceType returns AWS::CloudWatch::Alarm to implement the ResourceProperties interface
 func (s CloudWatchAlarm) CfnResourceType() string {
 	return "AWS::CloudWatch::Alarm"
+}
+
+// CloudWatchDashboard represents AWS::CloudWatch::Dashboard
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cw-dashboard.html
+type CloudWatchDashboard struct {
+	// A name for the dashboard. The name must be between 1 and 255
+	// characters. If you do not specify a name, one will be generated
+	// automatically.
+	DashboardName *StringExpr `json:"DashboardName,omitempty"`
+
+	// A JSON string that defines the widgets contained in the dashboard and
+	// their location. For information about how to format this string, see
+	// Dashboard Body Structure and Syntax.
+	DashboardBody *StringExpr `json:"DashboardBody,omitempty"`
+}
+
+// CfnResourceType returns AWS::CloudWatch::Dashboard to implement the ResourceProperties interface
+func (s CloudWatchDashboard) CfnResourceType() string {
+	return "AWS::CloudWatch::Dashboard"
 }
 
 // CodeBuildProject represents AWS::CodeBuild::Project
@@ -1152,6 +1538,15 @@ type CodeBuildProject struct {
 	// The output settings for artifacts that the project generates during a
 	// build.
 	Artifacts *CodeBuildProjectArtifacts `json:"Artifacts,omitempty"`
+
+	// Indicates whether AWS CodeBuild generates a publicly accessible URL
+	// for your project's build badge. For more information, see Build Badges
+	// Sample in the AWS CodeBuild User Guide.
+	BadgeEnabled interface{} `json:"BadgeEnabled,omitempty"`
+
+	// Settings that AWS CodeBuild uses to store and reuse build
+	// dependencies.
+	Cache *CodeBuildProjectProjectCache `json:"Cache,omitempty"`
 
 	// A description of the project. Use the description to identify the
 	// purpose of the project.
@@ -1188,6 +1583,11 @@ type CodeBuildProject struct {
 	// it's not complete. For valid values, see the timeoutInMinutes field in
 	// the AWS CodeBuild User Guide.
 	TimeoutInMinutes *IntegerExpr `json:"TimeoutInMinutes,omitempty"`
+
+	// Settings that enable AWS CodeBuild to access resources in an Amazon
+	// VPC. For more information, see Use AWS CodeBuild with Amazon Virtual
+	// Private Cloud in the AWS CodeBuild User Guide.
+	VpcConfig *CodeBuildProjectVpcConfig `json:"VpcConfig,omitempty"`
 }
 
 // CfnResourceType returns AWS::CodeBuild::Project to implement the ResourceProperties interface
@@ -1225,6 +1625,9 @@ type CodeDeployApplication struct {
 	// CloudFormation generates a unique physical ID and uses that ID for the
 	// application name. For more information, see Name Type.
 	ApplicationName *StringExpr `json:"ApplicationName,omitempty"`
+
+	// The compute platform that AWS CodeDeploy deploys the application to.
+	ComputePlatform *StringExpr `json:"ComputePlatform,omitempty"`
 }
 
 // CfnResourceType returns AWS::CodeDeploy::Application to implement the ResourceProperties interface
@@ -1261,23 +1664,36 @@ func (s CodeDeployDeploymentConfig) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codedeploy-deploymentgroup.html
 type CodeDeployDeploymentGroup struct {
-	// The name of an AWS CodeDeploy application for this deployment group.
+	// Information about the Amazon CloudWatch alarms that are associated
+	// with the deployment group.
+	AlarmConfiguration *CodeDeployDeploymentGroupAlarmConfiguration `json:"AlarmConfiguration,omitempty"`
+
+	// The name of an existing AWS CodeDeploy application to associate this
+	// deployment group with.
 	ApplicationName *StringExpr `json:"ApplicationName,omitempty"`
+
+	// Information about the automatic rollback configuration that is
+	// associated with the deployment group. If you specify this property,
+	// don't specify the Deployment property.
+	AutoRollbackConfiguration *CodeDeployDeploymentGroupAutoRollbackConfiguration `json:"AutoRollbackConfiguration,omitempty"`
 
 	// A list of associated Auto Scaling groups that AWS CodeDeploy
 	// automatically deploys revisions to when new instances are created.
-	AutoScalingGroups *StringListExpr `json:"AutoScalingGroups,omitempty"`
+	// Duplicates are not allowed.
+	AutoScalingGroups interface{} `json:"AutoScalingGroups,omitempty"`
 
-	// The application revision that will be deployed to this deployment
-	// group.
+	// The application revision to deploy to this deployment group. If you
+	// specify this property, your target application revision will be
+	// deployed as soon as the provisioning process is complete. If you
+	// specify this property, don't specify the AutoRollbackConfiguration
+	// property.
 	Deployment *CodeDeployDeploymentGroupDeployment `json:"Deployment,omitempty"`
 
 	// A deployment configuration name or a predefined configuration name.
 	// With predefined configurations, you can deploy application revisions
 	// to one instance at a time, half of the instances at a time, or all the
-	// instances at once. For more information and valid values, see the
-	// DeploymentConfigName parameter for the CreateDeploymentGroup action in
-	// the AWS CodeDeploy API Reference.
+	// instances at once. For more information and valid values, see Working
+	// with Deployment Configurations in the AWS CodeDeploy User Guide.
 	DeploymentConfigName *StringExpr `json:"DeploymentConfigName,omitempty"`
 
 	// A name for the deployment group. If you don't specify a name, AWS
@@ -1285,15 +1701,28 @@ type CodeDeployDeploymentGroup struct {
 	// deployment group name. For more information, see Name Type.
 	DeploymentGroupName *StringExpr `json:"DeploymentGroupName,omitempty"`
 
-	// The Amazon EC2 tags to filter on. AWS CodeDeploy includes all
-	// instances that match the tag filter with this deployment group.
+	// Attributes that determine the type of deployment to run and whether to
+	// route deployment traffic behind a load balancer.
+	DeploymentStyle *CodeDeployDeploymentGroupDeploymentStyle `json:"DeploymentStyle,omitempty"`
+
+	// The EC2 tags that are already applied to EC2 instances that you want
+	// to include in the deployment group. AWS CodeDeploy includes all EC2
+	// instances identified by any of the tags you specify in this deployment
+	// group. Duplicates are not allowed.
 	Ec2TagFilters *CodeDeployDeploymentGroupEc2TagFiltersList `json:"Ec2TagFilters,omitempty"`
 
-	// The on-premises instance tags to filter on. AWS CodeDeploy includes
-	// all on-premises instances that match the tag filter with this
-	// deployment group. To register on-premises instances with AWS
-	// CodeDeploy, see Configure Existing On-Premises Instances by Using AWS
-	// CodeDeploy in the AWS CodeDeploy User Guide.
+	// Information about the load balancer used in the deployment. For more
+	// information, see Integrating AWS CodeDeploy with Elastic Load
+	// Balancing in the AWS CodeDeploy User Guide.
+	LoadBalancerInfo *CodeDeployDeploymentGroupLoadBalancerInfo `json:"LoadBalancerInfo,omitempty"`
+
+	// The on-premises instance tags already applied to on-premises instances
+	// that you want to include in the deployment group. AWS CodeDeploy
+	// includes all on-premises instances identified by any of the tags you
+	// specify in this deployment group. To register on-premises instances
+	// with AWS CodeDeploy, see Working with On-Premises Instances for AWS
+	// CodeDeploy in the AWS CodeDeploy User Guide. Duplicates are not
+	// allowed.
 	OnPremisesInstanceTagFilters *CodeDeployDeploymentGroupOnPremisesInstanceTagFiltersList `json:"OnPremisesInstanceTagFilters,omitempty"`
 
 	// A service role Amazon Resource Name (ARN) that grants AWS CodeDeploy
@@ -1301,6 +1730,10 @@ type CodeDeployDeploymentGroup struct {
 	// information, see Create a Service Role for AWS CodeDeploy in the AWS
 	// CodeDeploy User Guide.
 	ServiceRoleArn *StringExpr `json:"ServiceRoleArn,omitempty"`
+
+	// Information about the notification triggers for the deployment group.
+	// Duplicates are not allowed.
+	TriggerConfigurations *CodeDeployDeploymentGroupTriggerConfigList `json:"TriggerConfigurations,omitempty"`
 }
 
 // CfnResourceType returns AWS::CodeDeploy::DeploymentGroup to implement the ResourceProperties interface
@@ -1378,6 +1811,275 @@ func (s CodePipelinePipeline) CfnResourceType() string {
 	return "AWS::CodePipeline::Pipeline"
 }
 
+// CognitoIdentityPool represents AWS::Cognito::IdentityPool
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-identitypool.html
+type CognitoIdentityPool struct {
+	// The name of your Amazon Cognito identity pool.
+	IdentityPoolName *StringExpr `json:"IdentityPoolName,omitempty"`
+
+	// Specifies whether the identity pool supports unauthenticated logins.
+	AllowUnauthenticatedIdentities *BoolExpr `json:"AllowUnauthenticatedIdentities,omitempty"`
+
+	// The "domain" by which Amazon Cognito will refer to your users. This
+	// name acts as a placeholder that allows your backend and the Amazon
+	// Cognito service to communicate about the developer provider. For the
+	// DeveloperProviderName, you can use letters and periods (.),
+	// underscores (_), and dashes (-).
+	DeveloperProviderName *StringExpr `json:"DeveloperProviderName,omitempty"`
+
+	// Key-value pairs that map provider names to provider app IDs.
+	SupportedLoginProviders *StringExpr `json:"SupportedLoginProviders,omitempty"`
+
+	// An array of Amazon Cognito user pools and their client IDs.
+	CognitoIdentityProviders *CognitoIdentityPoolCognitoIdentityProviderList `json:"CognitoIdentityProviders,omitempty"`
+
+	// A list of Amazon Resource Names (ARNs) of Security Assertion Markup
+	// Language (SAML) providers.
+	SamlProviderARNs interface{} `json:"SamlProviderARNs,omitempty"`
+
+	// A list of ARNs for the OpendID Connect provider.
+	OpenIdConnectProviderARNs interface{} `json:"OpenIdConnectProviderARNs,omitempty"`
+
+	// Configuration options for configuring Amazon Cognito streams.
+	CognitoStreams *CognitoIdentityPoolCognitoStreams `json:"CognitoStreams,omitempty"`
+
+	// Configuration options to be applied to the identity pool.
+	PushSync *CognitoIdentityPoolPushSync `json:"PushSync,omitempty"`
+
+	// The events to configure.
+	CognitoEvents interface{} `json:"CognitoEvents,omitempty"`
+}
+
+// CfnResourceType returns AWS::Cognito::IdentityPool to implement the ResourceProperties interface
+func (s CognitoIdentityPool) CfnResourceType() string {
+	return "AWS::Cognito::IdentityPool"
+}
+
+// CognitoIdentityPoolRoleAttachment represents AWS::Cognito::IdentityPoolRoleAttachment
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-identitypoolroleattachment.html
+type CognitoIdentityPoolRoleAttachment struct {
+	// An identity pool ID in the format REGION:GUID.
+	IdentityPoolId *StringExpr `json:"IdentityPoolId,omitempty"`
+
+	// How users for a specific identity provider are to mapped to roles.
+	// This is a string to RoleMapping object map. The string identifies the
+	// identity provider, for example, "graph.facebook.com" or
+	// "cognito-idp-east-1.amazonaws.com/us-east-1_abcdefghi:app_client_id"
+	RoleMappings *CognitoIdentityPoolRoleAttachmentRoleMapping `json:"RoleMappings,omitempty"`
+
+	// The map of roles associated with this pool. For a given role, the key
+	// will be either "authenticated" or "unauthenticated" and the value will
+	// be the Role ARN.
+	Roles interface{} `json:"Roles,omitempty"`
+}
+
+// CfnResourceType returns AWS::Cognito::IdentityPoolRoleAttachment to implement the ResourceProperties interface
+func (s CognitoIdentityPoolRoleAttachment) CfnResourceType() string {
+	return "AWS::Cognito::IdentityPoolRoleAttachment"
+}
+
+// CognitoUserPool represents AWS::Cognito::UserPool
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html
+type CognitoUserPool struct {
+	// The type of configuration for creating a new user profile.
+	AdminCreateUserConfig *CognitoUserPoolAdminCreateUserConfig `json:"AdminCreateUserConfig,omitempty"`
+
+	// Attributes supported as an alias for this user pool. Possible values:
+	// phone_number, email, and/or preferred_username.
+	AliasAttributes interface{} `json:"AliasAttributes,omitempty"`
+
+	// The attributes to be auto-verified. Possible values: email and/or
+	// phone_number.
+	AutoVerifiedAttributes interface{} `json:"AutoVerifiedAttributes,omitempty"`
+
+	// The type of configuration for the user pool's device tracking.
+	DeviceConfiguration *CognitoUserPoolDeviceConfiguration `json:"DeviceConfiguration,omitempty"`
+
+	// The email configuration.
+	EmailConfiguration *CognitoUserPoolEmailConfiguration `json:"EmailConfiguration,omitempty"`
+
+	// A string representing the email verification message. Must contain
+	// {####} in the description.
+	EmailVerificationMessage *StringExpr `json:"EmailVerificationMessage,omitempty"`
+
+	// A string representing the email verification subject.
+	EmailVerificationSubject *StringExpr `json:"EmailVerificationSubject,omitempty"`
+
+	// The AWS Lambda trigger configuration information for the Amazon
+	// Cognito user pool.
+	LambdaConfig *CognitoUserPoolLambdaConfig `json:"LambdaConfig,omitempty"`
+
+	// Specifies multi-factor authentication (MFA) configuration details. Can
+	// be one of the following values:
+	MfaConfiguration *StringExpr `json:"MfaConfiguration,omitempty"`
+
+	// The policies associated with the Amazon Cognito user pool.
+	Policies *CognitoUserPoolPolicies `json:"Policies,omitempty"`
+
+	// A string used to name the user pool.
+	UserPoolName *StringExpr `json:"UserPoolName,omitempty"`
+
+	// A list of schema attributes for the new user pool. These attributes
+	// can be standard or custom attributes.
+	Schema *CognitoUserPoolSchemaAttributeList `json:"Schema,omitempty"`
+
+	// A string representing the SMS authentication message. Must contain
+	// {####} in the message.
+	SmsAuthenticationMessage *StringExpr `json:"SmsAuthenticationMessage,omitempty"`
+
+	// The Short Message Service (SMS) configuration.
+	SmsConfiguration *CognitoUserPoolSmsConfiguration `json:"SmsConfiguration,omitempty"`
+
+	// A string representing the SMS verification message. Must contain
+	// {####} in the message.
+	SmsVerificationMessage *StringExpr `json:"SmsVerificationMessage,omitempty"`
+
+	// The cost allocation tags for the user pool. For more information, see
+	// Adding Cost Allocation Tags to Your User Pool in the Amazon Cognito
+	// Developer Guide.
+	UserPoolTags *StringExpr `json:"UserPoolTags,omitempty"`
+}
+
+// CfnResourceType returns AWS::Cognito::UserPool to implement the ResourceProperties interface
+func (s CognitoUserPool) CfnResourceType() string {
+	return "AWS::Cognito::UserPool"
+}
+
+// CognitoUserPoolClient represents AWS::Cognito::UserPoolClient
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolclient.html
+type CognitoUserPoolClient struct {
+	// The client name for the user pool client that you want to create.
+	ClientName *StringExpr `json:"ClientName,omitempty"`
+
+	// The explicit authentication flows, which can be one of the following:
+	// ADMIN_NO_SRP_AUTH or CUSTOM_AUTH_FLOW_ONLY.
+	ExplicitAuthFlows interface{} `json:"ExplicitAuthFlows,omitempty"`
+
+	// Specifies whether you want to generate a secret for the user pool
+	// client being created.
+	GenerateSecret *BoolExpr `json:"GenerateSecret,omitempty"`
+
+	// The read attributes.
+	ReadAttributes interface{} `json:"ReadAttributes,omitempty"`
+
+	// The time limit, in days, after which the refresh token is no longer
+	// valid.
+	RefreshTokenValidity *IntegerExpr `json:"RefreshTokenValidity,omitempty"`
+
+	// The user pool ID for the user pool where you want to create a client.
+	UserPoolId *StringExpr `json:"UserPoolId,omitempty"`
+
+	// The write attributes.
+	WriteAttributes interface{} `json:"WriteAttributes,omitempty"`
+}
+
+// CfnResourceType returns AWS::Cognito::UserPoolClient to implement the ResourceProperties interface
+func (s CognitoUserPoolClient) CfnResourceType() string {
+	return "AWS::Cognito::UserPoolClient"
+}
+
+// CognitoUserPoolGroup represents AWS::Cognito::UserPoolGroup
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolgroup.html
+type CognitoUserPoolGroup struct {
+	// A description of the user group.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// The name of the user group. GroupName must be unique.
+	GroupName *StringExpr `json:"GroupName,omitempty"`
+
+	// A nonnegative integer value that specifies the precedence of this
+	// group relative to the other groups that a user can belong to in the
+	// user pool. Zero is the highest Precedence value. Groups with lower
+	// Precedence values take precedence over groups with higher or null
+	// Precedence values. If a user belongs to two or more groups, the role
+	// ARN of the group with the lowest precedence value is used in the
+	// cognito:roles and cognito:preferred_role claims in the user's tokens.
+	Precedence *IntegerExpr `json:"Precedence,omitempty"`
+
+	// The role ARN for the group.
+	RoleArn *StringExpr `json:"RoleArn,omitempty"`
+
+	// The user pool ID.
+	UserPoolId *StringExpr `json:"UserPoolId,omitempty"`
+}
+
+// CfnResourceType returns AWS::Cognito::UserPoolGroup to implement the ResourceProperties interface
+func (s CognitoUserPoolGroup) CfnResourceType() string {
+	return "AWS::Cognito::UserPoolGroup"
+}
+
+// CognitoUserPoolUser represents AWS::Cognito::UserPoolUser
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpooluser.html
+type CognitoUserPoolUser struct {
+	// Specifies how the welcome message will be sent. For email, specify
+	// EMAIL. To use a phone number, specify SMS. You can specify more than
+	// one value. The default value is SMS.
+	DesiredDeliveryMediums interface{} `json:"DesiredDeliveryMediums,omitempty"`
+
+	// Use this parameter only if the phone_number_verified attribute or the
+	// email_verified attribute is set to True. Otherwise, it is ignored. The
+	// default value is False.
+	ForceAliasCreation *BoolExpr `json:"ForceAliasCreation,omitempty"`
+
+	// A list of name-value pairs that contain user attributes and attribute
+	// values to be set for the user that you are creating. You can create a
+	// user without specifying any attributes other than Username. However,
+	// any attributes that you specify as required (in CreateUserPool or in
+	// the Attributes tab of the console) must be supplied either by you (in
+	// your call to AdminCreateUser) or by the user (when signing up in
+	// response to your welcome message).
+	UserAttributes *CognitoUserPoolUserAttributeList `json:"UserAttributes,omitempty"`
+
+	// Specifies the action you'd like to take for the message. Valid values
+	// are RESEND and SUPPRESS.
+	MessageAction *StringExpr `json:"MessageAction,omitempty"`
+
+	// The user name for the user. Username must be unique within the user
+	// pool. It must be a UTF-8 string between 1 and 128 characters. You
+	// can't change the username.
+	Username *StringExpr `json:"Username,omitempty"`
+
+	// The ID for the user pool where the user will be created.
+	UserPoolId *StringExpr `json:"UserPoolId,omitempty"`
+
+	// The user's validation data. This is a list of name-value pairs that
+	// contain user attributes and attribute values that you can use for
+	// custom validation, such as restricting the types of user accounts that
+	// can be registered. For example, you might choose to allow or disallow
+	// user sign-up based on the user's domain.
+	ValidationData *CognitoUserPoolUserAttributeList `json:"ValidationData,omitempty"`
+}
+
+// CfnResourceType returns AWS::Cognito::UserPoolUser to implement the ResourceProperties interface
+func (s CognitoUserPoolUser) CfnResourceType() string {
+	return "AWS::Cognito::UserPoolUser"
+}
+
+// CognitoUserPoolUserToGroupAttachment represents AWS::Cognito::UserPoolUserToGroupAttachment
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolusertogroupattachment.html
+type CognitoUserPoolUserToGroupAttachment struct {
+	// The name of the group.
+	GroupName *StringExpr `json:"GroupName,omitempty"`
+
+	// The user's user name.
+	Username *StringExpr `json:"Username,omitempty"`
+
+	// The ID of the user pool.
+	UserPoolId *StringExpr `json:"UserPoolId,omitempty"`
+}
+
+// CfnResourceType returns AWS::Cognito::UserPoolUserToGroupAttachment to implement the ResourceProperties interface
+func (s CognitoUserPoolUserToGroupAttachment) CfnResourceType() string {
+	return "AWS::Cognito::UserPoolUserToGroupAttachment"
+}
+
 // ConfigConfigRule represents AWS::Config::ConfigRule
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-config-configrule.html
@@ -1435,7 +2137,7 @@ type ConfigConfigurationRecorder struct {
 	// Management (IAM) role that is used to make read or write requests to
 	// the delivery channel that you specify and to get configuration details
 	// for supported AWS resources. For more information, see Permissions for
-	// the AWS Config IAM Role in the AWS Config Developer Guide.
+	// the IAM Role Assigned to AWS Config in the AWS Config Developer Guide.
 	RoleARN *StringExpr `json:"RoleARN,omitempty"`
 }
 
@@ -1505,7 +2207,7 @@ type DataPipelinePipeline struct {
 	// information about pipeline objects and a description of each object,
 	// see Pipeline Object Reference in the AWS Data Pipeline Developer
 	// Guide.
-	PipelineObjects *DataPipelinePipelineObjectsList `json:"PipelineObjects,omitempty"`
+	PipelineObjects *DataPipelinePipelineObjectList `json:"PipelineObjects,omitempty"`
 
 	// A list of arbitrary tags (key-value pairs) to associate with the
 	// pipeline, which you can use to control permissions. For more
@@ -1517,6 +2219,105 @@ type DataPipelinePipeline struct {
 // CfnResourceType returns AWS::DataPipeline::Pipeline to implement the ResourceProperties interface
 func (s DataPipelinePipeline) CfnResourceType() string {
 	return "AWS::DataPipeline::Pipeline"
+}
+
+// DAXCluster represents AWS::DAX::Cluster
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dax-cluster.html
+type DAXCluster struct {
+	// The Availability Zones (AZs) in which the cluster nodes will be
+	// created. All nodes belonging to the cluster are placed in these
+	// Availability Zones. Use this parameter if you want to distribute the
+	// nodes across multiple AZs.
+	AvailabilityZones interface{} `json:"AvailabilityZones,omitempty"`
+
+	// The cluster identifier. This parameter is stored as a lowercase
+	// string.
+	ClusterName *StringExpr `json:"ClusterName,omitempty"`
+
+	// A description of the cluster.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// A valid Amazon Resource Name (ARN) that identifies an IAM role. At
+	// runtime, DAX will assume this role and use the role's permissions to
+	// access DynamoDB on your behalf.
+	IAMRoleARN *StringExpr `json:"IAMRoleARN,omitempty"`
+
+	// The compute and memory capacity of the nodes in the cluster.
+	NodeType *StringExpr `json:"NodeType,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Amazon SNS topic to which
+	// notifications will be sent.
+	NotificationTopicARN *StringExpr `json:"NotificationTopicARN,omitempty"`
+
+	// The parameter group to be associated with the DAX cluster.
+	ParameterGroupName *StringExpr `json:"ParameterGroupName,omitempty"`
+
+	// Specifies the weekly time range during which maintenance on the DAX
+	// cluster is performed. It is specified as a range in the format
+	// ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance
+	// window is a 60 minute period. Valid values for ddd are:
+	PreferredMaintenanceWindow *StringExpr `json:"PreferredMaintenanceWindow,omitempty"`
+
+	// The number of nodes in the DAX cluster. A replication factor of 1 will
+	// create a single-node cluster, without any read replicas. For
+	// additional fault tolerance, you can create a multiple node cluster
+	// with one or more read replicas. To do this, set ReplicationFactor to 2
+	// or more.
+	ReplicationFactor *IntegerExpr `json:"ReplicationFactor,omitempty"`
+
+	// A list of security group IDs to be assigned to each node in the DAX
+	// cluster. (Each of the security group ID is system-generated.)
+	SecurityGroupIds interface{} `json:"SecurityGroupIds,omitempty"`
+
+	// The name of the subnet group to be used for the replication group.
+	SubnetGroupName *StringExpr `json:"SubnetGroupName,omitempty"`
+
+	// A map of tags to associate with the DAX cluster.
+	Tags *StringExpr `json:"Tags,omitempty"`
+}
+
+// CfnResourceType returns AWS::DAX::Cluster to implement the ResourceProperties interface
+func (s DAXCluster) CfnResourceType() string {
+	return "AWS::DAX::Cluster"
+}
+
+// DAXParameterGroup represents AWS::DAX::ParameterGroup
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dax-parametergroup.html
+type DAXParameterGroup struct {
+	// The name of the parameter group.
+	ParameterGroupName *StringExpr `json:"ParameterGroupName,omitempty"`
+
+	// A description of the parameter group.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// A map of DAX parameter names and values.
+	ParameterNameValues *StringExpr `json:"ParameterNameValues,omitempty"`
+}
+
+// CfnResourceType returns AWS::DAX::ParameterGroup to implement the ResourceProperties interface
+func (s DAXParameterGroup) CfnResourceType() string {
+	return "AWS::DAX::ParameterGroup"
+}
+
+// DAXSubnetGroup represents AWS::DAX::SubnetGroup
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dax-subnetgroup.html
+type DAXSubnetGroup struct {
+	// The name of the subnet group.
+	SubnetGroupName *StringExpr `json:"SubnetGroupName,omitempty"`
+
+	// The description of the subnet group.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// A list of subnets associated with the subnet group.
+	SubnetIds interface{} `json:"SubnetIds,omitempty"`
+}
+
+// CfnResourceType returns AWS::DAX::SubnetGroup to implement the ResourceProperties interface
+func (s DAXSubnetGroup) CfnResourceType() string {
+	return "AWS::DAX::SubnetGroup"
 }
 
 // DirectoryServiceMicrosoftAD represents AWS::DirectoryService::MicrosoftAD
@@ -1602,33 +2403,310 @@ func (s DirectoryServiceSimpleAD) CfnResourceType() string {
 	return "AWS::DirectoryService::SimpleAD"
 }
 
+// DMSCertificate represents AWS::DMS::Certificate
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dms-certificate.html
+type DMSCertificate struct {
+	// The customer-assigned name of the certificate. Valid characters are
+	// A-z and 0-9.
+	CertificateIdentifier *StringExpr `json:"CertificateIdentifier,omitempty"`
+
+	// The contents of the .pem X.509 certificate file for the certificate.
+	CertificatePem *StringExpr `json:"CertificatePem,omitempty"`
+
+	// The location of the imported Oracle Wallet certificate for use with
+	// SSL.
+	CertificateWallet interface{} `json:"CertificateWallet,omitempty"`
+}
+
+// CfnResourceType returns AWS::DMS::Certificate to implement the ResourceProperties interface
+func (s DMSCertificate) CfnResourceType() string {
+	return "AWS::DMS::Certificate"
+}
+
+// DMSEndpoint represents AWS::DMS::Endpoint
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dms-endpoint.html
+type DMSEndpoint struct {
+	// The Amazon Resource Number (ARN) for the certificate.
+	CertificateArn *StringExpr `json:"CertificateArn,omitempty"`
+
+	// The name of the endpoint database.
+	DatabaseName *StringExpr `json:"DatabaseName,omitempty"`
+
+	// Settings in JSON format for the target DynamoDB endpoint. For more
+	// information about the available settings, see the Using Object Mapping
+	// to Migrate Data to DynamoDB section at Using an Amazon DynamoDB
+	// Database as a Target for AWS Database Migration Service.
+	DynamoDbSettings interface{} `json:"DynamoDbSettings,omitempty"`
+
+	// The database endpoint identifier. Identifiers must begin with a
+	// letter; must contain only ASCII letters, digits, and hyphens; and must
+	// not end with a hyphen or contain two consecutive hyphens.
+	EndpointIdentifier *StringExpr `json:"EndpointIdentifier,omitempty"`
+
+	// The type of endpoint. Valid values are source and target.
+	EndpointType *StringExpr `json:"EndpointType,omitempty"`
+
+	// The type of engine for the endpoint. Valid values depend on the
+	// EndPointType and include MYSQL, ORACLE, POSTGRES, MARIADB, AURORA,
+	// REDSHIFT, S3, SYBASE, DYNAMODB, MONGODB, and SQLSERVER.
+	EngineName *StringExpr `json:"EngineName,omitempty"`
+
+	// Additional attributes associated with the connection.
+	ExtraConnectionAttributes *StringExpr `json:"ExtraConnectionAttributes,omitempty"`
+
+	// The KMS key identifier that will be used to encrypt the connection
+	// parameters. If you do not specify a value for the KmsKeyId parameter,
+	// then AWS DMS will use your default encryption key. AWS KMS creates the
+	// default encryption key for your AWS account. Your AWS account has a
+	// different default encryption key for each AWS region.
+	KmsKeyId *StringExpr `json:"KmsKeyId,omitempty"`
+
+	// Settings in JSON format for the source MongoDB endpoint. For more
+	// information about the available settings, see the Configuration
+	// Properties When Using MongoDB as a Source for AWS Database Migration
+	// Service section at Using Amazon S3 as a Target for AWS Database
+	// Migration Service.
+	MongoDbSettings interface{} `json:"MongoDbSettings,omitempty"`
+
+	// The password to be used to login to the endpoint database. Do not use
+	// this parameter directly. Use Password as an input parameter with
+	// noEcho as shown in the Parameters. For best practices information, see
+	// Do Not Embed Credentials in Your Templates.
+	Password *StringExpr `json:"Password,omitempty"`
+
+	// The port used by the endpoint database.
+	Port *IntegerExpr `json:"Port,omitempty"`
+
+	// Settings in JSON format for the target Amazon S3 endpoint. For more
+	// information about the available settings, see the Extra Connection
+	// Attributes section at Using Amazon S3 as a Target for AWS Database
+	// Migration Service in the AWS Database Migration Service User Guide.
+	S3Settings interface{} `json:"S3Settings,omitempty"`
+
+	// The name of the server where the endpoint database resides.
+	ServerName *StringExpr `json:"ServerName,omitempty"`
+
+	// The SSL mode to use for the SSL connection.
+	SslMode *StringExpr `json:"SslMode,omitempty"`
+
+	// The tags that you want to attach to the DMS endpoint.
+	Tags *ResourceTagList `json:"Tags,omitempty"`
+
+	// The user name to be used to login to the endpoint database.
+	Username *StringExpr `json:"Username,omitempty"`
+}
+
+// CfnResourceType returns AWS::DMS::Endpoint to implement the ResourceProperties interface
+func (s DMSEndpoint) CfnResourceType() string {
+	return "AWS::DMS::Endpoint"
+}
+
+// DMSEventSubscription represents AWS::DMS::EventSubscription
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dms-eventsubscription.html
+type DMSEventSubscription struct {
+	// Indicates whether to activate the subscription. If you don't specify
+	// this property, AWS CloudFormation activates the subscription.
+	Enabled *BoolExpr `json:"Enabled,omitempty"`
+
+	// A list of event categories that you want to subscribe to for a given
+	// source type. If you don't specify this property, you are notified
+	// about all event categories. For more information, see Using AWS DMS
+	// Event Notification in the AWS Database Migration Service User Guide.
+	EventCategories interface{} `json:"EventCategories,omitempty"`
+
+	// The Amazon Resource Name (ARN) of an Amazon SNS topic that you want to
+	// send event notifications to.
+	SnsTopicArn *StringExpr `json:"SnsTopicArn,omitempty"`
+
+	// A list of identifiers for which AWS DMS provides notification events.
+	SourceIds interface{} `json:"SourceIds,omitempty"`
+
+	// The type of source for which AWS DMS provides notification events. For
+	// example, if you want to be notified of events generated by a database
+	// instance, set this parameter to replication-instance. If you don't
+	// specify a value, notifications are provided for all source types. For
+	// valid values, see the SourceType parameter for the
+	// CreateEventSubscription action in the AWS Database Migration Service
+	// API Reference.
+	SourceType *StringExpr `json:"SourceType,omitempty"`
+
+	// The subscription name.
+	SubscriptionName interface{} `json:"SubscriptionName,omitempty"`
+
+	// The tags that you want to attach to the DMS event subscription.
+	Tags *ResourceTagList `json:"Tags,omitempty"`
+}
+
+// CfnResourceType returns AWS::DMS::EventSubscription to implement the ResourceProperties interface
+func (s DMSEventSubscription) CfnResourceType() string {
+	return "AWS::DMS::EventSubscription"
+}
+
+// DMSReplicationInstance represents AWS::DMS::ReplicationInstance
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dms-replicationinstance.html
+type DMSReplicationInstance struct {
+	// The amount of storage (in gigabytes) to be initially allocated for the
+	// replication instance.
+	AllocatedStorage *IntegerExpr `json:"AllocatedStorage,omitempty"`
+
+	// Indicates that minor engine upgrades will be applied automatically to
+	// the replication instance during the maintenance window.
+	AutoMinorVersionUpgrade *BoolExpr `json:"AutoMinorVersionUpgrade,omitempty"`
+
+	// The EC2 Availability Zone that the replication instance will be
+	// created in. The default value is a random, system-chosen Availability
+	// Zone in the endpoint's region.
+	AvailabilityZone *StringExpr `json:"AvailabilityZone,omitempty"`
+
+	// The engine version number of the replication instance.
+	EngineVersion *StringExpr `json:"EngineVersion,omitempty"`
+
+	// The KMS key identifier that will be used to encrypt the content on the
+	// replication instance. If you do not specify a value for the KmsKeyId
+	// parameter, then AWS DMS will use your default encryption key. AWS KMS
+	// creates the default encryption key for your AWS account. Your AWS
+	// account has a different default encryption key for each AWS region.
+	KmsKeyId *StringExpr `json:"KmsKeyId,omitempty"`
+
+	// Specifies if the replication instance is a Multi-AZ deployment. You
+	// cannot set the AvailabilityZone parameter if the MultiAZ parameter is
+	// set to true .
+	MultiAZ *BoolExpr `json:"MultiAZ,omitempty"`
+
+	// The weekly time range during which system maintenance can occur, in
+	// Universal Coordinated Time (UTC).
+	PreferredMaintenanceWindow *StringExpr `json:"PreferredMaintenanceWindow,omitempty"`
+
+	// Specifies the accessibility options for the replication instance. A
+	// value of true represents an instance with a public IP address. A value
+	// of false represents an instance with a private IP address. The default
+	// value is true .
+	PubliclyAccessible *BoolExpr `json:"PubliclyAccessible,omitempty"`
+
+	// The compute and memory capacity of the replication instance as
+	// specified by the replication instance class.
+	ReplicationInstanceClass *StringExpr `json:"ReplicationInstanceClass,omitempty"`
+
+	// A name for the replication instance. If you specify a name, AWS
+	// CloudFormation converts it to lower case. If you don't specify a name,
+	// AWS CloudFormation generates a unique physical ID and uses that ID for
+	// the replication instance identifier. For more information, see Name
+	// Type.
+	ReplicationInstanceIdentifier *StringExpr `json:"ReplicationInstanceIdentifier,omitempty"`
+
+	// A subnet group to associate with the replication instance.
+	ReplicationSubnetGroupIdentifier *StringExpr `json:"ReplicationSubnetGroupIdentifier,omitempty"`
+
+	// The tags that you want to attach to the DMS endpoint.
+	Tags *ResourceTagList `json:"Tags,omitempty"`
+
+	// Specifies the VPC security group to be used with the replication
+	// instance. The VPC security group must work with the VPC containing the
+	// replication instance.
+	VpcSecurityGroupIds interface{} `json:"VpcSecurityGroupIds,omitempty"`
+}
+
+// CfnResourceType returns AWS::DMS::ReplicationInstance to implement the ResourceProperties interface
+func (s DMSReplicationInstance) CfnResourceType() string {
+	return "AWS::DMS::ReplicationInstance"
+}
+
+// DMSReplicationSubnetGroup represents AWS::DMS::ReplicationSubnetGroup
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dms-replicationsubnet-group.html
+type DMSReplicationSubnetGroup struct {
+	// The identifier for the replication subnet group. If you don't specify
+	// a name, AWS CloudFormation generates a unique physical ID and uses
+	// that ID for the identifier.
+	ReplicationSubnetGroupIdentifier *StringExpr `json:"ReplicationSubnetGroupIdentifier,omitempty"`
+
+	// The description for the replication subnet group.
+	ReplicationSubnetGroupDescription *StringExpr `json:"ReplicationSubnetGroupDescription,omitempty"`
+
+	// The EC2 subnet IDs for the replication subnet group.
+	SubnetIds interface{} `json:"SubnetIds,omitempty"`
+
+	// The tags that you want to attach to the AWS DMS replication subnet
+	// group.
+	Tags *ResourceTagList `json:"Tags,omitempty"`
+}
+
+// CfnResourceType returns AWS::DMS::ReplicationSubnetGroup to implement the ResourceProperties interface
+func (s DMSReplicationSubnetGroup) CfnResourceType() string {
+	return "AWS::DMS::ReplicationSubnetGroup"
+}
+
+// DMSReplicationTask represents AWS::DMS::ReplicationTask
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dms-replicationtask.html
+type DMSReplicationTask struct {
+	// The start time for the Change Data Capture (CDC) operation.
+	CdcStartTime interface{} `json:"CdcStartTime,omitempty"`
+
+	// The migration type.
+	MigrationType *StringExpr `json:"MigrationType,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the replication instance.
+	ReplicationInstanceArn *StringExpr `json:"ReplicationInstanceArn,omitempty"`
+
+	// The ARN string that uniquely identifies the endpoint.
+	ReplicationTaskIdentifier *StringExpr `json:"ReplicationTaskIdentifier,omitempty"`
+
+	// Settings for the task, such as target metadata settings. For a
+	// complete list of task settings, see Task Settings for AWS Database
+	// Migration Service Tasks in the AWS Database Migration Service User
+	// Guide.
+	ReplicationTaskSettings *StringExpr `json:"ReplicationTaskSettings,omitempty"`
+
+	// The ARN string that uniquely identifies the endpoint.
+	SourceEndpointArn *StringExpr `json:"SourceEndpointArn,omitempty"`
+
+	// The JSON that contains additional parameter values.
+	TableMappings *StringExpr `json:"TableMappings,omitempty"`
+
+	// The tags that you want to attach to the migration task.
+	Tags *ResourceTagList `json:"Tags,omitempty"`
+
+	// The ARN string that uniquely identifies the endpoint.
+	TargetEndpointArn *StringExpr `json:"TargetEndpointArn,omitempty"`
+}
+
+// CfnResourceType returns AWS::DMS::ReplicationTask to implement the ResourceProperties interface
+func (s DMSReplicationTask) CfnResourceType() string {
+	return "AWS::DMS::ReplicationTask"
+}
+
 // DynamoDBTable represents AWS::DynamoDB::Table
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
 type DynamoDBTable struct {
-	// A list of AttributeName and AttributeType objects that describe the
-	// key schema for the table and indexes.
-	AttributeDefinitions *DynamoDBAttributeDefinitionsList `json:"AttributeDefinitions,omitempty"`
+	// A list of attributes that describe the key schema for the table and
+	// indexes. Duplicates are allowed.
+	AttributeDefinitions *DynamoDBTableAttributeDefinitionList `json:"AttributeDefinitions,omitempty"`
 
 	// Global secondary indexes to be created on the table. You can create up
 	// to 5 global secondary indexes.
-	GlobalSecondaryIndexes *DynamoDBGlobalSecondaryIndexesList `json:"GlobalSecondaryIndexes,omitempty"`
+	GlobalSecondaryIndexes *DynamoDBTableGlobalSecondaryIndexList `json:"GlobalSecondaryIndexes,omitempty"`
 
 	// Specifies the attributes that make up the primary key for the table.
 	// The attributes in the KeySchema property must also be defined in the
 	// AttributeDefinitions property.
-	KeySchema *DynamoDBKeySchemaList `json:"KeySchema,omitempty"`
+	KeySchema *DynamoDBTableKeySchemaList `json:"KeySchema,omitempty"`
 
 	// Local secondary indexes to be created on the table. You can create up
 	// to 5 local secondary indexes. Each index is scoped to a given hash key
 	// value. The size of each hash key can be up to 10 gigabytes.
-	LocalSecondaryIndexes *DynamoDBLocalSecondaryIndexesList `json:"LocalSecondaryIndexes,omitempty"`
+	LocalSecondaryIndexes *DynamoDBTableLocalSecondaryIndexList `json:"LocalSecondaryIndexes,omitempty"`
 
-	// Throughput for the specified table, consisting of values for
+	// Throughput for the specified table, which consists of values for
 	// ReadCapacityUnits and WriteCapacityUnits. For more information about
-	// the contents of a provisioned throughput structure, see DynamoDB
-	// Provisioned Throughput.
-	ProvisionedThroughput *DynamoDBProvisionedThroughput `json:"ProvisionedThroughput,omitempty"`
+	// the contents of a provisioned throughput structure, see Amazon
+	// DynamoDB Table ProvisionedThroughput.
+	ProvisionedThroughput *DynamoDBTableProvisionedThroughput `json:"ProvisionedThroughput,omitempty"`
 
 	// The settings for the DynamoDB table stream, which capture changes to
 	// items stored in the table.
@@ -1638,6 +2716,13 @@ type DynamoDBTable struct {
 	// generates a unique physical ID and uses that ID for the table name.
 	// For more information, see Name Type.
 	TableName *StringExpr `json:"TableName,omitempty"`
+
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this table. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
+
+	// Specifies the Time to Live (TTL) settings for the table.
+	TimeToLiveSpecification *DynamoDBTableTimeToLiveSpecification `json:"TimeToLiveSpecification,omitempty"`
 }
 
 // CfnResourceType returns AWS::DynamoDB::Table to implement the ResourceProperties interface
@@ -1678,18 +2763,18 @@ type EC2DHCPOptions struct {
 
 	// The IP (IPv4) address of a domain name server. You can specify up to
 	// four addresses.
-	DomainNameServers *StringListExpr `json:"DomainNameServers,omitempty"`
+	DomainNameServers interface{} `json:"DomainNameServers,omitempty"`
 
 	// The IP address (IPv4) of a NetBIOS name server. You can specify up to
 	// four addresses.
-	NetbiosNameServers *StringListExpr `json:"NetbiosNameServers,omitempty"`
+	NetbiosNameServers interface{} `json:"NetbiosNameServers,omitempty"`
 
 	// An integer value indicating the NetBIOS node type:
 	NetbiosNodeType interface{} `json:"NetbiosNodeType,omitempty"`
 
 	// The IP address (IPv4) of a Network Time Protocol (NTP) server. You can
 	// specify up to four addresses.
-	NtpServers *StringListExpr `json:"NtpServers,omitempty"`
+	NtpServers interface{} `json:"NtpServers,omitempty"`
 
 	// An arbitrary set of tags (key–value pairs) for this resource.
 	Tags []ResourceTag `json:"Tags,omitempty"`
@@ -1698,6 +2783,20 @@ type EC2DHCPOptions struct {
 // CfnResourceType returns AWS::EC2::DHCPOptions to implement the ResourceProperties interface
 func (s EC2DHCPOptions) CfnResourceType() string {
 	return "AWS::EC2::DHCPOptions"
+}
+
+// EC2EgressOnlyInternetGateway represents AWS::EC2::EgressOnlyInternetGateway
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-egressonlyinternetgateway.html
+type EC2EgressOnlyInternetGateway struct {
+	// The ID of the VPC for which to create the egress-only Internet
+	// gateway.
+	VpcId *StringExpr `json:"VpcId,omitempty"`
+}
+
+// CfnResourceType returns AWS::EC2::EgressOnlyInternetGateway to implement the ResourceProperties interface
+func (s EC2EgressOnlyInternetGateway) CfnResourceType() string {
+	return "AWS::EC2::EgressOnlyInternetGateway"
 }
 
 // EC2EIP represents AWS::EC2::EIP
@@ -1861,7 +2960,7 @@ type EC2Instance struct {
 	// compatible, dedicated host available to successfully launch instances.
 	HostId *StringExpr `json:"HostId,omitempty"`
 
-	// The physical ID of an instance profile or a reference to an
+	// The name of an instance profile or a reference to an
 	// AWS::IAM::InstanceProfile resource.
 	IamInstanceProfile *StringExpr `json:"IamInstanceProfile,omitempty"`
 
@@ -1920,14 +3019,14 @@ type EC2Instance struct {
 	// A list that contains the security group IDs for VPC security groups to
 	// assign to the Amazon EC2 instance. If you specified the
 	// NetworkInterfaces property, do not specify this property.
-	SecurityGroupIds *StringListExpr `json:"SecurityGroupIds,omitempty"`
+	SecurityGroupIds interface{} `json:"SecurityGroupIds,omitempty"`
 
 	// Valid only for Amazon EC2 security groups. A list that contains the
 	// Amazon EC2 security groups to assign to the Amazon EC2 instance. The
 	// list can contain both the name of existing Amazon EC2 security groups
 	// or references to AWS::EC2::SecurityGroup resources created in the
 	// template.
-	SecurityGroups *StringListExpr `json:"SecurityGroups,omitempty"`
+	SecurityGroups interface{} `json:"SecurityGroups,omitempty"`
 
 	// Controls whether source/destination checking is enabled on the
 	// instance. Also determines if an instance in a VPC will perform network
@@ -1972,7 +3071,7 @@ func (s EC2Instance) CfnResourceType() string {
 
 // EC2InternetGateway represents AWS::EC2::InternetGateway
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-internet-gateway.html
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-internetgateway.html
 type EC2InternetGateway struct {
 	// An arbitrary set of tags (key–value pairs) for this resource.
 	Tags []ResourceTag `json:"Tags,omitempty"`
@@ -1994,6 +3093,10 @@ type EC2NatGateway struct {
 
 	// The public subnet in which to create the NAT gateway.
 	SubnetId *StringExpr `json:"SubnetId,omitempty"`
+
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this resource. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
 }
 
 // CfnResourceType returns AWS::EC2::NatGateway to implement the ResourceProperties interface
@@ -2075,9 +3178,9 @@ type EC2NetworkInterface struct {
 	GroupSet *StringListExpr `json:"GroupSet,omitempty"`
 
 	// The number of IPv6 addresses to associate with the network interface.
-	// Amazon EC2 automatically selects the IPv6 addresses from the subnet
-	// range. To specify specific IPv6 addresses, use the Ipv6Addresses
-	// property and don't specify this property.
+	// EC2 automatically selects the IPv6 addresses from the subnet range. To
+	// specify specific IPv6 addresses, use the Ipv6Addresses property and
+	// don't specify this property.
 	Ipv6AddressCount *IntegerExpr `json:"Ipv6AddressCount,omitempty"`
 
 	// One or more specific IPv6 addresses from the IPv6 CIDR block range of
@@ -2094,16 +3197,16 @@ type EC2NetworkInterface struct {
 	// Assigns a list of private IP addresses to the network interface. You
 	// can specify a primary private IP address by setting the value of the
 	// Primary property to true in the PrivateIpAddressSpecification
-	// property. If you want Amazon EC2 to automatically assign private IP
+	// property. If you want EC2 to automatically assign private IP
 	// addresses, use the SecondaryPrivateIpAddressCount property and do not
 	// specify this property.
 	PrivateIpAddresses *EC2NetworkInterfacePrivateIPSpecificationList `json:"PrivateIpAddresses,omitempty"`
 
-	// The number of secondary private IP addresses that Amazon EC2
-	// automatically assigns to the network interface. Amazon EC2 uses the
-	// value of the PrivateIpAddress property as the primary private IP
-	// address. If you don't specify that property, Amazon EC2 automatically
-	// assigns both the primary and secondary private IP addresses.
+	// The number of secondary private IP addresses that EC2 automatically
+	// assigns to the network interface. EC2 uses the value of the
+	// PrivateIpAddress property as the primary private IP address. If you
+	// don't specify that property, EC2 automatically assigns both the
+	// primary and secondary private IP addresses.
 	SecondaryPrivateIpAddressCount *IntegerExpr `json:"SecondaryPrivateIpAddressCount,omitempty"`
 
 	// Flag indicating whether traffic to or from the instance is validated.
@@ -2146,6 +3249,25 @@ func (s EC2NetworkInterfaceAttachment) CfnResourceType() string {
 	return "AWS::EC2::NetworkInterfaceAttachment"
 }
 
+// EC2NetworkInterfacePermission represents AWS::EC2::NetworkInterfacePermission
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-networkinterfacepermission.html
+type EC2NetworkInterfacePermission struct {
+	// The AWS account ID.
+	AwsAccountId interface{} `json:"AwsAccountId,omitempty"`
+
+	// The ID of the network interface.
+	NetworkInterfaceId interface{} `json:"NetworkInterfaceId,omitempty"`
+
+	// The type of permission to grant: INSTANCE-ATTACH or EIP-ASSOCIATE.
+	Permission interface{} `json:"Permission,omitempty"`
+}
+
+// CfnResourceType returns AWS::EC2::NetworkInterfacePermission to implement the ResourceProperties interface
+func (s EC2NetworkInterfacePermission) CfnResourceType() string {
+	return "AWS::EC2::NetworkInterfacePermission"
+}
+
 // EC2PlacementGroup represents AWS::EC2::PlacementGroup
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-placementgroup.html
@@ -2177,7 +3299,11 @@ type EC2Route struct {
 	// example, ::/0. Routing decisions are based on the most specific match.
 	DestinationIpv6CidrBlock *StringExpr `json:"DestinationIpv6CidrBlock,omitempty"`
 
-	// The ID of an Internet gateway or virtual private gateway that is
+	// The ID of an egress-only internet gateway that is attached to your VPC
+	// (over IPv6 only).
+	EgressOnlyInternetGatewayId *StringExpr `json:"EgressOnlyInternetGatewayId,omitempty"`
+
+	// The ID of an internet gateway or virtual private gateway that is
 	// attached to your VPC. For example: igw-eaad4883.
 	GatewayId *StringExpr `json:"GatewayId,omitempty"`
 
@@ -2222,7 +3348,12 @@ func (s EC2RouteTable) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
 type EC2SecurityGroup struct {
-	// Description of the security group.
+	// The name of the security group. For valid values, see the GroupName
+	// parameter of the CreateSecurityGroup action in the Amazon EC2 API
+	// Reference.
+	GroupName *StringExpr `json:"GroupName,omitempty"`
+
+	// A description of the security group.
 	GroupDescription *StringExpr `json:"GroupDescription,omitempty"`
 
 	// A list of Amazon EC2 security group egress rules.
@@ -2234,8 +3365,8 @@ type EC2SecurityGroup struct {
 	// The tags that you want to attach to the resource.
 	Tags []ResourceTag `json:"Tags,omitempty"`
 
-	// The physical ID of the VPC. Can be obtained by using a reference to an
-	// AWS::EC2::VPC, such as: { "Ref" : "myVPC" }.
+	// The physical ID of the VPC. You can obtain the physical ID by using a
+	// reference to an AWS::EC2::VPC, such as: { "Ref" : "myVPC" }.
 	VpcId *StringExpr `json:"VpcId,omitempty"`
 }
 
@@ -2253,6 +3384,9 @@ type EC2SecurityGroupEgress struct {
 
 	// An IPv6 CIDR range.
 	CidrIpv6 *StringExpr `json:"CidrIpv6,omitempty"`
+
+	// Description of the egress rule.
+	Description *StringExpr `json:"Description,omitempty"`
 
 	// The AWS service prefix of an Amazon VPC endpoint. For more
 	// information, see VPC Endpoints in the Amazon VPC User Guide.
@@ -2295,6 +3429,9 @@ type EC2SecurityGroupIngress struct {
 
 	// An IPv6 CIDR range.
 	CidrIpv6 *StringExpr `json:"CidrIpv6,omitempty"`
+
+	// Description of the ingress rule.
+	Description *StringExpr `json:"Description,omitempty"`
 
 	// Start of port range for the TCP and UDP protocols, or an ICMP type
 	// number. If you specify icmp for the IpProtocol property, you can
@@ -2357,6 +3494,10 @@ func (s EC2SpotFleet) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-subnet.html
 type EC2Subnet struct {
+	// Indicates whether a network interface created in this subnet receives
+	// an IPv6 address.
+	AssignIpv6AddressOnCreation *BoolExpr `json:"AssignIpv6AddressOnCreation,omitempty"`
+
 	// The availability zone in which you want the subnet. Default: AWS
 	// selects a zone for you (recommended).
 	AvailabilityZone *StringExpr `json:"AvailabilityZone,omitempty"`
@@ -2364,6 +3505,10 @@ type EC2Subnet struct {
 	// The CIDR block that you want the subnet to cover (for example,
 	// "10.0.0.0/24").
 	CidrBlock *StringExpr `json:"CidrBlock,omitempty"`
+
+	// The IPv6 network range for the subnet, in CIDR notation. The subnet
+	// size must use a /64 prefix length.
+	Ipv6CidrBlock *StringExpr `json:"Ipv6CidrBlock,omitempty"`
 
 	// Indicates whether instances that are launched in this subnet receive a
 	// public IP address. By default, the value is false.
@@ -2470,7 +3615,7 @@ type EC2Volume struct {
 
 	// The Amazon Resource Name (ARN) of the AWS Key Management Service
 	// master key that is used to create the encrypted volume, such as
-	// arn:aws:kms:us-east-1:012345678910:key/abcd1234-a123-456a-a12b-a123b4cd56ef.
+	// arn:aws:kms:us-east-2:012345678910:key/abcd1234-a123-456a-a12b-a123b4cd56ef.
 	// If you create an encrypted volume and don't specify this property, AWS
 	// CloudFormation uses the default master key.
 	KmsKeyId *StringExpr `json:"KmsKeyId,omitempty"`
@@ -2563,6 +3708,9 @@ type EC2VPCCidrBlock struct {
 	// addresses or the size of the CIDR block.
 	AmazonProvidedIpv6CidrBlock *BoolExpr `json:"AmazonProvidedIpv6CidrBlock,omitempty"`
 
+	// An IPv4 CIDR block to associate with the VPC.
+	CidrBlock *StringExpr `json:"CidrBlock,omitempty"`
+
 	// The ID of the VPC to associate the Amazon-provided IPv6 CIDR block
 	// with.
 	VpcId *StringExpr `json:"VpcId,omitempty"`
@@ -2602,7 +3750,7 @@ type EC2VPCEndpoint struct {
 
 	// One or more route table IDs that are used by the VPC to reach the
 	// endpoint.
-	RouteTableIds *StringListExpr `json:"RouteTableIds,omitempty"`
+	RouteTableIds interface{} `json:"RouteTableIds,omitempty"`
 
 	// The AWS service to which you want to establish a connection. Specify
 	// the service name in the form of com.amazonaws.region.service.
@@ -2683,6 +3831,9 @@ type EC2VPNConnection struct {
 	// The ID of the virtual private gateway. This can either be an embedded
 	// JSON object or a reference to a Gateway ID.
 	VpnGatewayId *StringExpr `json:"VpnGatewayId,omitempty"`
+
+	// The tunnel options for the VPN connection. Duplicates not allowed.
+	VpnTunnelOptionsSpecifications *EC2VPNConnectionVpnTunnelOptionsSpecificationList `json:"VpnTunnelOptionsSpecifications,omitempty"`
 }
 
 // CfnResourceType returns AWS::EC2::VPNConnection to implement the ResourceProperties interface
@@ -2711,6 +3862,10 @@ func (s EC2VPNConnectionRoute) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-vpn-gateway.html
 type EC2VPNGateway struct {
+	// The private Autonomous System Number (ASN) for the Amazon side of a
+	// BGP session.
+	AmazonSideAsn interface{} `json:"AmazonSideAsn,omitempty"`
+
 	// The type of VPN connection this virtual private gateway supports. The
 	// only valid value is "ipsec.1".
 	Type *StringExpr `json:"Type,omitempty"`
@@ -2748,6 +3903,9 @@ func (s EC2VPNGatewayRoutePropagation) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecr-repository.html
 type ECRRepository struct {
+	// A lifecycle policy for the repository.
+	LifecyclePolicy *ElasticContainerRegistryRepositoryLifecyclePolicy `json:"LifecyclePolicy,omitempty"`
+
 	// A name for the image repository. If you don't specify a name, AWS
 	// CloudFormation generates a unique physical ID and uses that ID for the
 	// repository name. For more information, see Name Type.
@@ -2755,7 +3913,8 @@ type ECRRepository struct {
 
 	// A policy that controls who has access to the repository and which
 	// actions they can perform on it. For more information, see Amazon ECR
-	// Repository Policies in the Amazon EC2 Container Registry User Guide.
+	// Repository Policies in the Amazon Elastic Container Registry User
+	// Guide.
 	RepositoryPolicyText interface{} `json:"RepositoryPolicyText,omitempty"`
 }
 
@@ -2784,27 +3943,57 @@ func (s ECSCluster) CfnResourceType() string {
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
 type ECSService struct {
 	// The name or Amazon Resource Name (ARN) of the cluster that you want to
-	// run your service on. If you do not specify a cluster, Amazon ECS uses
-	// the default cluster.
+	// run your Amazon ECS service on. If you do not specify a cluster,
+	// Amazon ECS uses the default cluster.
 	Cluster *StringExpr `json:"Cluster,omitempty"`
 
 	// Configures how many tasks run during a deployment.
-	DeploymentConfiguration *EC2ContainerServiceServiceDeploymentConfiguration `json:"DeploymentConfiguration,omitempty"`
+	DeploymentConfiguration *ElasticContainerServiceServiceDeploymentConfiguration `json:"DeploymentConfiguration,omitempty"`
 
 	// The number of simultaneous tasks that you want to run on the cluster.
-	// Specify the tasks with the TaskDefinition property,
+	// Specify the tasks with the TaskDefinition property.
 	DesiredCount *IntegerExpr `json:"DesiredCount,omitempty"`
 
-	// A list of load balancer objects to associate with the cluster. For
-	// information about the number of load balancers you can specify per
-	// service, see Service Load Balancing in the Amazon EC2 Container
-	// Service Developer Guide.
-	LoadBalancers *EC2ContainerServiceServiceLoadBalancersList `json:"LoadBalancers,omitempty"`
+	// The launch type on which to run your service. If one is not specified,
+	// EC2 will be used by default. Valid values include EC2 and FARGATE.
+	LaunchType interface{} `json:"LaunchType,omitempty"`
+
+	// A list of load balancer objects to associate with the cluster. If you
+	// specify the Role property, LoadBalancers must be specified as well.
+	// For information about the number of load balancers that you can
+	// specify per service, see Service Load Balancing in the Amazon Elastic
+	// Container Service Developer Guide.
+	LoadBalancers *ElasticContainerServiceServiceLoadBalancersList `json:"LoadBalancers,omitempty"`
+
+	// The network configuration for the service. This parameter is required
+	// for task definitions that use the awsvpc network mode to receive their
+	// own Elastic Network Interface, and it is not supported for other
+	// network modes. For more information, see Task Networking in the Amazon
+	// Elastic Container Service Developer Guide.
+	NetworkConfiguration *ElasticContainerServiceServiceNetworkConfiguration `json:"NetworkConfiguration,omitempty"`
+
+	// The placement constraints for the tasks in the service.
+	PlacementConstraints *ElasticContainerServiceServicePlacementConstraintList `json:"PlacementConstraints,omitempty"`
+
+	// The placement strategies that determine how tasks for the service are
+	// placed.
+	PlacementStrategies *ElasticContainerServiceServicePlacementStrategiesList `json:"PlacementStrategies,omitempty"`
+
+	// The platform version on which to run your service. If one is not
+	// specified, the latest version will be used by default.
+	PlatformVersion interface{} `json:"PlatformVersion,omitempty"`
 
 	// The name or ARN of an AWS Identity and Access Management (IAM) role
 	// that allows your Amazon ECS container agent to make calls to your load
 	// balancer.
 	Role *StringExpr `json:"Role,omitempty"`
+
+	// The name of your service. The name is limited to 255 letters
+	// (uppercase and lowercase), numbers, hyphens, and underscores. Service
+	// names must be unique within a cluster, but you can have similarly
+	// named services in multiple clusters within a region or across multiple
+	// regions.
+	ServiceName *StringExpr `json:"ServiceName,omitempty"`
 
 	// The ARN of the task definition (including the revision number) that
 	// you want to run on the cluster, such as
@@ -2824,9 +4013,21 @@ func (s ECSService) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-taskdefinition.html
 type ECSTaskDefinition struct {
-	// A list of volume definitions in JSON format for volumes that you can
-	// use in your container definitions.
-	Volumes *EC2ContainerServiceTaskDefinitionVolumesList `json:"Volumes,omitempty"`
+	// A list of container definitions in JSON format that describes the
+	// containers that make up your task.
+	ContainerDefinitions *ElasticContainerServiceTaskDefinitionContainerDefinitionList `json:"ContainerDefinitions,omitempty"`
+
+	// The number of cpu units used by the task. If using the EC2 launch
+	// type, this field is optional and any value can be used. If you are
+	// using the Fargate launch type, this field is required and you must use
+	// one of the following values, which determines your range of valid
+	// values for the memory parameter:
+	Cpu *StringExpr `json:"Cpu,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the task execution role that
+	// containers in this task can assume. All containers in this task are
+	// granted the permissions that are specified in this role.
+	ExecutionRoleArn *StringExpr `json:"ExecutionRoleArn,omitempty"`
 
 	// The name of a family that this task definition is registered to. A
 	// family groups multiple versions of a task definition. Amazon ECS gives
@@ -2835,21 +4036,35 @@ type ECSTaskDefinition struct {
 	// definition that you add.
 	Family *StringExpr `json:"Family,omitempty"`
 
+	// The amount (in MiB) of memory used by the task. If using the EC2
+	// launch type, this field is optional and any value can be used. If you
+	// are using the Fargate launch type, this field is required and you must
+	// use one of the following values, which determines your range of valid
+	// values for the cpu parameter:
+	Memory *StringExpr `json:"Memory,omitempty"`
+
 	// The Docker networking mode to use for the containers in the task, such
 	// as none, bridge, or host. For information about network modes, see
-	// NetworkMode in the Task Definition Parameters topic in the Amazon EC2
-	// Container Service Developer Guide.
+	// NetworkMode in the Task Definition Parameters topic in the Amazon
+	// Elastic Container Service Developer Guide.
 	NetworkMode *StringExpr `json:"NetworkMode,omitempty"`
+
+	// The placement constraints for the tasks in the service.
+	PlacementConstraints *ElasticContainerServiceServicePlacementConstraint `json:"PlacementConstraints,omitempty"`
+
+	// The launch type the task requires. If no value is specified, it will
+	// default to EC2. Valid values include EC2 and FARGATE.
+	RequiresCompatibilities interface{} `json:"RequiresCompatibilities,omitempty"`
 
 	// The Amazon Resource Name (ARN) of an AWS Identity and Access
 	// Management (IAM) role that grants containers in the task permission to
 	// call AWS APIs on your behalf. For more information, see IAM Roles for
-	// Tasks in the Amazon EC2 Container Service Developer Guide.
+	// Tasks in the Amazon Elastic Container Service Developer Guide.
 	TaskRoleArn *StringExpr `json:"TaskRoleArn,omitempty"`
 
-	// A list of container definitions in JSON format that describe the
-	// containers that make up your task.
-	ContainerDefinitions *EC2ContainerServiceTaskDefinitionContainerDefinitionsList `json:"ContainerDefinitions,omitempty"`
+	// A list of volume definitions in JSON format for the volumes that you
+	// can use in your container definitions.
+	Volumes *ElasticContainerServiceTaskDefinitionVolumesList `json:"Volumes,omitempty"`
 }
 
 // CfnResourceType returns AWS::ECS::TaskDefinition to implement the ResourceProperties interface
@@ -2863,6 +4078,17 @@ func (s ECSTaskDefinition) CfnResourceType() string {
 type EFSFileSystem struct {
 	// Tags to associate with the file system.
 	FileSystemTags *ElasticFileSystemFileSystemFileSystemTagsList `json:"FileSystemTags,omitempty"`
+
+	// A boolean value that, if true, creates an encrypted file system. For
+	// more information, see CreateFileSystem in the Amazon Elastic File
+	// System User Guide.
+	Encrypted *BoolExpr `json:"Encrypted,omitempty"`
+
+	// The ID of the AWS KMS customer master key (CMK) to use to protect the
+	// encrypted file system. This parameter is only required if you want to
+	// use a non-default CMK. For more information, see CreateFileSystem in
+	// the Amazon Elastic File System User Guide.
+	KmsKeyId *StringExpr `json:"KmsKeyId,omitempty"`
 
 	// The performance mode of the file system. For valid values, see the
 	// PerformanceMode parameter for the CreateFileSystem action in the
@@ -2893,7 +4119,7 @@ type EFSMountTarget struct {
 	// the subnet that is specified in the SubnetId property. For more
 	// information about security groups and mount targets, see Security in
 	// the Amazon Elastic File System User Guide.
-	SecurityGroups *StringListExpr `json:"SecurityGroups,omitempty"`
+	SecurityGroups interface{} `json:"SecurityGroups,omitempty"`
 
 	// The ID of the subnet in which you want to add the mount target.
 	SubnetId *StringExpr `json:"SubnetId,omitempty"`
@@ -2928,7 +4154,7 @@ type ElastiCacheCacheCluster struct {
 	// A list of cache security group names that are associated with this
 	// cache cluster. If your cache cluster is in a VPC, specify the
 	// VpcSecurityGroupIds property instead.
-	CacheSecurityGroupNames *StringListExpr `json:"CacheSecurityGroupNames,omitempty"`
+	CacheSecurityGroupNames interface{} `json:"CacheSecurityGroupNames,omitempty"`
 
 	// The cache subnet group that you associate with a cache cluster.
 	CacheSubnetGroupName *StringExpr `json:"CacheSubnetGroupName,omitempty"`
@@ -2966,7 +4192,7 @@ type ElastiCacheCacheCluster struct {
 	// three nodes in two different Availability Zones, you can specify
 	// ["us-east-1a", "us-east-1a", "us-east-1b"], which would create two
 	// nodes in us-east-1a and one node in us-east-1b.
-	PreferredAvailabilityZones *StringListExpr `json:"PreferredAvailabilityZones,omitempty"`
+	PreferredAvailabilityZones interface{} `json:"PreferredAvailabilityZones,omitempty"`
 
 	// The weekly time range (in UTC) during which system maintenance can
 	// occur.
@@ -2976,7 +4202,7 @@ type ElastiCacheCacheCluster struct {
 	// cache cluster. If you manage a Redis instance outside of Amazon
 	// ElastiCache, you can create a new cache cluster in ElastiCache by
 	// using a snapshot file that is stored in an Amazon S3 bucket.
-	SnapshotArns *StringListExpr `json:"SnapshotArns,omitempty"`
+	SnapshotArns interface{} `json:"SnapshotArns,omitempty"`
 
 	// The name of a snapshot from which to restore data into a new Redis
 	// cache cluster.
@@ -2998,7 +4224,7 @@ type ElastiCacheCacheCluster struct {
 
 	// A list of VPC security group IDs. If your cache cluster isn't in a
 	// VPC, specify the CacheSecurityGroupNames property instead.
-	VpcSecurityGroupIds *StringListExpr `json:"VpcSecurityGroupIds,omitempty"`
+	VpcSecurityGroupIds interface{} `json:"VpcSecurityGroupIds,omitempty"`
 }
 
 // CfnResourceType returns AWS::ElastiCache::CacheCluster to implement the ResourceProperties interface
@@ -3032,6 +4258,16 @@ func (s ElastiCacheParameterGroup) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticache-replicationgroup.html
 type ElastiCacheReplicationGroup struct {
+	// Indicates whether to enable encryption at rest. The default value is
+	// false. For more information about how you can use this property, see
+	// CreateReplicationGroup in the Amazon ElastiCache API Reference.
+	AtRestEncryptionEnabled *BoolExpr `json:"AtRestEncryptionEnabled,omitempty"`
+
+	// The password that's used to access a password-protected server. For
+	// constraints, see CreateReplicationGroup in the Amazon ElastiCache API
+	// Reference.
+	AuthToken *StringExpr `json:"AuthToken,omitempty"`
+
 	// Indicates whether Multi-AZ is enabled. When Multi-AZ is enabled, a
 	// read-only replica is automatically promoted to a read-write primary
 	// cluster if the existing primary cluster fails. If you specify true,
@@ -3042,8 +4278,8 @@ type ElastiCacheReplicationGroup struct {
 	// Currently, this property isn't used by ElastiCache.
 	AutoMinorVersionUpgrade *BoolExpr `json:"AutoMinorVersionUpgrade,omitempty"`
 
-	// The compute and memory capacity of nodes in the node group. To see
-	// valid values, see CreateReplicationGroup in the Amazon ElastiCache API
+	// The compute and memory capacity of nodes in the node group. For valid
+	// values, see CreateReplicationGroup in the Amazon ElastiCache API
 	// Reference Guide.
 	CacheNodeType *StringExpr `json:"CacheNodeType,omitempty"`
 
@@ -3054,7 +4290,7 @@ type ElastiCacheReplicationGroup struct {
 
 	// A list of cache security group names to associate with this
 	// replication group.
-	CacheSecurityGroupNames *StringListExpr `json:"CacheSecurityGroupNames,omitempty"`
+	CacheSecurityGroupNames interface{} `json:"CacheSecurityGroupNames,omitempty"`
 
 	// The name of a cache subnet group to use for this replication group.
 	CacheSubnetGroupName *StringExpr `json:"CacheSubnetGroupName,omitempty"`
@@ -3089,9 +4325,9 @@ type ElastiCacheReplicationGroup struct {
 	// connections.
 	Port *IntegerExpr `json:"Port,omitempty"`
 
-	// A list of Availability Zones (AZs) in which the cache clusters in this
+	// A list of Availability Zones in which the cache clusters in this
 	// replication group are created.
-	PreferredCacheClusterAZs *StringListExpr `json:"PreferredCacheClusterAZs,omitempty"`
+	PreferredCacheClusterAZs interface{} `json:"PreferredCacheClusterAZs,omitempty"`
 
 	// The weekly time range during which system maintenance can occur. Use
 	// the following format to specify a time range: ddd:hh24:mi-ddd:hh24:mi
@@ -3108,7 +4344,7 @@ type ElastiCacheReplicationGroup struct {
 	// Reference Guide.
 	ReplicasPerNodeGroup *IntegerExpr `json:"ReplicasPerNodeGroup,omitempty"`
 
-	// The description of the replication group.
+	// A description of the replication group.
 	ReplicationGroupDescription *StringExpr `json:"ReplicationGroupDescription,omitempty"`
 
 	// An ID for the replication group. If you don't specify an ID, AWS
@@ -3118,14 +4354,14 @@ type ElastiCacheReplicationGroup struct {
 
 	// A list of Amazon Virtual Private Cloud (Amazon VPC) security groups to
 	// associate with this replication group.
-	SecurityGroupIds *StringListExpr `json:"SecurityGroupIds,omitempty"`
+	SecurityGroupIds interface{} `json:"SecurityGroupIds,omitempty"`
 
 	// A single-element string list that specifies an ARN of a Redis .rdb
 	// snapshot file that is stored in Amazon Simple Storage Service (Amazon
 	// S3). The snapshot file populates the node group. The Amazon S3 object
 	// name in the ARN cannot contain commas. For example, you can specify
 	// arn:aws:s3:::my_bucket/snapshot1.rdb.
-	SnapshotArns *StringListExpr `json:"SnapshotArns,omitempty"`
+	SnapshotArns interface{} `json:"SnapshotArns,omitempty"`
 
 	// The name of a snapshot from which to restore data into the replication
 	// group.
@@ -3139,14 +4375,19 @@ type ElastiCacheReplicationGroup struct {
 	// snapshot source for the replication group.
 	SnapshottingClusterId *StringExpr `json:"SnapshottingClusterId,omitempty"`
 
-	// The time range (in UTC) when ElastiCache takes a daily snapshot of
-	// your node group that you specified in the SnapshottingClusterId
-	// property. For example, you can specify 05:00-09:00.
+	// The time range (in UTC) when ElastiCache takes a daily snapshot of the
+	// node group that you specified in the SnapshottingClusterId property.
+	// For example, you can specify 05:00-09:00.
 	SnapshotWindow *StringExpr `json:"SnapshotWindow,omitempty"`
 
 	// An arbitrary set of tags (key–value pairs) for this replication
 	// group.
 	Tags []ResourceTag `json:"Tags,omitempty"`
+
+	// Indicates whether to enable in-transit encryption. The default value
+	// is false. For more information about how you can use this property,
+	// see CreateReplicationGroup in the Amazon ElastiCache API Reference.
+	TransitEncryptionEnabled *BoolExpr `json:"TransitEncryptionEnabled,omitempty"`
 }
 
 // CfnResourceType returns AWS::ElastiCache::ReplicationGroup to implement the ResourceProperties interface
@@ -3220,6 +4461,11 @@ type ElasticBeanstalkApplication struct {
 
 	// An optional description of this application.
 	Description *StringExpr `json:"Description,omitempty"`
+
+	// Defines lifecycle settings for resources that belong to the
+	// application, and the service role that Elastic Beanstalk assumes in
+	// order to apply lifecycle settings.
+	ResourceLifecycleConfig *ElasticBeanstalkApplicationApplicationResourceLifecycleConfig `json:"ResourceLifecycleConfig,omitempty"`
 }
 
 // CfnResourceType returns AWS::ElasticBeanstalk::Application to implement the ResourceProperties interface
@@ -3263,11 +4509,16 @@ type ElasticBeanstalkConfigurationTemplate struct {
 	// specify the SolutionStackName or SourceConfiguration properties.
 	EnvironmentId *StringExpr `json:"EnvironmentId,omitempty"`
 
-	// A list of OptionSettings for this Elastic Beanstalk configuration,
-	// such as the instance type. For a complete list of Elastic Beanstalk
-	// configuration options, see Option Values, in the AWS Elastic Beanstalk
+	// The options for the Elastic Beanstalk configuration, such as the
+	// instance type. For a complete list of Elastic Beanstalk configuration
+	// options, see Option Values, in the AWS Elastic Beanstalk Developer
+	// Guide.
+	OptionSettings *ElasticBeanstalkConfigurationTemplateConfigurationOptionSettingList `json:"OptionSettings,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the custom platform. For more
+	// information, see Custom Platforms in the AWS Elastic Beanstalk
 	// Developer Guide.
-	OptionSettings *ElasticBeanstalkOptionSettingsList `json:"OptionSettings,omitempty"`
+	PlatformArn interface{} `json:"PlatformArn,omitempty"`
 
 	// The name of an Elastic Beanstalk solution stack that this
 	// configuration will use. A solution stack specifies the operating
@@ -3282,7 +4533,7 @@ type ElasticBeanstalkConfigurationTemplate struct {
 	// and the SourceConfiguration property, the solution stack in the source
 	// configuration template must match the value that you specified for the
 	// SolutionStackName property.
-	SourceConfiguration *ElasticBeanstalkSourceConfiguration `json:"SourceConfiguration,omitempty"`
+	SourceConfiguration *ElasticBeanstalkConfigurationTemplateSourceConfiguration `json:"SourceConfiguration,omitempty"`
 }
 
 // CfnResourceType returns AWS::ElasticBeanstalk::ConfigurationTemplate to implement the ResourceProperties interface
@@ -3313,20 +4564,23 @@ type ElasticBeanstalkEnvironment struct {
 	// defined in the solution stack or the configuration template. If you
 	// remove any options during a stack update, the removed options revert
 	// to default values.
-	OptionSettings *ElasticBeanstalkOptionSettingsList `json:"OptionSettings,omitempty"`
+	OptionSettings *ElasticBeanstalkEnvironmentOptionSettingList `json:"OptionSettings,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the custom platform to use with the
+	// environment. For more information, see Custom Platforms in the AWS
+	// Elastic Beanstalk Developer Guide.
+	PlatformArn interface{} `json:"PlatformArn,omitempty"`
 
 	// The name of an Elastic Beanstalk solution stack that this
 	// configuration will use. For more information, see Supported Platforms
-	// in the AWS Elastic Beanstalk Developer Guide. You must specify either
-	// this parameter or an Elastic Beanstalk configuration template name.
+	// in the AWS Elastic Beanstalk Developer Guide.
 	SolutionStackName *StringExpr `json:"SolutionStackName,omitempty"`
 
 	// An arbitrary set of tags (key–value pairs) for this environment.
 	Tags []ResourceTag `json:"Tags,omitempty"`
 
 	// The name of the Elastic Beanstalk configuration template to use with
-	// the environment. You must specify either this parameter or a solution
-	// stack name.
+	// the environment.
 	TemplateName *StringExpr `json:"TemplateName,omitempty"`
 
 	// Specifies the tier to use in creating this environment. The
@@ -3361,7 +4615,7 @@ type ElasticLoadBalancingLoadBalancer struct {
 
 	// The Availability Zones in which to create the load balancer. You can
 	// specify the AvailabilityZones or Subnets property, but not both.
-	AvailabilityZones *StringListExpr `json:"AvailabilityZones,omitempty"`
+	AvailabilityZones interface{} `json:"AvailabilityZones,omitempty"`
 
 	// Whether deregistered or unhealthy instances can complete all in-flight
 	// requests.
@@ -3378,10 +4632,10 @@ type ElasticLoadBalancingLoadBalancer struct {
 	CrossZone *BoolExpr `json:"CrossZone,omitempty"`
 
 	// Application health check for the instances.
-	HealthCheck *ElasticLoadBalancingHealthCheck `json:"HealthCheck,omitempty"`
+	HealthCheck *ElasticLoadBalancingLoadBalancerHealthCheck `json:"HealthCheck,omitempty"`
 
 	// A list of EC2 instance IDs for the load balancer.
-	Instances *StringListExpr `json:"Instances,omitempty"`
+	Instances interface{} `json:"Instances,omitempty"`
 
 	// Generates a stickiness policy with sticky session lifetimes controlled
 	// by the lifetime of the browser (user-agent), or by a specified
@@ -3419,7 +4673,7 @@ type ElasticLoadBalancingLoadBalancer struct {
 	// your load balancer. Do not specify multiple subnets that are in the
 	// same Availability Zone. You can specify the AvailabilityZones or
 	// Subnets property, but not both.
-	Subnets *StringListExpr `json:"Subnets,omitempty"`
+	Subnets interface{} `json:"Subnets,omitempty"`
 
 	// An arbitrary set of tags (key-value pairs) for this load balancer.
 	Tags []ResourceTag `json:"Tags,omitempty"`
@@ -3438,11 +4692,11 @@ type ElasticLoadBalancingV2Listener struct {
 	// can encrypt traffic between the load balancer and the clients that
 	// initiate HTTPS sessions, and traffic between the load balancer and
 	// your targets.
-	Certificates *ElasticLoadBalancingListenerCertificatesList `json:"Certificates,omitempty"`
+	Certificates *ElasticLoadBalancingListenerCertificateList `json:"Certificates,omitempty"`
 
 	// The default actions that the listener takes when handling incoming
 	// requests.
-	DefaultActions *ElasticLoadBalancingListenerDefaultActionsList `json:"DefaultActions,omitempty"`
+	DefaultActions *ElasticLoadBalancingListenerActionList `json:"DefaultActions,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the load balancer to associate with
 	// the listener.
@@ -3462,6 +4716,22 @@ type ElasticLoadBalancingV2Listener struct {
 // CfnResourceType returns AWS::ElasticLoadBalancingV2::Listener to implement the ResourceProperties interface
 func (s ElasticLoadBalancingV2Listener) CfnResourceType() string {
 	return "AWS::ElasticLoadBalancingV2::Listener"
+}
+
+// ElasticLoadBalancingV2ListenerCertificate represents AWS::ElasticLoadBalancingV2::ListenerCertificate
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticloadbalancingv2-listenercertificate.html
+type ElasticLoadBalancingV2ListenerCertificate struct {
+	// Certificates specified for the listener. Duplicates not allowed.
+	Certificates *ElasticLoadBalancingListenerCertificateCertificateList `json:"Certificates,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the listener.
+	ListenerArn interface{} `json:"ListenerArn,omitempty"`
+}
+
+// CfnResourceType returns AWS::ElasticLoadBalancingV2::ListenerCertificate to implement the ResourceProperties interface
+func (s ElasticLoadBalancingV2ListenerCertificate) CfnResourceType() string {
+	return "AWS::ElasticLoadBalancingV2::ListenerCertificate"
 }
 
 // ElasticLoadBalancingV2ListenerRule represents AWS::ElasticLoadBalancingV2::ListenerRule
@@ -3503,24 +4773,39 @@ type ElasticLoadBalancingV2LoadBalancer struct {
 	// characters and hyphens. A name can't begin or end with a hyphen.
 	Name *StringExpr `json:"Name,omitempty"`
 
-	// Specifies whether the load balancer is internal or Internet-facing. An
-	// internal load balancer routes requests to targets using private IP
-	// addresses. An Internet-facing load balancer routes requests from
-	// clients over the Internet to targets in your public subnets.
+	// Specifies whether the load balancer is internal or Internet-facing.
+	// Valid values are internet-facing and internal. The default is
+	// internet-facing.
 	Scheme *StringExpr `json:"Scheme,omitempty"`
 
-	// Specifies a list of the IDs of the security groups to assign to the
-	// load balancer.
-	SecurityGroups *StringListExpr `json:"SecurityGroups,omitempty"`
+	// [Application Load Balancers] Specifies a list of the IDs of the
+	// security groups to assign to the load balancer.
+	SecurityGroups interface{} `json:"SecurityGroups,omitempty"`
 
-	// Specifies a list of at least two IDs of the subnets to associate with
-	// the load balancer. The subnets must be in different Availability
-	// Zones.
-	Subnets *StringListExpr `json:"Subnets,omitempty"`
+	// The subnets to attach to the load balancer, specified as a list of
+	// SubnetMapping property types. You can specify only one subnet per
+	// Availability Zone. You must specify either subnets or subnet mappings.
+	SubnetMappings *ElasticLoadBalancingLoadBalancerSubnetMappingList `json:"SubnetMappings,omitempty"`
+
+	// The subnets to attach to the load balancer, specified as a list of
+	// subnet IDs. You can specify only one subnet per Availability Zone. You
+	// must specify either subnets or subnet mappings.
+	Subnets interface{} `json:"Subnets,omitempty"`
 
 	// Specifies an arbitrary set of tags (key–value pairs) to associate
 	// with this load balancer. Use tags to manage your resources.
 	Tags []ResourceTag `json:"Tags,omitempty"`
+
+	// Specifies the type of load balancer to create. Valid values are
+	// application and network.The default is application.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// [Application Load Balancers] The type of IP addresses that are used by
+	// the load balancer's subnets, such as ipv4 (for IPv4 addresses) or
+	// dualstack (for IPv4 and IPv6 addresses). For valid values, see the
+	// IpAddressType parameter for the CreateLoadBalancer action in the
+	// Elastic Load Balancing API Reference version 2015-12-01.
+	IpAddressType *StringExpr `json:"IpAddressType,omitempty"`
 }
 
 // CfnResourceType returns AWS::ElasticLoadBalancingV2::LoadBalancer to implement the ResourceProperties interface
@@ -3579,6 +4864,10 @@ type ElasticLoadBalancingV2TargetGroup struct {
 	// The targets to add to this target group.
 	Targets *ElasticLoadBalancingTargetGroupTargetDescriptionList `json:"Targets,omitempty"`
 
+	// The registration type of the targets in this target group. Valid
+	// values are instance and ip. The default is instance.
+	TargetType interface{} `json:"TargetType,omitempty"`
+
 	// The number of consecutive failed health checks that are required
 	// before a target is considered unhealthy.
 	UnhealthyThresholdCount *IntegerExpr `json:"UnhealthyThresholdCount,omitempty"`
@@ -3635,6 +4924,11 @@ type ElasticsearchDomain struct {
 	// An arbitrary set of tags (key–value pairs) to associate with the
 	// Amazon ES domain.
 	Tags []ResourceTag `json:"Tags,omitempty"`
+
+	// The virtual private cloud (VPC) configuration for the Amazon ES
+	// domain. For more information, see VPC Support for Amazon Elasticsearch
+	// Service Domains in the Amazon Elasticsearch Service Developer Guide.
+	VPCOptions *ElasticsearchServiceDomainVPCOptions `json:"VPCOptions,omitempty"`
 }
 
 // CfnResourceType returns AWS::Elasticsearch::Domain to implement the ResourceProperties interface
@@ -3646,30 +4940,48 @@ func (s ElasticsearchDomain) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-emr-cluster.html
 type EMRCluster struct {
-	// Additional features that you want to select.
+	// (Intended for advanced uses only.) Additional features that you want
+	// to select. This is meta information about third-party applications
+	// that third-party vendors use for testing purposes.
 	AdditionalInfo interface{} `json:"AdditionalInfo,omitempty"`
 
 	// The software applications to deploy on the cluster, and the arguments
 	// that Amazon EMR passes to those applications.
 	Applications *EMRClusterApplicationList `json:"Applications,omitempty"`
 
+	// An AWS Identity and Access Management (IAM) role for automatic scaling
+	// policies. The default role is EMR_AutoScaling_DefaultRole. The IAM
+	// role provides permissions that the automatic scaling feature requires
+	// to launch and terminate Amazon EC2 instances in an instance group.
+	AutoScalingRole *StringExpr `json:"AutoScalingRole,omitempty"`
+
 	// A list of bootstrap actions that Amazon EMR runs before starting
 	// applications on the cluster.
 	BootstrapActions *EMRClusterBootstrapActionConfigList `json:"BootstrapActions,omitempty"`
 
 	// The software configuration of the Amazon EMR cluster.
-	Configurations *EMRClusterConfigurationList `json:"Configurations,omitempty"`
+	Configurations *EMRClusterConfigurationsList `json:"Configurations,omitempty"`
 
-	// Configures the EC2 instances that will run jobs in the Amazon EMR
-	// cluster.
+	// A custom Amazon Linux AMI for the cluster (instead of an EMR-owned
+	// AMI). For more information, see Using a Custom AMI in the Amazon EMR
+	// Management Guide.
+	CustomAmiId *StringExpr `json:"CustomAmiId,omitempty"`
+
+	// The size, in GiB, of the EBS root device volume of the Linux AMI
+	// that's used for each EC2 instance.
+	EbsRootVolumeSize *IntegerExpr `json:"EbsRootVolumeSize,omitempty"`
+
+	// Configures the EC2 instances that run jobs in the Amazon EMR cluster.
 	Instances *EMRClusterJobFlowInstancesConfig `json:"Instances,omitempty"`
 
-	// Also called instance profile and EC2 role. Accepts an instance profile
-	// associated with the role that you want to use. All EC2 instances in
-	// the cluster assume this role.
+	// (Also called instance profile and EC2 role.) Accepts an instance
+	// profile that's associated with the role that you want to use. All EC2
+	// instances in the cluster assume this role. For more information, see
+	// Create and Use IAM Roles for Amazon EMR in the Amazon EMR Management
+	// Guide.
 	JobFlowRole *StringExpr `json:"JobFlowRole,omitempty"`
 
-	// An S3 bucket location to which Amazon EMR writes logs files from a job
+	// An S3 bucket location that Amazon EMR writes logs files to from a job
 	// flow. If you don't specify a value, Amazon EMR doesn't write any log
 	// files.
 	LogUri *StringExpr `json:"LogUri,omitempty"`
@@ -3682,6 +4994,14 @@ type EMRCluster struct {
 	// Amazon EMR cluster. For more information, see About Amazon EMR
 	// Releases in the Amazon EMR Release Guide.
 	ReleaseLabel *StringExpr `json:"ReleaseLabel,omitempty"`
+
+	// Indicates how individual EC2 instances terminate when an automatic
+	// scale-in activity occurs or an instance group is resized. For more
+	// information, see Cluster in the Amazon EMR API Reference.
+	ScaleDownBehavior *StringExpr `json:"ScaleDownBehavior,omitempty"`
+
+	// The name of the security configuration that's applied to the cluster.
+	SecurityConfiguration *StringExpr `json:"SecurityConfiguration,omitempty"`
 
 	// The IAM role that Amazon EMR assumes to access AWS resources on your
 	// behalf. For more information, see Configure IAM Roles for Amazon EMR
@@ -3696,7 +5016,7 @@ type EMRCluster struct {
 	// users in the AWS account. If you specify true, all IAM users can view
 	// and (if they have permissions) manage the instances. If you specify
 	// false, only the IAM user that created the cluster can view and manage
-	// it. By default, AWS CloudFormation sets this property to false.
+	// it.
 	VisibleToAllUsers *BoolExpr `json:"VisibleToAllUsers,omitempty"`
 }
 
@@ -3705,18 +5025,63 @@ func (s EMRCluster) CfnResourceType() string {
 	return "AWS::EMR::Cluster"
 }
 
+// EMRInstanceFleetConfig represents AWS::EMR::InstanceFleetConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticmapreduce-instancefleetconfig.html
+type EMRInstanceFleetConfig struct {
+	// The ID of the target cluster.
+	ClusterId *StringExpr `json:"ClusterId,omitempty"`
+
+	// The node type that the instance fleet hosts. Valid values are MASTER,
+	// CORE, and TASK.
+	InstanceFleetType *StringExpr `json:"InstanceFleetType,omitempty"`
+
+	// The instance type configurations that define the EC2 instances in the
+	// instance fleet. Duplicates not allowed.
+	InstanceTypeConfigs *EMRInstanceFleetConfigInstanceTypeConfigList `json:"InstanceTypeConfigs,omitempty"`
+
+	// The launch specification for the instance fleet.
+	LaunchSpecifications *EMRInstanceFleetConfigInstanceFleetProvisioningSpecifications `json:"LaunchSpecifications,omitempty"`
+
+	// The friendly name of the instance fleet. For constraints, see
+	// InstanceFleetConfig in the Amazon EMR API Reference.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The target capacity of On-Demand units for the instance fleet. This
+	// determines how many On-Demand Instances to provision. For more
+	// information, see InstanceFleetConfig in the Amazon EMR API Reference.
+	TargetOnDemandCapacity *IntegerExpr `json:"TargetOnDemandCapacity,omitempty"`
+
+	// The target capacity of Spot units for the instance fleet. This
+	// determines how many Spot Instances to provision. For more information,
+	// see InstanceFleetConfig in the Amazon EMR API Reference.
+	TargetSpotCapacity *IntegerExpr `json:"TargetSpotCapacity,omitempty"`
+}
+
+// CfnResourceType returns AWS::EMR::InstanceFleetConfig to implement the ResourceProperties interface
+func (s EMRInstanceFleetConfig) CfnResourceType() string {
+	return "AWS::EMR::InstanceFleetConfig"
+}
+
 // EMRInstanceGroupConfig represents AWS::EMR::InstanceGroupConfig
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-emr-instancegroupconfig.html
 type EMRInstanceGroupConfig struct {
-	// The bid price in USD for each EC2 instance in the instance group when
-	// launching instances (nodes) as Spot Instances.
+	// An automatic scaling policy for a core instance group or task instance
+	// group in an Amazon EMR cluster. An automatic scaling policy defines
+	// how an instance group dynamically adds and terminates EC2 instances in
+	// response to the value of a CloudWatch metric. For more information,
+	// see PutAutoScalingPolicy in the Amazon EMR API Reference.
+	AutoScalingPolicy *EMRInstanceGroupConfigAutoScalingPolicy `json:"AutoScalingPolicy,omitempty"`
+
+	// The bid price in USD for each Amazon EC2 instance in the instance
+	// group when launching instances (nodes) as Spot Instances.
 	BidPrice *StringExpr `json:"BidPrice,omitempty"`
 
 	// A list of configurations to apply to this instance group. For more
 	// information see, Configuring Applications in the Amazon EMR Release
 	// Guide.
-	Configurations *EMRClusterConfigurationList `json:"Configurations,omitempty"`
+	Configurations *EMRClusterConfigurationsList `json:"Configurations,omitempty"`
 
 	// Configures Amazon Elastic Block Store (Amazon EBS) storage volumes to
 	// attach to your instances.
@@ -3753,14 +5118,30 @@ func (s EMRInstanceGroupConfig) CfnResourceType() string {
 	return "AWS::EMR::InstanceGroupConfig"
 }
 
+// EMRSecurityConfiguration represents AWS::EMR::SecurityConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-emr-securityconfiguration.html
+type EMRSecurityConfiguration struct {
+	// The name of the security configuration. For a list of valid parameters
+	// for encryption settings, see AWS CLI Security Configuration JSON
+	// Reference in the Amazon EMR Release Guide.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The security configuration details in JSON format.
+	SecurityConfiguration *StringExpr `json:"SecurityConfiguration,omitempty"`
+}
+
+// CfnResourceType returns AWS::EMR::SecurityConfiguration to implement the ResourceProperties interface
+func (s EMRSecurityConfiguration) CfnResourceType() string {
+	return "AWS::EMR::SecurityConfiguration"
+}
+
 // EMRStep represents AWS::EMR::Step
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-emr-step.html
 type EMRStep struct {
 	// The action to take if the job flow step fails. Currently, AWS
-	// CloudFormation supports CONTINUE and CANCEL_AND_WAIT. For more
-	// information, see Managing Cluster Termination in the Amazon EMR
-	// Management Guide.
+	// CloudFormation supports CONTINUE and CANCEL_AND_WAIT.
 	ActionOnFailure *StringExpr `json:"ActionOnFailure,omitempty"`
 
 	// The JAR file that includes the main function that Amazon EMR executes.
@@ -3795,12 +5176,6 @@ type EventsRule struct {
 	// more information, see Name Type.
 	Name *StringExpr `json:"Name,omitempty"`
 
-	// The Amazon Resource Name (ARN) of the AWS Identity and Access
-	// Management (IAM) role that grants CloudWatch Events permission to make
-	// calls to target services, such as AWS Lambda (Lambda) or Amazon
-	// Kinesis streams.
-	RoleArn *StringExpr `json:"RoleArn,omitempty"`
-
 	// The schedule or rate (frequency) that determines when CloudWatch
 	// Events runs the rule. For more information, see Schedule Expression
 	// Syntax for Rules in the Amazon CloudWatch User Guide.
@@ -3811,8 +5186,8 @@ type EventsRule struct {
 	// Reference.
 	State *StringExpr `json:"State,omitempty"`
 
-	// The resources, such as Lambda functions or Amazon Kinesis streams,
-	// that CloudWatch Events routes events to and invokes when the rule is
+	// The resources, such as Lambda functions or Kinesis streams, that
+	// CloudWatch Events routes events to and invokes when the rule is
 	// triggered. For information about valid targets, see the PutTargets
 	// action in the Amazon CloudWatch Events API Reference.
 	Targets *CloudWatchEventsRuleTargetList `json:"Targets,omitempty"`
@@ -3896,7 +5271,7 @@ type GameLiftFleet struct {
 	// The path to game-session log files that are generated by your game
 	// server, with the slashes (\) escaped. After a game session has been
 	// terminated, GameLift captures and stores the logs in an S3 bucket.
-	LogPaths *StringListExpr `json:"LogPaths,omitempty"`
+	LogPaths interface{} `json:"LogPaths,omitempty"`
 
 	// The maximum number of EC2 instances that you want to allow in this
 	// fleet. By default, AWS CloudFormation, sets this property to 1.
@@ -3925,6 +5300,326 @@ type GameLiftFleet struct {
 // CfnResourceType returns AWS::GameLift::Fleet to implement the ResourceProperties interface
 func (s GameLiftFleet) CfnResourceType() string {
 	return "AWS::GameLift::Fleet"
+}
+
+// GlueClassifier represents AWS::Glue::Classifier
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-classifier.html
+type GlueClassifier struct {
+	// A classifier that uses grok.
+	GrokClassifier *GlueClassifierGrokClassifier `json:"GrokClassifier,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::Classifier to implement the ResourceProperties interface
+func (s GlueClassifier) CfnResourceType() string {
+	return "AWS::Glue::Classifier"
+}
+
+// GlueConnection represents AWS::Glue::Connection
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-connection.html
+type GlueConnection struct {
+	// The connection that you want to create.
+	ConnectionInput *GlueConnectionConnectionInput `json:"ConnectionInput,omitempty"`
+
+	// The ID of the data catalog to create the catalog object in. Currently,
+	// this should be the AWS account ID.
+	CatalogId interface{} `json:"CatalogId,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::Connection to implement the ResourceProperties interface
+func (s GlueConnection) CfnResourceType() string {
+	return "AWS::Glue::Connection"
+}
+
+// GlueCrawler represents AWS::Glue::Crawler
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-crawler.html
+type GlueCrawler struct {
+	// The Amazon Resource Name (ARN) of an IAM role that's used to access
+	// customer resources, such as Amazon S3 data.
+	Role interface{} `json:"Role,omitempty"`
+
+	// A list of UTF-8 strings that specify the custom classifiers that are
+	// associated with the crawler.
+	Classifiers interface{} `json:"Classifiers,omitempty"`
+
+	// A description of the crawler and where it should be used. It must
+	// match the URI address multi-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*
+	Description interface{} `json:"Description,omitempty"`
+
+	// The policy that specifies update and delete behaviors for the crawler.
+	SchemaChangePolicy *GlueCrawlerSchemaChangePolicy `json:"SchemaChangePolicy,omitempty"`
+
+	// The schedule for the crawler.
+	Schedule *GlueCrawlerSchedule `json:"Schedule,omitempty"`
+
+	// The name of the database where the crawler's output is stored.
+	DatabaseName interface{} `json:"DatabaseName,omitempty"`
+
+	// The crawler targets.
+	Targets *GlueCrawlerTargets `json:"Targets,omitempty"`
+
+	// The table prefix that's used for catalog tables that are created.
+	TablePrefix interface{} `json:"TablePrefix,omitempty"`
+
+	// The name of the crawler. Must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::Crawler to implement the ResourceProperties interface
+func (s GlueCrawler) CfnResourceType() string {
+	return "AWS::Glue::Crawler"
+}
+
+// GlueDatabase represents AWS::Glue::Database
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-database.html
+type GlueDatabase struct {
+	// The metadata of the database.
+	DatabaseInput *GlueDatabaseDatabaseInput `json:"DatabaseInput,omitempty"`
+
+	// The ID of the data catalog to create the catalog object in. Currently,
+	// this should be the AWS account ID.
+	CatalogId interface{} `json:"CatalogId,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::Database to implement the ResourceProperties interface
+func (s GlueDatabase) CfnResourceType() string {
+	return "AWS::Glue::Database"
+}
+
+// GlueDevEndpoint represents AWS::Glue::DevEndpoint
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-devendpoint.html
+type GlueDevEndpoint struct {
+	// The name of the endpoint.
+	EndpointName interface{} `json:"EndpointName,omitempty"`
+
+	// The path to one or more Java Jars in an Amazon S3 bucket to load in
+	// your endpoint.
+	ExtraJarsS3Path interface{} `json:"ExtraJarsS3Path,omitempty"`
+
+	// The path to one or more Python libraries in an Amazon S3 bucket to
+	// load in your endpoint.
+	ExtraPythonLibsS3Path interface{} `json:"ExtraPythonLibsS3Path,omitempty"`
+
+	// The number of nodes that the endpoint uses.
+	NumberOfNodes interface{} `json:"NumberOfNodes,omitempty"`
+
+	// The public key for the endpoint to use for authentication.
+	PublicKey interface{} `json:"PublicKey,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the IAM role for the endpoint. It
+	// must match the AWS ARN string pattern: arn:aws:iam::\d{12}:role/.*
+	RoleArn interface{} `json:"RoleArn,omitempty"`
+
+	// A list of UTF-8 strings that specify the security group IDs for the
+	// endpoint.
+	SecurityGroupIds interface{} `json:"SecurityGroupIds,omitempty"`
+
+	// The subnet ID for the endpoint.
+	SubnetId interface{} `json:"SubnetId,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::DevEndpoint to implement the ResourceProperties interface
+func (s GlueDevEndpoint) CfnResourceType() string {
+	return "AWS::Glue::DevEndpoint"
+}
+
+// GlueJob represents AWS::Glue::Job
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-job.html
+type GlueJob struct {
+	// The role that's associated with the job.
+	Role interface{} `json:"Role,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify the
+	// default parameters for the job.
+	DefaultArguments interface{} `json:"DefaultArguments,omitempty"`
+
+	// The connections that are used by the job.
+	Connections *GlueJobConnectionsList `json:"Connections,omitempty"`
+
+	// The maximum number of times to retry this job if it fails.
+	MaxRetries interface{} `json:"MaxRetries,omitempty"`
+
+	// The description of the job.
+	Description interface{} `json:"Description,omitempty"`
+
+	// The location of the logs for the job.
+	LogUri interface{} `json:"LogUri,omitempty"`
+
+	// The code that executes a job.
+	Command *GlueJobJobCommand `json:"Command,omitempty"`
+
+	// The number of capacity units that are allocated to this job.
+	AllocatedCapacity interface{} `json:"AllocatedCapacity,omitempty"`
+
+	// The execution property of the job, which specifies the maximum number
+	// of concurrent runs that are allowed for the job.
+	ExecutionProperty *GlueJobExecutionProperty `json:"ExecutionProperty,omitempty"`
+
+	// The name of the job. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::Job to implement the ResourceProperties interface
+func (s GlueJob) CfnResourceType() string {
+	return "AWS::Glue::Job"
+}
+
+// GluePartition represents AWS::Glue::Partition
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-partition.html
+type GluePartition struct {
+	// The name of the metadata table to create the partition in.
+	TableName interface{} `json:"TableName,omitempty"`
+
+	// The name of the catalog database to create the partition in. It must
+	// match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	DatabaseName interface{} `json:"DatabaseName,omitempty"`
+
+	// The ID of the data catalog to create the catalog object in. Currently,
+	// this should be the AWS account ID.
+	CatalogId interface{} `json:"CatalogId,omitempty"`
+
+	// The metadata of the partition.
+	PartitionInput *GluePartitionPartitionInput `json:"PartitionInput,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::Partition to implement the ResourceProperties interface
+func (s GluePartition) CfnResourceType() string {
+	return "AWS::Glue::Partition"
+}
+
+// GlueTable represents AWS::Glue::Table
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-table.html
+type GlueTable struct {
+	// The metadata of the table.
+	TableInput *GlueTableTableInput `json:"TableInput,omitempty"`
+
+	// The name of the catalog database for the table. It must match the
+	// single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	DatabaseName interface{} `json:"DatabaseName,omitempty"`
+
+	// The ID of the data catalog to create the catalog object in. Currently,
+	// this should be the AWS account ID.
+	CatalogId interface{} `json:"CatalogId,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::Table to implement the ResourceProperties interface
+func (s GlueTable) CfnResourceType() string {
+	return "AWS::Glue::Table"
+}
+
+// GlueTrigger represents AWS::Glue::Trigger
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-glue-trigger.html
+type GlueTrigger struct {
+	// The type of job trigger. Valid values are SCHEDULED, CONDITIONAL, or
+	// ON_DEMAND.
+	Type interface{} `json:"Type,omitempty"`
+
+	// The description of the job trigger.
+	Description interface{} `json:"Description,omitempty"`
+
+	// The actions that the job trigger initiates when it fires.
+	Actions *GlueTriggerActionList `json:"Actions,omitempty"`
+
+	// The cron schedule expression for the job trigger.
+	Schedule interface{} `json:"Schedule,omitempty"`
+
+	// The name of the job trigger.
+	Name interface{} `json:"Name,omitempty"`
+
+	// The predicate of the job trigger, which determines when the trigger
+	// fires.
+	Predicate *GlueTriggerPredicate `json:"Predicate,omitempty"`
+}
+
+// CfnResourceType returns AWS::Glue::Trigger to implement the ResourceProperties interface
+func (s GlueTrigger) CfnResourceType() string {
+	return "AWS::Glue::Trigger"
+}
+
+// GuardDutyDetector represents AWS::GuardDuty::Detector
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-guardduty-detector.html
+type GuardDutyDetector struct {
+	// A Boolean value that specifies whether the detector is to be enabled.
+	Enable interface{} `json:"Enable,omitempty"`
+}
+
+// CfnResourceType returns AWS::GuardDuty::Detector to implement the ResourceProperties interface
+func (s GuardDutyDetector) CfnResourceType() string {
+	return "AWS::GuardDuty::Detector"
+}
+
+// GuardDutyIPSet represents AWS::GuardDuty::IPSet
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-guardduty-ipset.html
+type GuardDutyIPSet struct {
+	// A Boolean value that indicates whether GuardDuty is to start using the
+	// uploaded IP set.
+	Activate interface{} `json:"Activate,omitempty"`
+
+	// The detector ID that specifies the GuardDuty service for which an IP
+	// set is to be created.
+	DetectorId interface{} `json:"DetectorId,omitempty"`
+
+	// The format of the file that contains the IP set. Valid values are TXT,
+	// STIX, and OTX_CSV.
+	Format interface{} `json:"Format,omitempty"`
+
+	// The URI of the file that contains the IP set.
+	Location interface{} `json:"Location,omitempty"`
+
+	// The friendly name to identify the IP set. This name is displayed in
+	// all findings that are triggered by activity that involves IP addresses
+	// included in this IP set.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::GuardDuty::IPSet to implement the ResourceProperties interface
+func (s GuardDutyIPSet) CfnResourceType() string {
+	return "AWS::GuardDuty::IPSet"
+}
+
+// GuardDutyThreatIntelSet represents AWS::GuardDuty::ThreatIntelSet
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-guardduty-threatintelset.html
+type GuardDutyThreatIntelSet struct {
+	// A Boolean value that indicates whether GuardDuty should start using
+	// the uploaded ThreatIntelSet.
+	Activate interface{} `json:"Activate,omitempty"`
+
+	// The detector ID that specifies the GuardDuty service for which an
+	// ThreatIntelSet is to be created.
+	DetectorId interface{} `json:"DetectorId,omitempty"`
+
+	// The format of the file that contains the ThreatIntelSet. Valid values
+	// are TXT, STIX, OTX_CSV, ALIEN_VAULT, PROOF_POINT, and FIRE_EYE.
+	Format interface{} `json:"Format,omitempty"`
+
+	// The URI of the file that contains the ThreatIntelSet.
+	Location interface{} `json:"Location,omitempty"`
+
+	// A friendly ThreatIntelSet name that is displayed in all findings
+	// generated by activity that involves IP addresses included in this
+	// ThreatIntelSet.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::GuardDuty::ThreatIntelSet to implement the ResourceProperties interface
+func (s GuardDutyThreatIntelSet) CfnResourceType() string {
+	return "AWS::GuardDuty::ThreatIntelSet"
 }
 
 // IAMAccessKey represents AWS::IAM::AccessKey
@@ -3961,7 +5656,7 @@ type IAMGroup struct {
 	GroupName *StringExpr `json:"GroupName,omitempty"`
 
 	// One or more managed policy ARNs to attach to this group.
-	ManagedPolicyArns *StringListExpr `json:"ManagedPolicyArns,omitempty"`
+	ManagedPolicyArns interface{} `json:"ManagedPolicyArns,omitempty"`
 
 	// The path to the group. For more information about paths, see IAM
 	// Identifiers in the IAM User Guide.
@@ -3989,7 +5684,7 @@ type IAMInstanceProfile struct {
 	// The name of an existing IAM role to associate with this instance
 	// profile. Currently, you can assign a maximum of one role to an
 	// instance profile.
-	Roles *StringListExpr `json:"Roles,omitempty"`
+	Roles interface{} `json:"Roles,omitempty"`
 
 	// The name of the instance profile that you want to create. This
 	// parameter allows (per its regex pattern) a string consisting of upper
@@ -4007,15 +5702,15 @@ func (s IAMInstanceProfile) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-managedpolicy.html
 type IAMManagedPolicy struct {
-	// A description of the policy. For example, you can describe the
-	// permissions that are defined in the policy.
+	// A description of the IAM policy. For example, describe the permissions
+	// that are defined in the policy.
 	Description *StringExpr `json:"Description,omitempty"`
 
-	// The names of groups to attach to this policy.
-	Groups *StringListExpr `json:"Groups,omitempty"`
+	// The names of IAM groups to attach to this policy.
+	Groups interface{} `json:"Groups,omitempty"`
 
-	// The path for the policy. By default, the path is /. For more
-	// information, see IAM Identifiers in the IAM User Guide guide.
+	// The path for the IAM policy. By default, the path is /. For more
+	// information, see IAM Identifiers in the IAM User Guide.
 	Path *StringExpr `json:"Path,omitempty"`
 
 	// Policies that define the permissions for this managed policy. For more
@@ -4023,11 +5718,16 @@ type IAMManagedPolicy struct {
 	// IAM User Guide.
 	PolicyDocument interface{} `json:"PolicyDocument,omitempty"`
 
-	// The names of roles to attach to this policy.
-	Roles *StringListExpr `json:"Roles,omitempty"`
+	// The names of IAM roles to attach to this policy.
+	Roles interface{} `json:"Roles,omitempty"`
 
 	// The names of users to attach to this policy.
-	Users *StringListExpr `json:"Users,omitempty"`
+	Users interface{} `json:"Users,omitempty"`
+
+	// A custom, friendly name for your IAM managed policy. For valid values,
+	// see the PolicyName parameter of the CreatePolicy action in the IAM API
+	// Reference.
+	ManagedPolicyName *StringExpr `json:"ManagedPolicyName,omitempty"`
 }
 
 // CfnResourceType returns AWS::IAM::ManagedPolicy to implement the ResourceProperties interface
@@ -4040,7 +5740,7 @@ func (s IAMManagedPolicy) CfnResourceType() string {
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-policy.html
 type IAMPolicy struct {
 	// The names of groups to which you want to add the policy.
-	Groups *StringListExpr `json:"Groups,omitempty"`
+	Groups interface{} `json:"Groups,omitempty"`
 
 	// A policy document that contains permissions to add to the specified
 	// users or groups.
@@ -4051,11 +5751,11 @@ type IAMPolicy struct {
 	// policies for an IAM role, each policy must have a unique name.
 	PolicyName *StringExpr `json:"PolicyName,omitempty"`
 
-	// The names of AWS::IAM::Roles to attach to this policy.
-	Roles *StringListExpr `json:"Roles,omitempty"`
+	// The names of AWS::IAM::Roles to which this policy will be attached.
+	Roles interface{} `json:"Roles,omitempty"`
 
 	// The names of users for whom you want to add the policy.
-	Users *StringListExpr `json:"Users,omitempty"`
+	Users interface{} `json:"Users,omitempty"`
 }
 
 // CfnResourceType returns AWS::IAM::Policy to implement the ResourceProperties interface
@@ -4067,11 +5767,15 @@ func (s IAMPolicy) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
 type IAMRole struct {
-	// The trust policy that is associated with this role.
+	// The trust policy that is associated with this role. You can associate
+	// only one assume role policy with a role. For an example of an assume
+	// role policy, see Template Examples. For more information about the
+	// elements that you can use in an IAM policy, see IAM Policy Elements
+	// Reference in the IAM User Guide.
 	AssumeRolePolicyDocument interface{} `json:"AssumeRolePolicyDocument,omitempty"`
 
 	// One or more managed policy ARNs to attach to this role.
-	ManagedPolicyArns *StringListExpr `json:"ManagedPolicyArns,omitempty"`
+	ManagedPolicyArns interface{} `json:"ManagedPolicyArns,omitempty"`
 
 	// The path associated with this role. For information about IAM paths,
 	// see Friendly Names and Paths in IAM User Guide.
@@ -4098,14 +5802,14 @@ func (s IAMRole) CfnResourceType() string {
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iam-user.html
 type IAMUser struct {
 	// A name of a group to which you want to add the user.
-	Groups *StringListExpr `json:"Groups,omitempty"`
+	Groups interface{} `json:"Groups,omitempty"`
 
 	// Creates a login profile so that the user can access the AWS Management
 	// Console.
 	LoginProfile *IAMUserLoginProfile `json:"LoginProfile,omitempty"`
 
 	// One or more managed policy ARNs to attach to this user.
-	ManagedPolicyArns *StringListExpr `json:"ManagedPolicyArns,omitempty"`
+	ManagedPolicyArns interface{} `json:"ManagedPolicyArns,omitempty"`
 
 	// The path for the user name. For more information about paths, see IAM
 	// Identifiers in the IAM User Guide.
@@ -4125,6 +5829,65 @@ type IAMUser struct {
 // CfnResourceType returns AWS::IAM::User to implement the ResourceProperties interface
 func (s IAMUser) CfnResourceType() string {
 	return "AWS::IAM::User"
+}
+
+// InspectorAssessmentTarget represents AWS::Inspector::AssessmentTarget
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-inspector-assessmenttarget.html
+type InspectorAssessmentTarget struct {
+	// The name of the Amazon Inspector assessment target.
+	AssessmentTargetName interface{} `json:"AssessmentTargetName,omitempty"`
+
+	// The ARN that specifies the resource group that is associated with the
+	// assessment target.
+	ResourceGroupArn interface{} `json:"ResourceGroupArn,omitempty"`
+}
+
+// CfnResourceType returns AWS::Inspector::AssessmentTarget to implement the ResourceProperties interface
+func (s InspectorAssessmentTarget) CfnResourceType() string {
+	return "AWS::Inspector::AssessmentTarget"
+}
+
+// InspectorAssessmentTemplate represents AWS::Inspector::AssessmentTemplate
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-inspector-assessmenttemplate.html
+type InspectorAssessmentTemplate struct {
+	// The ARN of the assessment target that corresponds to this assessment
+	// template.
+	AssessmentTargetArn interface{} `json:"AssessmentTargetArn,omitempty"`
+
+	// The duration in seconds specified for this assessment tempate. The
+	// default value is 3600 seconds (one hour). The maximum value is 86400
+	// seconds (one day).
+	DurationInSeconds interface{} `json:"DurationInSeconds,omitempty"`
+
+	// The name of the assessment template.
+	AssessmentTemplateName interface{} `json:"AssessmentTemplateName,omitempty"`
+
+	// The rules packages that are specified for this assessment template.
+	RulesPackageArns interface{} `json:"RulesPackageArns,omitempty"`
+
+	// The user-defined attributes that are assigned to every generated
+	// finding from the assessment run that uses this assessment template.
+	UserAttributesForFindings *ResourceTagList `json:"UserAttributesForFindings,omitempty"`
+}
+
+// CfnResourceType returns AWS::Inspector::AssessmentTemplate to implement the ResourceProperties interface
+func (s InspectorAssessmentTemplate) CfnResourceType() string {
+	return "AWS::Inspector::AssessmentTemplate"
+}
+
+// InspectorResourceGroup represents AWS::Inspector::ResourceGroup
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-inspector-resourcegroup.html
+type InspectorResourceGroup struct {
+	// The tags (key and value pairs) of the resource group.
+	ResourceGroupTags *ResourceTagList `json:"ResourceGroupTags,omitempty"`
+}
+
+// CfnResourceType returns AWS::Inspector::ResourceGroup to implement the ResourceProperties interface
+func (s InspectorResourceGroup) CfnResourceType() string {
+	return "AWS::Inspector::ResourceGroup"
 }
 
 // IAMUserToGroupAddition represents AWS::IAM::UserToGroupAddition
@@ -4196,9 +5959,8 @@ func (s IoTPolicyPrincipalAttachment) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iot-thing.html
 type IoTThing struct {
-	// A JSON string that contains up to three key-value pairs, for example:
-	// { "attributes": { "string1":"string2" } }.
-	AttributePayload interface{} `json:"AttributePayload,omitempty"`
+	// The attribute payload.
+	AttributePayload *IoTThingAttributePayload `json:"AttributePayload,omitempty"`
 
 	// The name (the physical ID) of the AWS IoT thing.
 	ThingName *StringExpr `json:"ThingName,omitempty"`
@@ -4234,7 +5996,7 @@ type IoTTopicRule struct {
 	RuleName *StringExpr `json:"RuleName,omitempty"`
 
 	// The actions associated with the AWS IoT rule.
-	TopicRulePayload *IoTTopicRulePayload `json:"TopicRulePayload,omitempty"`
+	TopicRulePayload *IoTTopicRuleTopicRulePayload `json:"TopicRulePayload,omitempty"`
 }
 
 // CfnResourceType returns AWS::IoT::TopicRule to implement the ResourceProperties interface
@@ -4246,23 +6008,87 @@ func (s IoTTopicRule) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-kinesis-stream.html
 type KinesisStream struct {
-	// The name of the Amazon Kinesis stream. If you don't specify a name,
-	// AWS CloudFormation generates a unique physical ID and uses that ID for
-	// the stream name. For more information, see Name Type.
+	// The name of the Kinesis stream. If you don't specify a name, AWS
+	// CloudFormation generates a unique physical ID and uses that ID for the
+	// stream name. For more information, see Name Type.
 	Name *StringExpr `json:"Name,omitempty"`
+
+	// The number of hours for the data records that are stored in shards to
+	// remain accessible. The default value is 24. For more information about
+	// the stream retention period, see Changing the Data Retention Period in
+	// the Amazon Kinesis Developer Guide.
+	RetentionPeriodHours *IntegerExpr `json:"RetentionPeriodHours,omitempty"`
 
 	// The number of shards that the stream uses. For greater provisioned
 	// throughput, increase the number of shards.
 	ShardCount *IntegerExpr `json:"ShardCount,omitempty"`
 
 	// An arbitrary set of tags (key–value pairs) to associate with the
-	// Amazon Kinesis stream.
+	// Kinesis stream. For information about constraints for this property,
+	// see Tag Restrictions in the Amazon Kinesis Developer Guide.
 	Tags []ResourceTag `json:"Tags,omitempty"`
 }
 
 // CfnResourceType returns AWS::Kinesis::Stream to implement the ResourceProperties interface
 func (s KinesisStream) CfnResourceType() string {
 	return "AWS::Kinesis::Stream"
+}
+
+// KinesisAnalyticsApplication represents AWS::KinesisAnalytics::Application
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-kinesisanalytics-application.html
+type KinesisAnalyticsApplication struct {
+	// The name of your Amazon Kinesis Analytics application.
+	ApplicationName interface{} `json:"ApplicationName,omitempty"`
+
+	// The summary description of the application.
+	ApplicationDescription interface{} `json:"ApplicationDescription,omitempty"`
+
+	// One or more SQL statements that read input data, transform it, and
+	// generate output.
+	ApplicationCode interface{} `json:"ApplicationCode,omitempty"`
+
+	// Use this parameter to configure the application input.
+	Inputs *KinesisAnalyticsApplicationInputList `json:"Inputs,omitempty"`
+}
+
+// CfnResourceType returns AWS::KinesisAnalytics::Application to implement the ResourceProperties interface
+func (s KinesisAnalyticsApplication) CfnResourceType() string {
+	return "AWS::KinesisAnalytics::Application"
+}
+
+// KinesisAnalyticsApplicationOutput represents AWS::KinesisAnalytics::ApplicationOutput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-kinesisanalytics-applicationoutput.html
+type KinesisAnalyticsApplicationOutput struct {
+	// The name of the application to which you want to add the output
+	// configuration.
+	ApplicationName *StringExpr `json:"ApplicationName,omitempty"`
+
+	// An array of objects, each describing one output configuration.
+	Output *KinesisAnalyticsApplicationOutputOutput `json:"Output,omitempty"`
+}
+
+// CfnResourceType returns AWS::KinesisAnalytics::ApplicationOutput to implement the ResourceProperties interface
+func (s KinesisAnalyticsApplicationOutput) CfnResourceType() string {
+	return "AWS::KinesisAnalytics::ApplicationOutput"
+}
+
+// KinesisAnalyticsApplicationReferenceDataSource represents AWS::KinesisAnalytics::ApplicationReferenceDataSource
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-kinesisanalytics-applicationreferencedatasource.html
+type KinesisAnalyticsApplicationReferenceDataSource struct {
+	// The name of an existing application.
+	ApplicationName interface{} `json:"ApplicationName,omitempty"`
+
+	// The reference data source, which is an object in your Amazon Simple
+	// Storage Service (Amazon S3) bucket.
+	ReferenceDataSource *KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSource `json:"ReferenceDataSource,omitempty"`
+}
+
+// CfnResourceType returns AWS::KinesisAnalytics::ApplicationReferenceDataSource to implement the ResourceProperties interface
+func (s KinesisAnalyticsApplicationReferenceDataSource) CfnResourceType() string {
+	return "AWS::KinesisAnalytics::ApplicationReferenceDataSource"
 }
 
 // KinesisFirehoseDeliveryStream represents AWS::KinesisFirehose::DeliveryStream
@@ -4272,8 +6098,21 @@ type KinesisFirehoseDeliveryStream struct {
 	// A name for the delivery stream.
 	DeliveryStreamName *StringExpr `json:"DeliveryStreamName,omitempty"`
 
+	// The delivery stream type. This property can be one of the following
+	// values:
+	DeliveryStreamType *StringExpr `json:"DeliveryStreamType,omitempty"`
+
 	// An Amazon ES destination for the delivery stream.
 	ElasticsearchDestinationConfiguration *KinesisFirehoseDeliveryStreamElasticsearchDestinationConfiguration `json:"ElasticsearchDestinationConfiguration,omitempty"`
+
+	// An Amazon S3 destination for the delivery stream.
+	ExtendedS3DestinationConfiguration *KinesisFirehoseDeliveryStreamExtendedS3DestinationConfiguration `json:"ExtendedS3DestinationConfiguration,omitempty"`
+
+	// When a Kinesis stream is used as the source for the delivery stream, a
+	// Kinesis Firehose DeliveryStream KinesisStreamSourceConfiguration
+	// containing the Kinesis stream ARN and the role ARN for the source
+	// stream.
+	KinesisStreamSourceConfiguration *KinesisFirehoseDeliveryStreamKinesisStreamSourceConfiguration `json:"KinesisStreamSourceConfiguration,omitempty"`
 
 	// An Amazon Redshift destination for the delivery stream.
 	RedshiftDestinationConfiguration *KinesisFirehoseDeliveryStreamRedshiftDestinationConfiguration `json:"RedshiftDestinationConfiguration,omitempty"`
@@ -4328,6 +6167,10 @@ type KMSKey struct {
 	// For more information, see Key Policies in the AWS Key Management
 	// Service Developer Guide.
 	KeyPolicy interface{} `json:"KeyPolicy,omitempty"`
+
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this key. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
 }
 
 // CfnResourceType returns AWS::KMS::Key to implement the ResourceProperties interface
@@ -4348,9 +6191,9 @@ type LambdaEventSourceMapping struct {
 	// Indicates whether Lambda begins polling the event source.
 	Enabled *BoolExpr `json:"Enabled,omitempty"`
 
-	// The Amazon Resource Name (ARN) of the Amazon Kinesis or DynamoDB
-	// stream that is the source of events. Any record added to this stream
-	// can invoke the Lambda function. For more information, see
+	// The Amazon Resource Name (ARN) of the Kinesis or DynamoDB stream that
+	// is the source of events. Any record added to this stream can invoke
+	// the Lambda function. For more information, see
 	// CreateEventSourceMapping in the AWS Lambda Developer Guide.
 	EventSourceArn *StringExpr `json:"EventSourceArn,omitempty"`
 
@@ -4387,6 +6230,13 @@ type LambdaAlias struct {
 
 	// A name for the alias.
 	Name *StringExpr `json:"Name,omitempty"`
+
+	// Use this parameter to point your alias to two different function
+	// versions, allowing you to dictate what percentage of traffic will
+	// invoke each version. For more information, see Routing Traffic to
+	// Different Function Versions Using Aliases in the AWS Lambda Developer
+	// Guide.
+	RoutingConfig *LambdaAliasAliasRoutingConfiguration `json:"RoutingConfig,omitempty"`
 }
 
 // CfnResourceType returns AWS::Lambda::Alias to implement the ResourceProperties interface
@@ -4452,8 +6302,14 @@ type LambdaFunction struct {
 	// The function execution time (in seconds) after which Lambda terminates
 	// the function. Because the execution time affects cost, set this value
 	// based on the function's expected execution time. By default, Timeout
-	// is set to 3 seconds.
+	// is set to 3 seconds. For more information, see the FAQs.
 	Timeout *IntegerExpr `json:"Timeout,omitempty"`
+
+	// The parent object that contains your Lambda function's tracing
+	// settings. By default, the Mode property is set to PassThrough. For
+	// valid values, see the TracingConfig data type in the AWS Lambda
+	// Developer Guide.
+	TracingConfig *LambdaFunctionTracingConfig `json:"TracingConfig,omitempty"`
 
 	// If the Lambda function requires access to resources in a VPC, specify
 	// a VPC configuration that Lambda uses to set up an elastic network
@@ -4464,7 +6320,10 @@ type LambdaFunction struct {
 	// Translation (NAT) instance inside your VPC or use an Amazon Virtual
 	// Private Cloud (Amazon VPC) NAT gateway. For more information, see NAT
 	// Gateways in the Amazon VPC User Guide.
-	VpcConfig *LambdaFunctionVPCConfig `json:"VpcConfig,omitempty"`
+	VpcConfig *LambdaFunctionVpcConfig `json:"VpcConfig,omitempty"`
+
+	// An arbitrary set of tags (key–value pairs) for this Lambda function.
+	Tags []ResourceTag `json:"Tags,omitempty"`
 }
 
 // CfnResourceType returns AWS::Lambda::Function to implement the ResourceProperties interface
@@ -4482,6 +6341,10 @@ type LambdaPermission struct {
 	// actions. For a list of actions, see Actions and Condition Context Keys
 	// for AWS Lambda in the IAM User Guide.
 	Action *StringExpr `json:"Action,omitempty"`
+
+	// A unique token that must be supplied by the principal invoking the
+	// function.
+	EventSourceToken *StringExpr `json:"EventSourceToken,omitempty"`
 
 	// The name (physical ID), Amazon Resource Name (ARN), or alias ARN of
 	// the Lambda function that you want to associate with this statement.
@@ -4557,7 +6420,7 @@ type LogsDestination struct {
 	RoleArn *StringExpr `json:"RoleArn,omitempty"`
 
 	// The ARN of the AWS resource that receives log events. Currently, you
-	// can specify only an Amazon Kinesis stream.
+	// can specify only an Kinesis stream.
 	TargetArn *StringExpr `json:"TargetArn,omitempty"`
 }
 
@@ -4609,12 +6472,13 @@ func (s LogsLogStream) CfnResourceType() string {
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-logs-metricfilter.html
 type LogsMetricFilter struct {
 	// Describes the pattern that CloudWatch Logs follows to interpret each
-	// entry in a log. For example, a log entry might contain fields such as
-	// timestamps, IP addresses, error codes, bytes transferred, and so on.
-	// You use the pattern to specify those fields and to specify what to
-	// look for in the log file. For example, if you're interested in error
-	// codes that begin with 1234, your filter pattern might be [timestamps,
-	// ip_addresses, error_codes = 1234*, size, ...].
+	// entry in a log. A log entry might contain fields such as timestamps,
+	// IP addresses, error codes, bytes transferred, and so on. You use the
+	// pattern to specify those fields and to specify what to look for in the
+	// log file. For example, if you're interested in error codes that begin
+	// with 1234, your filter pattern might be [timestamps, ip_addresses,
+	// error_codes = 1234*, size, ...]. For more information, see Filter and
+	// Pattern Syntax in the Amazon CloudWatch User Guide.
 	FilterPattern *StringExpr `json:"FilterPattern,omitempty"`
 
 	// The name of an existing log group that you want to associate with this
@@ -4634,8 +6498,9 @@ func (s LogsMetricFilter) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-logs-subscriptionfilter.html
 type LogsSubscriptionFilter struct {
-	// The Amazon Resource Name (ARN) of the Amazon Kinesis stream or Lambda
-	// function that you want to use as the subscription feed destination.
+	// The Amazon Resource Name (ARN) of the Kinesis stream, Kinesis Firehose
+	// delivery stream, or Lambda function that you want to use as the
+	// subscription feed destination.
 	DestinationArn *StringExpr `json:"DestinationArn,omitempty"`
 
 	// The filtering expressions that restrict what gets delivered to the
@@ -4651,7 +6516,7 @@ type LogsSubscriptionFilter struct {
 	LogGroupName *StringExpr `json:"LogGroupName,omitempty"`
 
 	// An IAM role that grants CloudWatch Logs permission to put data into
-	// the specified Amazon Kinesis stream. For Lambda and CloudWatch Logs
+	// the specified Kinesis stream. For Lambda and CloudWatch Logs
 	// destinations, don't specify this property because CloudWatch Logs gets
 	// the necessary permissions from the destination resource.
 	RoleArn *StringExpr `json:"RoleArn,omitempty"`
@@ -4677,11 +6542,11 @@ type OpsWorksApp struct {
 	Description *StringExpr `json:"Description,omitempty"`
 
 	// A list of databases to associate with the AWS OpsWorks app.
-	DataSources *DataSourceList `json:"DataSources,omitempty"`
+	DataSources *OpsWorksAppDataSourceList `json:"DataSources,omitempty"`
 
 	// The app virtual host settings, with multiple domains separated by
 	// commas. For example, 'www.example.com, example.com'.
-	Domains *StringListExpr `json:"Domains,omitempty"`
+	Domains interface{} `json:"Domains,omitempty"`
 
 	// Whether to enable SSL for this app.
 	EnableSsl *BoolExpr `json:"EnableSsl,omitempty"`
@@ -4770,7 +6635,7 @@ type OpsWorksInstance struct {
 	EbsOptimized *BoolExpr `json:"EbsOptimized,omitempty"`
 
 	// A list of Elastic IP addresses to associate with the instance.
-	ElasticIps *StringListExpr `json:"ElasticIps,omitempty"`
+	ElasticIps interface{} `json:"ElasticIps,omitempty"`
 
 	// The name of the instance host.
 	Hostname *StringExpr `json:"Hostname,omitempty"`
@@ -4785,7 +6650,7 @@ type OpsWorksInstance struct {
 	InstanceType *StringExpr `json:"InstanceType,omitempty"`
 
 	// The IDs of the AWS OpsWorks layers to associate with this instance.
-	LayerIds *StringListExpr `json:"LayerIds,omitempty"`
+	LayerIds interface{} `json:"LayerIds,omitempty"`
 
 	// The instance operating system. For more information, see
 	// CreateInstance in the AWS OpsWorks Stacks API Reference.
@@ -4819,7 +6684,7 @@ type OpsWorksInstance struct {
 
 	// A list of AWS OpsWorks volume IDs to associate with the instance. For
 	// more information, see AWS::OpsWorks::Volume.
-	Volumes *StringListExpr `json:"Volumes,omitempty"`
+	Volumes interface{} `json:"Volumes,omitempty"`
 }
 
 // CfnResourceType returns AWS::OpsWorks::Instance to implement the ResourceProperties interface
@@ -4858,7 +6723,7 @@ type OpsWorksLayer struct {
 	CustomRecipes *OpsWorksRecipes `json:"CustomRecipes,omitempty"`
 
 	// Custom security group IDs for this layer.
-	CustomSecurityGroupIds *StringListExpr `json:"CustomSecurityGroupIds,omitempty"`
+	CustomSecurityGroupIds interface{} `json:"CustomSecurityGroupIds,omitempty"`
 
 	// Whether to automatically heal Amazon EC2 instances that have become
 	// disconnected or timed out.
@@ -4878,7 +6743,7 @@ type OpsWorksLayer struct {
 	Name *StringExpr `json:"Name,omitempty"`
 
 	// The packages for this layer.
-	Packages *StringListExpr `json:"Packages,omitempty"`
+	Packages interface{} `json:"Packages,omitempty"`
 
 	// The layer short name, which is used internally by AWS OpsWorks and by
 	// Chef recipes. The short name is also used as the name for the
@@ -4888,6 +6753,10 @@ type OpsWorksLayer struct {
 	// The ID of the AWS OpsWorks stack that this layer will be associated
 	// with.
 	StackId *StringExpr `json:"StackId,omitempty"`
+
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this AWS OpsWorks layer. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
 
 	// The layer type. A stack cannot have more than one layer of the same
 	// type, except for the custom type. You can have any number of custom
@@ -4927,7 +6796,7 @@ type OpsWorksStack struct {
 	// If you're cloning an AWS OpsWorks stack, a list of AWS OpsWorks
 	// application stack IDs from the source stack to include in the cloned
 	// stack.
-	CloneAppIds *StringListExpr `json:"CloneAppIds,omitempty"`
+	CloneAppIds interface{} `json:"CloneAppIds,omitempty"`
 
 	// If you're cloning an AWS OpsWorks stack, indicates whether to clone
 	// the source stack's permissions.
@@ -4975,7 +6844,7 @@ type OpsWorksStack struct {
 	// instance.
 	DefaultSubnetId *StringExpr `json:"DefaultSubnetId,omitempty"`
 
-	// The Amazon Resource Name (ARN) of the Amazon EC2 Container Service
+	// The Amazon Resource Name (ARN) of the Amazon Elastic Container Service
 	// (Amazon ECS) cluster to register with the AWS OpsWorks stack.
 	EcsClusterArn *StringExpr `json:"EcsClusterArn,omitempty"`
 
@@ -5004,6 +6873,10 @@ type OpsWorksStack struct {
 	// If you're cloning an AWS OpsWorks stack, the stack ID of the source
 	// AWS OpsWorks stack to clone.
 	SourceStackId *StringExpr `json:"SourceStackId,omitempty"`
+
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this AWS OpsWorks stack. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
 
 	// Whether the stack uses custom cookbooks.
 	UseCustomCookbooks *BoolExpr `json:"UseCustomCookbooks,omitempty"`
@@ -5037,10 +6910,13 @@ type OpsWorksUserProfile struct {
 	// Management (IAM) user to associate with this configuration.
 	IamUserArn *StringExpr `json:"IamUserArn,omitempty"`
 
-	// The public SSH key that is associated with the IAM user. The IAM user
-	// must have or be given the corresponding private key to access
-	// instances.
+	// The public SSH key that is associated with the IAM user. To access
+	// instances, the IAM user must have or be given the corresponding
+	// private key.
 	SshPublicKey *StringExpr `json:"SshPublicKey,omitempty"`
+
+	// The user's SSH user name.
+	SshUsername *StringExpr `json:"SshUsername,omitempty"`
 }
 
 // CfnResourceType returns AWS::OpsWorks::UserProfile to implement the ResourceProperties interface
@@ -5085,10 +6961,10 @@ type RDSDBCluster struct {
 	// Service API Reference.
 	BackupRetentionPeriod *IntegerExpr `json:"BackupRetentionPeriod,omitempty"`
 
-	// The name of your database. You can specify a name of up to eight
-	// alpha-numeric characters. If you do not provide a name, Amazon
+	// The name of your database. If you don't provide a name, Amazon
 	// Relational Database Service (Amazon RDS) won't create a database in
-	// this DB cluster.
+	// this DB cluster. For naming constraints, see Naming Constraints in
+	// Amazon RDS in the Amazon Relational Database Service User Guide.
 	DatabaseName *StringExpr `json:"DatabaseName,omitempty"`
 
 	// The name of the DB cluster parameter group to associate with this DB
@@ -5135,6 +7011,11 @@ type RDSDBCluster struct {
 	// occur.
 	PreferredMaintenanceWindow *StringExpr `json:"PreferredMaintenanceWindow,omitempty"`
 
+	// The Amazon Resource Name (ARN) of the source Amazon RDS MySQL DB
+	// instance or DB cluster, if this DB cluster is created as a Read
+	// Replica.
+	ReplicationSourceIdentifier *StringExpr `json:"ReplicationSourceIdentifier,omitempty"`
+
 	// The identifier for the DB cluster snapshot from which you want to
 	// restore.
 	SnapshotIdentifier *StringExpr `json:"SnapshotIdentifier,omitempty"`
@@ -5146,7 +7027,7 @@ type RDSDBCluster struct {
 	Tags *ResourceTagList `json:"Tags,omitempty"`
 
 	// A list of VPC security groups to associate with this DB cluster.
-	VpcSecurityGroupIds *StringListExpr `json:"VpcSecurityGroupIds,omitempty"`
+	VpcSecurityGroupIds interface{} `json:"VpcSecurityGroupIds,omitempty"`
 }
 
 // CfnResourceType returns AWS::RDS::DBCluster to implement the ResourceProperties interface
@@ -5197,7 +7078,7 @@ type RDSDBInstance struct {
 	AutoMinorVersionUpgrade *BoolExpr `json:"AutoMinorVersionUpgrade,omitempty"`
 
 	// The name of the Availability Zone where the DB instance is located.
-	// You cannot set the AvailabilityZone parameter if the MultiAZ parameter
+	// You can't set the AvailabilityZone parameter if the MultiAZ parameter
 	// is set to true.
 	AvailabilityZone *StringExpr `json:"AvailabilityZone,omitempty"`
 
@@ -5217,12 +7098,13 @@ type RDSDBInstance struct {
 	// snapshot when you delete the DB instance).
 	CopyTagsToSnapshot *BoolExpr `json:"CopyTagsToSnapshot,omitempty"`
 
-	// The name of an existing DB cluster that this instance will be
-	// associated with. If you specify this property, specify aurora for the
-	// Engine property and do not specify any of the following properties:
-	// AllocatedStorage, BackupRetentionPeriod, CharacterSetName,
-	// DBSecurityGroups, PreferredBackupWindow, PreferredMaintenanceWindow,
-	// Port, SourceDBInstanceIdentifier, or StorageType.
+	// The name of an existing DB cluster that this instance is associated
+	// with. If you specify this property, specify aurora for the Engine
+	// property and don't specify any of the following properties:
+	// AllocatedStorage, BackupRetentionPeriod, CharacterSetName, DBName,
+	// DBSecurityGroups, MasterUsername, MasterUserPassword, OptionGroupName,
+	// PreferredBackupWindow, PreferredMaintenanceWindow, Port,
+	// SourceDBInstanceIdentifier, StorageType, or VPCSecurityGroups.
 	DBClusterIdentifier *StringExpr `json:"DBClusterIdentifier,omitempty"`
 
 	// The name of the compute and memory capacity classes of the DB
@@ -5230,7 +7112,7 @@ type RDSDBInstance struct {
 	DBInstanceClass *StringExpr `json:"DBInstanceClass,omitempty"`
 
 	// A name for the DB instance. If you specify a name, AWS CloudFormation
-	// converts it to lower case. If you don't specify a name, AWS
+	// converts it to lowercase. If you don't specify a name, AWS
 	// CloudFormation generates a unique physical ID and uses that ID for the
 	// DB instance. For more information, see Name Type.
 	DBInstanceIdentifier *StringExpr `json:"DBInstanceIdentifier,omitempty"`
@@ -5248,25 +7130,26 @@ type RDSDBInstance struct {
 	// list can include both the name of existing DB security groups or
 	// references to AWS::RDS::DBSecurityGroup resources created in the
 	// template.
-	DBSecurityGroups *StringListExpr `json:"DBSecurityGroups,omitempty"`
+	DBSecurityGroups interface{} `json:"DBSecurityGroups,omitempty"`
 
-	// The name or ARN of the DB snapshot used to restore the DB instance. If
-	// you are restoring from a shared manual DB snapshot, you must specify
-	// the Amazon Resource Name (ARN) of the snapshot.
+	// The name or Amazon Resource Name (ARN) of the DB snapshot that's used
+	// to restore the DB instance. If you're restoring from a shared manual
+	// DB snapshot, you must specify the ARN of the snapshot.
 	DBSnapshotIdentifier *StringExpr `json:"DBSnapshotIdentifier,omitempty"`
 
-	// A DB subnet group to associate with the DB instance.
+	// A DB subnet group to associate with the DB instance. If you update
+	// this value, the new subnet group must be a subnet group in a new VPC.
 	DBSubnetGroupName *StringExpr `json:"DBSubnetGroupName,omitempty"`
 
-	// For an Amazon RDS DB instance that is running Microsoft SQL Server,
-	// the Active Directory directory ID to create the instance in. Amazon
-	// RDS uses Windows Authentication to authenticate users that connect to
-	// the DB instance. For more information, see Using Windows
-	// Authentication with an Amazon RDS DB Instance Running Microsoft SQL
-	// Server in the Amazon Relational Database Service User Guide.
+	// For an Amazon RDS DB instance that's running Microsoft SQL Server, the
+	// Active Directory directory ID to create the instance in. Amazon RDS
+	// uses Windows Authentication to authenticate users that connect to the
+	// DB instance. For more information, see Using Windows Authentication
+	// with an Amazon RDS DB Instance Running Microsoft SQL Server in the
+	// Amazon Relational Database Service User Guide.
 	Domain *StringExpr `json:"Domain,omitempty"`
 
-	// The name of an IAM role that Amazon RDS uses when calling the
+	// The name of an IAM role that Amazon RDS uses when calling the AWS
 	// Directory Service APIs.
 	DomainIAMRoleName *StringExpr `json:"DomainIAMRoleName,omitempty"`
 
@@ -5282,7 +7165,7 @@ type RDSDBInstance struct {
 	// provisions. The value must be equal to or greater than 1000.
 	Iops *IntegerExpr `json:"Iops,omitempty"`
 
-	// The ARN of the AWS Key Management Service (AWS KMS) master key that is
+	// The ARN of the AWS Key Management Service (AWS KMS) master key that's
 	// used to encrypt the DB instance, such as
 	// arn:aws:kms:us-east-1:012345678910:key/abcd1234-a123-456a-a12b-a123b4cd56ef.
 	// If you enable the StorageEncrypted property but don't specify this
@@ -5307,15 +7190,17 @@ type RDSDBInstance struct {
 
 	// The ARN of the AWS Identity and Access Management (IAM) role that
 	// permits Amazon RDS to send enhanced monitoring metrics to Amazon
-	// CloudWatch, for example, arn:aws:iam:123456789012:role/emaccess. For
+	// CloudWatch, for example, arn:aws:iam::123456789012:role/emaccess. For
 	// information on creating a monitoring role, see To create an IAM role
 	// for Amazon RDS Enhanced Monitoring in the Amazon Relational Database
 	// Service User Guide.
 	MonitoringRoleArn *StringExpr `json:"MonitoringRoleArn,omitempty"`
 
 	// Specifies if the database instance is a multiple Availability Zone
-	// deployment. You cannot set the AvailabilityZone parameter if the
-	// MultiAZ parameter is set to true.
+	// deployment. You can't set the AvailabilityZone parameter if the
+	// MultiAZ parameter is set to true. Amazon Aurora storage is replicated
+	// across all the Availability Zones and doesn't require the MultiAZ
+	// option to be set.
 	MultiAZ *BoolExpr `json:"MultiAZ,omitempty"`
 
 	// The option group that this DB instance is associated with.
@@ -5337,7 +7222,7 @@ type RDSDBInstance struct {
 	// Service API Reference.
 	PreferredMaintenanceWindow *StringExpr `json:"PreferredMaintenanceWindow,omitempty"`
 
-	// Indicates whether the DB instance is an Internet-facing instance. If
+	// Indicates whether the DB instance is an internet-facing instance. If
 	// you specify true, AWS CloudFormation creates an instance with a
 	// publicly resolvable DNS name, which resolves to a public IP address.
 	// If you specify false, AWS CloudFormation creates an internal instance
@@ -5350,6 +7235,10 @@ type RDSDBInstance struct {
 	// the Amazon Relational Database Service Developer Guide.
 	SourceDBInstanceIdentifier *StringExpr `json:"SourceDBInstanceIdentifier,omitempty"`
 
+	// The ID of the region that contains the source DB instance for the read
+	// replica.
+	SourceRegion interface{} `json:"SourceRegion,omitempty"`
+
 	// Indicates whether the DB instance is encrypted.
 	StorageEncrypted *BoolExpr `json:"StorageEncrypted,omitempty"`
 
@@ -5360,7 +7249,7 @@ type RDSDBInstance struct {
 	Tags []ResourceTag `json:"Tags,omitempty"`
 
 	// The time zone of the DB instance, which you can specify to match the
-	// time zone of your applications. To see which engines supports time
+	// time zone of your applications. To see which engines support time
 	// zones, see the Timezone parameter for the CreateDBInstance action in
 	// the Amazon Relational Database Service API Reference.
 	Timezone *StringExpr `json:"Timezone,omitempty"`
@@ -5369,7 +7258,7 @@ type RDSDBInstance struct {
 	// list can include both the physical IDs of existing VPC security groups
 	// and references to AWS::EC2::SecurityGroup resources created in the
 	// template.
-	VPCSecurityGroups *StringListExpr `json:"VPCSecurityGroups,omitempty"`
+	VPCSecurityGroups interface{} `json:"VPCSecurityGroups,omitempty"`
 }
 
 // CfnResourceType returns AWS::RDS::DBInstance to implement the ResourceProperties interface
@@ -5405,7 +7294,7 @@ func (s RDSDBParameterGroup) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-security-group.html
 type RDSDBSecurityGroup struct {
-	// The Id of VPC. Indicates which VPC this DB Security Group should
+	// The Id of the VPC. Indicates which VPC this DB Security Group should
 	// belong to.
 	EC2VpcId *StringExpr `json:"EC2VpcId,omitempty"`
 
@@ -5461,7 +7350,7 @@ type RDSDBSubnetGroup struct {
 	DBSubnetGroupDescription *StringExpr `json:"DBSubnetGroupDescription,omitempty"`
 
 	// The EC2 Subnet IDs for the DB Subnet Group.
-	SubnetIds *StringListExpr `json:"SubnetIds,omitempty"`
+	SubnetIds interface{} `json:"SubnetIds,omitempty"`
 
 	// The tags that you want to attach to the RDS database subnet group.
 	Tags *ResourceTagList `json:"Tags,omitempty"`
@@ -5485,7 +7374,7 @@ type RDSEventSubscription struct {
 	// about all event categories. For more information, see Using Amazon RDS
 	// Event Notification in the Amazon Relational Database Service User
 	// Guide.
-	EventCategories *StringListExpr `json:"EventCategories,omitempty"`
+	EventCategories interface{} `json:"EventCategories,omitempty"`
 
 	// The Amazon Resource Name (ARN) of an Amazon SNS topic that you want to
 	// send event notifications to.
@@ -5493,7 +7382,7 @@ type RDSEventSubscription struct {
 
 	// A list of identifiers for which Amazon RDS provides notification
 	// events.
-	SourceIds *StringListExpr `json:"SourceIds,omitempty"`
+	SourceIds interface{} `json:"SourceIds,omitempty"`
 
 	// The type of source for which Amazon RDS provides notification events.
 	// For example, if you want to be notified of events generated by a
@@ -5526,7 +7415,7 @@ type RDSOptionGroup struct {
 	OptionGroupDescription *StringExpr `json:"OptionGroupDescription,omitempty"`
 
 	// The configurations for this option group.
-	OptionConfigurations *RDSOptionGroupOptionConfigurationsList `json:"OptionConfigurations,omitempty"`
+	OptionConfigurations *RelationalDatabaseServiceOptionGroupOptionConfigurationList `json:"OptionConfigurations,omitempty"`
 
 	// An arbitrary set of tags (key–value pairs) for this option group.
 	Tags []ResourceTag `json:"Tags,omitempty"`
@@ -5541,20 +7430,21 @@ func (s RDSOptionGroup) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-redshift-cluster.html
 type RedshiftCluster struct {
-	// When a new version of the Amazon Redshift is released, tells whether
+	// When a new version of Amazon Redshift is released, tells whether
 	// upgrades can be applied to the engine that is running on the cluster.
-	// The upgrades are applied during the maintenance window.
+	// The upgrades are applied during the maintenance window. The default
+	// value is true.
 	AllowVersionUpgrade *BoolExpr `json:"AllowVersionUpgrade,omitempty"`
 
-	// The number of days that automated snapshots are retained. If you set
-	// the value to 0, automated snapshots are disabled.
+	// The number of days that automated snapshots are retained. The default
+	// value is 1. To disable automated snapshots, set the value to 0.
 	AutomatedSnapshotRetentionPeriod *IntegerExpr `json:"AutomatedSnapshotRetentionPeriod,omitempty"`
 
 	// The Amazon Elastic Compute Cloud (Amazon EC2) Availability Zone in
 	// which you want to provision your Amazon Redshift cluster. For example,
 	// if you have several EC2 instances running in a specific Availability
-	// Zone, you might want the cluster to be provisioned in the same zone in
-	// order to decrease network latency.
+	// Zone, you might want the cluster to be provisioned in the same zone to
+	// decrease network latency.
 	AvailabilityZone *StringExpr `json:"AvailabilityZone,omitempty"`
 
 	// The name of the parameter group that you want to associate with this
@@ -5562,43 +7452,56 @@ type RedshiftCluster struct {
 	ClusterParameterGroupName *StringExpr `json:"ClusterParameterGroupName,omitempty"`
 
 	// A list of security groups that you want to associate with this
-	// cluster.
-	ClusterSecurityGroups *StringListExpr `json:"ClusterSecurityGroups,omitempty"`
+	// cluster. Applies to EC2-Classic.
+	ClusterSecurityGroups interface{} `json:"ClusterSecurityGroups,omitempty"`
 
 	// The name of a cluster subnet group that you want to associate with
 	// this cluster.
 	ClusterSubnetGroupName *StringExpr `json:"ClusterSubnetGroupName,omitempty"`
 
-	// The type of cluster. You can specify single-node or multi-node.
+	// The type of cluster. Specify single-node or multi-node (default).
 	ClusterType *StringExpr `json:"ClusterType,omitempty"`
 
-	// The Amazon Redshift engine version that you want to deploy on the
-	// cluster.
+	// The version of the Amazon Redshift engine that you want to deploy on
+	// the cluster.
 	ClusterVersion *StringExpr `json:"ClusterVersion,omitempty"`
 
-	// The name of the first database that is created when the cluster is
-	// created.
+	// The name of the first database that will be created when the cluster
+	// is created.
 	DBName *StringExpr `json:"DBName,omitempty"`
 
 	// The Elastic IP (EIP) address for the cluster.
 	ElasticIp *StringExpr `json:"ElasticIp,omitempty"`
 
-	// Indicates whether the data in the cluster is encrypted at rest.
+	// Indicates whether the data in the cluster is encrypted at rest. The
+	// default value is false.
 	Encrypted *BoolExpr `json:"Encrypted,omitempty"`
 
-	// Specifies the name of the HSM client certificate that the Amazon
-	// Redshift cluster uses to retrieve the data encryption keys stored in
-	// an HSM.
+	// Specifies the name of the hardware security module (HSM) client
+	// certificate that the Amazon Redshift cluster uses to retrieve the data
+	// encryption keys stored in an HSM.
 	HsmClientCertificateIdentifier *StringExpr `json:"HsmClientCertificateIdentifier,omitempty"`
 
-	// Specifies the name of the hardware security module (HSM) configuration
-	// that contains the information that the Amazon Redshift cluster can use
-	// to retrieve and store keys in an HSM.
+	// The name of the HSM configuration that contains the information that
+	// the Amazon Redshift cluster can use to retrieve and store keys in an
+	// HSM.
 	HsmConfigurationIdentifier *StringExpr `json:"HsmConfigurationIdentifier,omitempty"`
 
-	// The AWS Key Management Service (AWS KMS) key ID that you want to use
-	// to encrypt data in the cluster.
+	// A list of AWS Identity and Access Management (IAM) roles that the
+	// cluster can use to access other AWS services. Supply the IAM roles by
+	// their Amazon Resource Name (ARN). You can provide a maximum of 10 IAM
+	// roles in a single request. A cluster can have a maximum of 10 IAM
+	// roles associated with it at a time.
+	IamRoles *StringListExpr `json:"IamRoles,omitempty"`
+
+	// The ID of the AWS Key Management Service (AWS KMS) key that you want
+	// to use to encrypt data in the cluster.
 	KmsKeyId *StringExpr `json:"KmsKeyId,omitempty"`
+
+	// Configures Amazon Redshift to create audit log files, containing
+	// logging information such as queries and connection attempts, for this
+	// cluster.
+	LoggingProperties *RedshiftLoggingProperties `json:"LoggingProperties,omitempty"`
 
 	// The user name that is associated with the master user account for this
 	// cluster.
@@ -5619,7 +7522,8 @@ type RedshiftCluster struct {
 	// 12-digit AWS account ID that contains that snapshot.
 	OwnerAccount *StringExpr `json:"OwnerAccount,omitempty"`
 
-	// The port number on which the cluster accepts incoming connections.
+	// The port number on which the cluster accepts incoming connections. The
+	// default value is 5439.
 	Port *IntegerExpr `json:"Port,omitempty"`
 
 	// The weekly time range (in UTC) during which automated cluster
@@ -5630,8 +7534,8 @@ type RedshiftCluster struct {
 	// Indicates whether the cluster can be accessed from a public network.
 	PubliclyAccessible *BoolExpr `json:"PubliclyAccessible,omitempty"`
 
-	// The name of the cluster the source snapshot was created from. For more
-	// information about restoring from a snapshot, see the
+	// The name of the cluster that the source snapshot was created from. For
+	// more information about restoring from a snapshot, see the
 	// RestoreFromClusterSnapshot action in the Amazon Redshift API
 	// Reference.
 	SnapshotClusterIdentifier interface{} `json:"SnapshotClusterIdentifier,omitempty"`
@@ -5639,8 +7543,12 @@ type RedshiftCluster struct {
 	// The name of the snapshot from which to create a new cluster.
 	SnapshotIdentifier *StringExpr `json:"SnapshotIdentifier,omitempty"`
 
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this cluster. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
+
 	// A list of VPC security groups that are associated with this cluster.
-	VpcSecurityGroupIds *StringListExpr `json:"VpcSecurityGroupIds,omitempty"`
+	VpcSecurityGroupIds interface{} `json:"VpcSecurityGroupIds,omitempty"`
 }
 
 // CfnResourceType returns AWS::Redshift::Cluster to implement the ResourceProperties interface
@@ -5665,6 +7573,10 @@ type RedshiftClusterParameterGroup struct {
 	// property. For more information, see Amazon Redshift Parameter Groups
 	// in the Amazon Redshift Cluster Management Guide.
 	Parameters *RedshiftParameterList `json:"Parameters,omitempty"`
+
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this parameter group. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
 }
 
 // CfnResourceType returns AWS::Redshift::ClusterParameterGroup to implement the ResourceProperties interface
@@ -5678,6 +7590,10 @@ func (s RedshiftClusterParameterGroup) CfnResourceType() string {
 type RedshiftClusterSecurityGroup struct {
 	// A description of the security group.
 	Description *StringExpr `json:"Description,omitempty"`
+
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this security group. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
 }
 
 // CfnResourceType returns AWS::Redshift::ClusterSecurityGroup to implement the ResourceProperties interface
@@ -5720,7 +7636,11 @@ type RedshiftClusterSubnetGroup struct {
 	Description *StringExpr `json:"Description,omitempty"`
 
 	// A list of VPC subnet IDs. You can modify a maximum of 20 subnets.
-	SubnetIds *StringListExpr `json:"SubnetIds,omitempty"`
+	SubnetIds interface{} `json:"SubnetIds,omitempty"`
+
+	// Specifies an arbitrary set of tags (key–value pairs) to associate
+	// with this subnet group. Use tags to manage your resources.
+	Tags []ResourceTag `json:"Tags,omitempty"`
 }
 
 // CfnResourceType returns AWS::Redshift::ClusterSubnetGroup to implement the ResourceProperties interface
@@ -5759,6 +7679,9 @@ type Route53HostedZone struct {
 	// domain name, specify a fully qualified domain name.
 	Name *StringExpr `json:"Name,omitempty"`
 
+	// The configuration for DNS query logging.
+	QueryLoggingConfig *Route53QueryLoggingConfig `json:"QueryLoggingConfig,omitempty"`
+
 	// One or more VPCs that you want to associate with this hosted zone.
 	// When you specify this property, AWS CloudFormation creates a private
 	// hosted zone.
@@ -5792,7 +7715,8 @@ type Route53RecordSet struct {
 	Failover *StringExpr `json:"Failover,omitempty"`
 
 	// Describes how Amazon Route 53 responds to DNS queries based on the
-	// geographic origin of the query.
+	// geographic origin of the query. This property is not compatible with
+	// the Region property.
 	GeoLocation *Route53RecordSetGeoLocationProperty `json:"GeoLocation,omitempty"`
 
 	// The health check ID that you want to apply to this record set. Amazon
@@ -5823,8 +7747,9 @@ type Route53RecordSet struct {
 	// List of resource records to add. Each record should be in the format
 	// appropriate for the record type specified by the Type property. For
 	// information about different record types and their record formats, see
-	// Appendix: Domain Name Format in the Amazon Route 53 Developer Guide.
-	ResourceRecords *StringListExpr `json:"ResourceRecords,omitempty"`
+	// Values for Basic Resource Record Sets and Appendix: Domain Name Format
+	// in the Amazon Route 53 Developer Guide.
+	ResourceRecords interface{} `json:"ResourceRecords,omitempty"`
 
 	// A unique identifier that differentiates among multiple resource record
 	// sets that have the same combination of DNS name and type.
@@ -5836,8 +7761,7 @@ type Route53RecordSet struct {
 	TTL *StringExpr `json:"TTL,omitempty"`
 
 	// The type of records to add. For valid values, see the Type content in
-	// the Amazon Route 53 API Reference. In AWS CloudFormation, you can't
-	// create records of type NS or SOA.
+	// the Amazon Route 53 API Reference.
 	Type *StringExpr `json:"Type,omitempty"`
 
 	// Weighted resource record sets only: Among resource record sets that
@@ -5886,7 +7810,8 @@ type Route53RecordSetGroup struct {
 	// record set.
 	HostedZoneName *StringExpr `json:"HostedZoneName,omitempty"`
 
-	// List of resource record sets to add.
+	// List of resource record sets to add. The maximum number of records is
+	// 1,000.
 	RecordSets *Route53RecordSetList `json:"RecordSets,omitempty"`
 }
 
@@ -5902,8 +7827,17 @@ type S3Bucket struct {
 	// A canned access control list (ACL) that grants predefined permissions
 	// to the bucket. For more information about canned ACLs, see Canned ACLs
 	// in the Amazon S3 documentation in the Amazon Simple Storage Service
-	// Developer Guide..
+	// Developer Guide.
 	AccessControl *StringExpr `json:"AccessControl,omitempty"`
+
+	// Configuration for the transfer acceleration state. For more
+	// information, see Amazon S3 Transfer Acceleration in the Amazon Simple
+	// Storage Service Developer Guide.
+	AccelerateConfiguration *S3BucketAccelerateConfiguration `json:"AccelerateConfiguration,omitempty"`
+
+	// The configuration and any analyses for the analytics filter of an
+	// Amazon S3 bucket. Duplicates not allowed.
+	AnalyticsConfigurations *S3BucketAnalyticsConfigurationList `json:"AnalyticsConfigurations,omitempty"`
 
 	// A name for the bucket. If you don't specify a name, AWS CloudFormation
 	// generates a unique physical ID and uses that ID for the bucket name.
@@ -5914,23 +7848,31 @@ type S3Bucket struct {
 	// Rules that define cross-origin resource sharing of objects in this
 	// bucket. For more information, see Enabling Cross-Origin Resource
 	// Sharing in the Amazon Simple Storage Service Developer Guide.
-	CorsConfiguration *S3CorsConfiguration `json:"CorsConfiguration,omitempty"`
+	CorsConfiguration *S3BucketCorsConfiguration `json:"CorsConfiguration,omitempty"`
+
+	// The inventory configuration for an Amazon S3 bucket. Duplicates not
+	// allowed.
+	InventoryConfigurations *S3BucketInventoryConfigurationList `json:"InventoryConfigurations,omitempty"`
 
 	// Rules that define how Amazon S3 manages objects during their lifetime.
 	// For more information, see Object Lifecycle Management in the Amazon
 	// Simple Storage Service Developer Guide.
-	LifecycleConfiguration *S3LifecycleConfiguration `json:"LifecycleConfiguration,omitempty"`
+	LifecycleConfiguration *S3BucketLifecycleConfiguration `json:"LifecycleConfiguration,omitempty"`
 
 	// Settings that define where logs are stored.
-	LoggingConfiguration *S3LoggingConfiguration `json:"LoggingConfiguration,omitempty"`
+	LoggingConfiguration *S3BucketLoggingConfiguration `json:"LoggingConfiguration,omitempty"`
+
+	// Settings that define a metrics configuration for the CloudWatch
+	// request metrics from the bucket.
+	MetricsConfigurations *S3BucketMetricsConfigurationList `json:"MetricsConfigurations,omitempty"`
 
 	// Configuration that defines how Amazon S3 handles bucket notifications.
-	NotificationConfiguration *S3NotificationConfiguration `json:"NotificationConfiguration,omitempty"`
+	NotificationConfiguration *S3BucketNotificationConfiguration `json:"NotificationConfiguration,omitempty"`
 
 	// Configuration for replicating objects in an S3 bucket. To enable
 	// replication, you must also enable versioning by using the
 	// VersioningConfiguration property.
-	ReplicationConfiguration *S3ReplicationConfiguration `json:"ReplicationConfiguration,omitempty"`
+	ReplicationConfiguration *S3BucketReplicationConfiguration `json:"ReplicationConfiguration,omitempty"`
 
 	// An arbitrary set of tags (key-value pairs) for this S3 bucket.
 	Tags []ResourceTag `json:"Tags,omitempty"`
@@ -5939,7 +7881,7 @@ type S3Bucket struct {
 	// enable versioning to prevent objects from being deleted or overwritten
 	// by mistake or to archive objects so that you can retrieve previous
 	// versions of them.
-	VersioningConfiguration *S3VersioningConfiguration `json:"VersioningConfiguration,omitempty"`
+	VersioningConfiguration *S3BucketVersioningConfiguration `json:"VersioningConfiguration,omitempty"`
 
 	// Information used to configure the bucket as a static website. For more
 	// information, see Hosting Websites on Amazon S3.
@@ -5980,6 +7922,96 @@ type SDBDomain struct {
 // CfnResourceType returns AWS::SDB::Domain to implement the ResourceProperties interface
 func (s SDBDomain) CfnResourceType() string {
 	return "AWS::SDB::Domain"
+}
+
+// ServiceDiscoveryInstance represents AWS::ServiceDiscovery::Instance
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicediscovery-instance.html
+type ServiceDiscoveryInstance struct {
+	// A string map that contains attribute keys and values. Supported
+	// attribute keys include the following:
+	InstanceAttributes interface{} `json:"InstanceAttributes,omitempty"`
+
+	// An identifier that you want to associate with the instance. Note the
+	// following:
+	InstanceId *StringExpr `json:"InstanceId,omitempty"`
+
+	// The ID of the service that you want to use for settings for the
+	// resource record sets and health check that Amazon Route 53 will
+	// create.
+	ServiceId *StringExpr `json:"ServiceId,omitempty"`
+}
+
+// CfnResourceType returns AWS::ServiceDiscovery::Instance to implement the ResourceProperties interface
+func (s ServiceDiscoveryInstance) CfnResourceType() string {
+	return "AWS::ServiceDiscovery::Instance"
+}
+
+// ServiceDiscoveryPrivateDnsNamespace represents AWS::ServiceDiscovery::PrivateDnsNamespace
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicediscovery-privatednsnamespace.html
+type ServiceDiscoveryPrivateDnsNamespace struct {
+	// A description for the namespace.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// The ID of the Amazon VPC that you want to associate the namespace
+	// with.
+	Vpc *StringExpr `json:"Vpc,omitempty"`
+
+	// The name that you want to assign to this namespace. When you create a
+	// namespace, Amazon Route 53 automatically creates a hosted zone that
+	// has the same name as the namespace.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::ServiceDiscovery::PrivateDnsNamespace to implement the ResourceProperties interface
+func (s ServiceDiscoveryPrivateDnsNamespace) CfnResourceType() string {
+	return "AWS::ServiceDiscovery::PrivateDnsNamespace"
+}
+
+// ServiceDiscoveryPublicDnsNamespace represents AWS::ServiceDiscovery::PublicDnsNamespace
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicediscovery-publicdnsnamespace.html
+type ServiceDiscoveryPublicDnsNamespace struct {
+	// A description for the namespace.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// The name that you want to assign to this namespace. When you create a
+	// namespace, Amazon Route 53 automatically creates a hosted zone that
+	// has the same name as the namespace.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::ServiceDiscovery::PublicDnsNamespace to implement the ResourceProperties interface
+func (s ServiceDiscoveryPublicDnsNamespace) CfnResourceType() string {
+	return "AWS::ServiceDiscovery::PublicDnsNamespace"
+}
+
+// ServiceDiscoveryService represents AWS::ServiceDiscovery::Service
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicediscovery-service.html
+type ServiceDiscoveryService struct {
+	// A description for the service.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// A complex type that contains information about the resource record
+	// sets that you want Amazon Route 53 to create when you register an
+	// instance.
+	DnsConfig *Route53ServiceDiscoveryDnsConfig `json:"DnsConfig,omitempty"`
+
+	// A complex type that contains settings for an optional health check. If
+	// you specify settings for a health check, Amazon Route 53 associates
+	// the health check with all the resource record sets that you specify in
+	// DnsConfig.
+	HealthCheckConfig *Route53ServiceDiscoveryHealthCheckConfig `json:"HealthCheckConfig,omitempty"`
+
+	// The name that you want to assign to the service.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::ServiceDiscovery::Service to implement the ResourceProperties interface
+func (s ServiceDiscoveryService) CfnResourceType() string {
+	return "AWS::ServiceDiscovery::Service"
 }
 
 // SNSSubscription represents AWS::SNS::Subscription
@@ -6051,7 +8083,7 @@ func (s SNSTopicPolicy) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sqs-queues.html
 type SQSQueue struct {
-	// For First-In-First-Out (FIFO) queues, specifies whether to enable
+	// For first-in-first-out (FIFO) queues, specifies whether to enable
 	// content-based deduplication. During the deduplication interval, Amazon
 	// SQS treats messages that are sent with identical content as duplicates
 	// and delivers only one copy of the message. For more information, see
@@ -6068,6 +8100,21 @@ type SQSQueue struct {
 	// see FIFO (First-In-First-Out) Queues in the Amazon Simple Queue
 	// Service Developer Guide.
 	FifoQueue *BoolExpr `json:"FifoQueue,omitempty"`
+
+	// The ID of an AWS managed customer master key (CMK) for Amazon SQS or a
+	// custom CMK. To use the AWS managed CMK for Amazon SQS, specify the
+	// alias alias/aws/sqs. For more information, see CreateQueue in the
+	// Amazon Simple Queue Service API Reference, Protecting Data Using
+	// Server-Side Encryption (SSE) and AWS KMS in the Amazon Simple Queue
+	// Service Developer Guide, or Customer Master Keys in the AWS Key
+	// Management Service Best Practices whitepaper.
+	KmsMasterKeyId *StringExpr `json:"KmsMasterKeyId,omitempty"`
+
+	// The length of time in seconds that Amazon SQS can reuse a data key to
+	// encrypt or decrypt messages before calling AWS KMS again. The value
+	// must be an integer between 60 (1 minute) and 86,400 (24 hours). The
+	// default is 300 (5 minutes).
+	KmsDataKeyReusePeriodSeconds *IntegerExpr `json:"KmsDataKeyReusePeriodSeconds,omitempty"`
 
 	// The limit of how many bytes that a message can contain before Amazon
 	// SQS rejects it. You can specify an integer value from 1024 bytes (1
@@ -6088,7 +8135,7 @@ type SQSQueue struct {
 	// Specifies the duration, in seconds, that the ReceiveMessage action
 	// call waits until a message is in the queue in order to include it in
 	// the response, as opposed to returning an empty response if a message
-	// is not yet available. You can specify an integer from 1 to 20. The
+	// isn't yet available. You can specify an integer from 1 to 20. The
 	// short polling is used as the default or when you specify 0 for this
 	// property. For more information, see Amazon SQS Long Poll.
 	ReceiveMessageWaitTimeSeconds *IntegerExpr `json:"ReceiveMessageWaitTimeSeconds,omitempty"`
@@ -6122,7 +8169,7 @@ type SQSQueuePolicy struct {
 
 	// The URLs of the queues to which you want to add the policy. You can
 	// use the Ref function to specify an AWS::SQS::Queue resource.
-	Queues *StringListExpr `json:"Queues,omitempty"`
+	Queues interface{} `json:"Queues,omitempty"`
 }
 
 // CfnResourceType returns AWS::SQS::QueuePolicy to implement the ResourceProperties interface
@@ -6147,9 +8194,8 @@ type SSMAssociation struct {
 	Parameters *StringExpr `json:"Parameters,omitempty"`
 
 	// A Cron expression that specifies when the association is applied to
-	// the target. For supported expressions, see the ScheduleExpression
-	// parameter for the CreateAssociation action in the Amazon EC2 Systems
-	// Manager API Reference.
+	// the target. For more on working with Cron expressions, see Working
+	// with Cron and Rate Expressions for Systems Manager.
 	ScheduleExpression *StringExpr `json:"ScheduleExpression,omitempty"`
 
 	// The targets that the SSM document sends commands to.
@@ -6182,6 +8228,124 @@ func (s SSMDocument) CfnResourceType() string {
 	return "AWS::SSM::Document"
 }
 
+// SSMMaintenanceWindow represents AWS::SSM::MaintenanceWindow
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ssm-maintenancewindow.html
+type SSMMaintenanceWindow struct {
+	// A description of the Maintenance Window.
+	Description interface{} `json:"Description,omitempty"`
+
+	// Enables a Maintenance Window task to execute on managed instances,
+	// even if you haven't registered those instances as targets. If this is
+	// enabled, then you must specify the unregistered instances (by instance
+	// ID) when you register a task with the Maintenance Window.
+	AllowUnassociatedTargets interface{} `json:"AllowUnassociatedTargets,omitempty"`
+
+	// The number of hours before the end of the Maintenance Window that
+	// Systems Manager stops scheduling new tasks for execution.
+	Cutoff interface{} `json:"Cutoff,omitempty"`
+
+	// The schedule of the Maintenance Window in the form of a cron or rate
+	// expression.
+	Schedule interface{} `json:"Schedule,omitempty"`
+
+	// The duration of the Maintenance Window in hours.
+	Duration interface{} `json:"Duration,omitempty"`
+
+	// The name of the Maintenance Window.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::SSM::MaintenanceWindow to implement the ResourceProperties interface
+func (s SSMMaintenanceWindow) CfnResourceType() string {
+	return "AWS::SSM::MaintenanceWindow"
+}
+
+// SSMMaintenanceWindowTarget represents AWS::SSM::MaintenanceWindowTarget
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ssm-maintenancewindowtarget.html
+type SSMMaintenanceWindowTarget struct {
+	// A user-provided value to include in any events in CloudWatch Events
+	// that are raised while running tasks for these targets in this
+	// Maintenance Window.
+	OwnerInformation interface{} `json:"OwnerInformation,omitempty"`
+
+	// A description for the target.
+	Description interface{} `json:"Description,omitempty"`
+
+	// The ID of the Maintenance Window to register the target with.
+	WindowId interface{} `json:"WindowId,omitempty"`
+
+	// The type of target that's being registered with the Maintenance
+	// Window.
+	ResourceType interface{} `json:"ResourceType,omitempty"`
+
+	// The targets, either instances or tags.
+	Targets *EC2SystemsManagerMaintenanceWindowTargetTargetsList `json:"Targets,omitempty"`
+
+	// An optional name for the target.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::SSM::MaintenanceWindowTarget to implement the ResourceProperties interface
+func (s SSMMaintenanceWindowTarget) CfnResourceType() string {
+	return "AWS::SSM::MaintenanceWindowTarget"
+}
+
+// SSMMaintenanceWindowTask represents AWS::SSM::MaintenanceWindowTask
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ssm-maintenancewindowtask.html
+type SSMMaintenanceWindowTask struct {
+	// The maximum number of errors allowed before this task stops being
+	// scheduled.
+	MaxErrors interface{} `json:"MaxErrors,omitempty"`
+
+	// A description of the task.
+	Description interface{} `json:"Description,omitempty"`
+
+	// The role that's used when the task is executed.
+	ServiceRoleArn interface{} `json:"ServiceRoleArn,omitempty"`
+
+	// The priority of the task in the Maintenance Window. The lower the
+	// number, the higher the priority. Tasks that have the same priority are
+	// scheduled in parallel.
+	Priority interface{} `json:"Priority,omitempty"`
+
+	// The maximum number of targets that you can run this task for, in
+	// parallel.
+	MaxConcurrency interface{} `json:"MaxConcurrency,omitempty"`
+
+	// The targets, either instances or tags.
+	Targets *EC2SystemsManagerMaintenanceWindowTaskTargetList `json:"Targets,omitempty"`
+
+	// The task name.
+	Name interface{} `json:"Name,omitempty"`
+
+	// The resource that the task uses during execution.
+	TaskArn interface{} `json:"TaskArn,omitempty"`
+
+	// The parameters for task execution.
+	TaskInvocationParameters *EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParameters `json:"TaskInvocationParameters,omitempty"`
+
+	// The ID of the Maintenance Window where the task is registered.
+	WindowId interface{} `json:"WindowId,omitempty"`
+
+	// The parameters to pass to the task when it's executed.
+	TaskParameters interface{} `json:"TaskParameters,omitempty"`
+
+	// The type of task. Valid values: RUN_COMMAND, AUTOMATION, LAMBDA,
+	// STEP_FUNCTION.
+	TaskType interface{} `json:"TaskType,omitempty"`
+
+	// Information about an Amazon S3 bucket to write task-level logs to.
+	LoggingInfo *EC2SystemsManagerMaintenanceWindowTaskLoggingInfo `json:"LoggingInfo,omitempty"`
+}
+
+// CfnResourceType returns AWS::SSM::MaintenanceWindowTask to implement the ResourceProperties interface
+func (s SSMMaintenanceWindowTask) CfnResourceType() string {
+	return "AWS::SSM::MaintenanceWindowTask"
+}
+
 // SSMParameter represents AWS::SSM::Parameter
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ssm-parameter.html
@@ -6206,6 +8370,50 @@ func (s SSMParameter) CfnResourceType() string {
 	return "AWS::SSM::Parameter"
 }
 
+// SSMPatchBaseline represents AWS::SSM::PatchBaseline
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ssm-patchbaseline.html
+type SSMPatchBaseline struct {
+	// Defines the operating system that the patch baseline applies to.
+	// Supported operating systems include WINDOWS, AMAZON_LINUX, UBUNTU, and
+	// REDHAT_ENTERPRISE_LINUX. The default value is WINDOWS.
+	OperatingSystem interface{} `json:"OperatingSystem,omitempty"`
+
+	// A list of explicitly approved patches for the baseline.
+	ApprovedPatches interface{} `json:"ApprovedPatches,omitempty"`
+
+	// The names of the patch groups to register with the patch baseline.
+	PatchGroups interface{} `json:"PatchGroups,omitempty"`
+
+	// A description of the patch baseline.
+	Description interface{} `json:"Description,omitempty"`
+
+	// The compliance level for approved patches. This means that if an
+	// approved patch is reported as missing, this is the severity of the
+	// compliance violation. Valid compliance severity levels include the
+	// following: CRITICAL, HIGH, MEDIUM, LOW, INFORMATIONAL, and
+	// UNSPECIFIED. The default value is UNSPECIFIED.
+	ApprovedPatchesComplianceLevel interface{} `json:"ApprovedPatchesComplianceLevel,omitempty"`
+
+	// A set of rules that are used to include patches in the baseline.
+	ApprovalRules *EC2SystemsManagerPatchBaselineRuleGroup `json:"ApprovalRules,omitempty"`
+
+	// A set of global filters that are used to exclude patches from the
+	// baseline.
+	GlobalFilters *EC2SystemsManagerPatchBaselinePatchFilterGroup `json:"GlobalFilters,omitempty"`
+
+	// The name of the patch baseline.
+	Name interface{} `json:"Name,omitempty"`
+
+	// A list of explicitly rejected patches for the baseline.
+	RejectedPatches interface{} `json:"RejectedPatches,omitempty"`
+}
+
+// CfnResourceType returns AWS::SSM::PatchBaseline to implement the ResourceProperties interface
+func (s SSMPatchBaseline) CfnResourceType() string {
+	return "AWS::SSM::PatchBaseline"
+}
+
 // StepFunctionsActivity represents AWS::StepFunctions::Activity
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-stepfunctions-activity.html
@@ -6224,6 +8432,12 @@ func (s StepFunctionsActivity) CfnResourceType() string {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-stepfunctions-statemachine.html
 type StepFunctionsStateMachine struct {
+	// The name of the state machine. If you do not specify a name one will
+	// be generated that is similar to MyStateMachine-1234abcdefgh. For more
+	// information on creating a valid name see Request Parameters in the AWS
+	// Step Functions API Reference.
+	StateMachineName *StringExpr `json:"StateMachineName,omitempty"`
+
 	// The Amazon States Language definition of the state machine. For more
 	// information, see Amazon States Language in the AWS Step Functions
 	// Developer Guide.
@@ -6386,6 +8600,170 @@ func (s WAFXssMatchSet) CfnResourceType() string {
 	return "AWS::WAF::XssMatchSet"
 }
 
+// WAFRegionalByteMatchSet represents AWS::WAFRegional::ByteMatchSet
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafregional-bytematchset.html
+type WAFRegionalByteMatchSet struct {
+	// Settings for the ByteMatchSet, such as the bytes (typically a string
+	// that corresponds with ASCII characters) that you want AWS WAF to
+	// search for in web requests.
+	ByteMatchTuples *WAFRegionalByteMatchSetByteMatchTuplesList `json:"ByteMatchTuples,omitempty"`
+
+	// A friendly name or description of the ByteMatchSet.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::WAFRegional::ByteMatchSet to implement the ResourceProperties interface
+func (s WAFRegionalByteMatchSet) CfnResourceType() string {
+	return "AWS::WAFRegional::ByteMatchSet"
+}
+
+// WAFRegionalIPSet represents AWS::WAFRegional::IPSet
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafregional-ipset.html
+type WAFRegionalIPSet struct {
+	// The IP address type and IP address range (in CIDR notation) from which
+	// web requests originate. If you associate the IPSet with a web ACL that
+	// is associated with a Amazon CloudFront (CloudFront) distribution, this
+	// descriptor is the value of one of the following fields in the
+	// CloudFront access logs:
+	IPSetDescriptors *WAFRegionalIPSetIPSetDescriptorsList `json:"IPSetDescriptors,omitempty"`
+
+	// If the viewer did not use an HTTP proxy or a load balancer to send the
+	// request
+	CXIp interface{} `json:"c-ip,omitempty"`
+
+	// If the viewer did use an HTTP proxy or a load balancer to send the
+	// request
+	XXForwardedXFor interface{} `json:"x-forwarded-for,omitempty"`
+
+	// A friendly name or description of the IPSet.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// CfnResourceType returns AWS::WAFRegional::IPSet to implement the ResourceProperties interface
+func (s WAFRegionalIPSet) CfnResourceType() string {
+	return "AWS::WAFRegional::IPSet"
+}
+
+// WAFRegionalRule represents AWS::WAFRegional::Rule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafregional-rule.html
+type WAFRegionalRule struct {
+	// A friendly name or description for the metrics of the rule. For valid
+	// values, see the MetricName parameter for the CreateRule action in the
+	// AWS WAF Regional API Reference.
+	MetricName *StringExpr `json:"MetricName,omitempty"`
+
+	// A friendly name or description of the rule.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The ByteMatchSet, IPSet, SizeConstraintSet, SqlInjectionMatchSet, or
+	// XssMatchSet objects to include in a rule. If you add more than one
+	// predicate to a rule, a request must match all conditions in order to
+	// be allowed or blocked.
+	Predicates *WAFRegionalRulePredicatesList `json:"Predicates,omitempty"`
+}
+
+// CfnResourceType returns AWS::WAFRegional::Rule to implement the ResourceProperties interface
+func (s WAFRegionalRule) CfnResourceType() string {
+	return "AWS::WAFRegional::Rule"
+}
+
+// WAFRegionalSizeConstraintSet represents AWS::WAFRegional::SizeConstraintSet
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafregional-sizeconstraintset.html
+type WAFRegionalSizeConstraintSet struct {
+	// A friendly name or description for the SizeConstraintSet.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The size constraint and the part of the web request to check.
+	SizeConstraints *WAFRegionalSizeConstraintSetSizeConstraintList `json:"SizeConstraints,omitempty"`
+}
+
+// CfnResourceType returns AWS::WAFRegional::SizeConstraintSet to implement the ResourceProperties interface
+func (s WAFRegionalSizeConstraintSet) CfnResourceType() string {
+	return "AWS::WAFRegional::SizeConstraintSet"
+}
+
+// WAFRegionalSqlInjectionMatchSet represents AWS::WAFRegional::SqlInjectionMatchSet
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafregional-sqlinjectionmatchset.html
+type WAFRegionalSqlInjectionMatchSet struct {
+	// A friendly name or description of the SqlInjectionMatchSet.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The parts of web requests that you want AWS WAF to inspect for
+	// malicious SQL code and, if you want AWS WAF to inspect a header, the
+	// name of the header.
+	SqlInjectionMatchTuples *WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesList `json:"SqlInjectionMatchTuples,omitempty"`
+}
+
+// CfnResourceType returns AWS::WAFRegional::SqlInjectionMatchSet to implement the ResourceProperties interface
+func (s WAFRegionalSqlInjectionMatchSet) CfnResourceType() string {
+	return "AWS::WAFRegional::SqlInjectionMatchSet"
+}
+
+// WAFRegionalWebACL represents AWS::WAFRegional::WebACL
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafregional-webacl.html
+type WAFRegionalWebACL struct {
+	// The action that you want AWS WAF to take when a request doesn't match
+	// the criteria in any of the rules that are associated with the web ACL.
+	DefaultAction *WAFRegionalWebACLAction `json:"DefaultAction,omitempty"`
+
+	// A friendly name or description for the Amazon CloudWatch metric of
+	// this web ACL. For valid values, see the MetricName parameter of the
+	// CreateWebACL action in the AWS WAF Regional API Reference.
+	MetricName *StringExpr `json:"MetricName,omitempty"`
+
+	// A friendly name or description of the web ACL.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The rules to associate with the web ACL and the settings for each
+	// rule.
+	Rules *WAFRegionalWebACLRulesList `json:"Rules,omitempty"`
+}
+
+// CfnResourceType returns AWS::WAFRegional::WebACL to implement the ResourceProperties interface
+func (s WAFRegionalWebACL) CfnResourceType() string {
+	return "AWS::WAFRegional::WebACL"
+}
+
+// WAFRegionalWebACLAssociation represents AWS::WAFRegional::WebACLAssociation
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafregional-webaclassociation.html
+type WAFRegionalWebACLAssociation struct {
+	// The Amazon Resource Name (ARN) of the resource to protect with the web
+	// ACL.
+	ResourceArn *StringExpr `json:"ResourceArn,omitempty"`
+
+	// A unique identifier (ID) for the web ACL.
+	WebACLId *StringExpr `json:"WebACLId,omitempty"`
+}
+
+// CfnResourceType returns AWS::WAFRegional::WebACLAssociation to implement the ResourceProperties interface
+func (s WAFRegionalWebACLAssociation) CfnResourceType() string {
+	return "AWS::WAFRegional::WebACLAssociation"
+}
+
+// WAFRegionalXssMatchSet represents AWS::WAFRegional::XssMatchSet
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafregional-xssmatchset.html
+type WAFRegionalXssMatchSet struct {
+	// A friendly name or description for the XssMatchSet.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The parts of web requests that you want to inspect for cross-site
+	// scripting attacks.
+	XssMatchTuples *WAFRegionalXssMatchSetXssMatchTupleList `json:"XssMatchTuples,omitempty"`
+}
+
+// CfnResourceType returns AWS::WAFRegional::XssMatchSet to implement the ResourceProperties interface
+func (s WAFRegionalXssMatchSet) CfnResourceType() string {
+	return "AWS::WAFRegional::XssMatchSet"
+}
+
 // WorkSpacesWorkspace represents AWS::WorkSpaces::Workspace
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-workspaces-workspace.html
@@ -6461,7 +8839,7 @@ func (l *APIGatewayApiKeyStageKeyList) UnmarshalJSON(buf []byte) error {
 
 // APIGatewayDeploymentStageDescription represents Amazon API Gateway Deployment StageDescription
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apitgateway-deployment-stagedescription.html
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-deployment-stagedescription.html
 type APIGatewayDeploymentStageDescription struct {
 	// Indicates whether cache clustering is enabled for the stage.
 	CacheClusterEnabled *BoolExpr `json:"CacheClusterEnabled,omitempty"`
@@ -6493,21 +8871,20 @@ type APIGatewayDeploymentStageDescription struct {
 	// A description of the purpose of the stage.
 	Description *StringExpr `json:"Description,omitempty"`
 
+	// The version identifier of the API documentation snapshot.
+	DocumentationVersion *StringExpr `json:"DocumentationVersion,omitempty"`
+
 	// The logging level for this method. For valid values, see the
 	// loggingLevel property of the Stage resource in the Amazon API Gateway
 	// API Reference.
 	LoggingLevel *StringExpr `json:"LoggingLevel,omitempty"`
 
 	// Configures settings for all of the stage's methods.
-	MethodSettings *APIGatewayDeploymentStageDescriptionMethodSettingList `json:"MethodSettings,omitempty"`
+	MethodSettings *APIGatewayDeploymentMethodSettingList `json:"MethodSettings,omitempty"`
 
 	// Indicates whether Amazon CloudWatch metrics are enabled for methods in
 	// the stage.
 	MetricsEnabled *BoolExpr `json:"MetricsEnabled,omitempty"`
-
-	// The name of the stage, which API Gateway uses as the first path
-	// segment in the invoke Uniform Resource Identifier (URI).
-	StageName *StringExpr `json:"StageName,omitempty"`
 
 	// The number of burst requests per second that API Gateway permits
 	// across all APIs, stages, and methods in your AWS account. For more
@@ -6547,10 +8924,10 @@ func (l *APIGatewayDeploymentStageDescriptionList) UnmarshalJSON(buf []byte) err
 	return err
 }
 
-// APIGatewayDeploymentStageDescriptionMethodSetting represents Amazon API Gateway Deployment StageDescription MethodSetting
+// APIGatewayDeploymentMethodSetting represents Amazon API Gateway Deployment MethodSetting
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apitgateway-deployment-stagedescription-methodsetting.html
-type APIGatewayDeploymentStageDescriptionMethodSetting struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-deployment-stagedescription-methodsetting.html
+type APIGatewayDeploymentMethodSetting struct {
 	// Indicates whether the cached responses are encrypted.
 	CacheDataEncrypted *BoolExpr `json:"CacheDataEncrypted,omitempty"`
 
@@ -6600,21 +8977,92 @@ type APIGatewayDeploymentStageDescriptionMethodSetting struct {
 	ThrottlingRateLimit *IntegerExpr `json:"ThrottlingRateLimit,omitempty"`
 }
 
-// APIGatewayDeploymentStageDescriptionMethodSettingList represents a list of APIGatewayDeploymentStageDescriptionMethodSetting
-type APIGatewayDeploymentStageDescriptionMethodSettingList []APIGatewayDeploymentStageDescriptionMethodSetting
+// APIGatewayDeploymentMethodSettingList represents a list of APIGatewayDeploymentMethodSetting
+type APIGatewayDeploymentMethodSettingList []APIGatewayDeploymentMethodSetting
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *APIGatewayDeploymentStageDescriptionMethodSettingList) UnmarshalJSON(buf []byte) error {
+func (l *APIGatewayDeploymentMethodSettingList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := APIGatewayDeploymentStageDescriptionMethodSetting{}
+	item := APIGatewayDeploymentMethodSetting{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = APIGatewayDeploymentStageDescriptionMethodSettingList{item}
+		*l = APIGatewayDeploymentMethodSettingList{item}
 		return nil
 	}
-	list := []APIGatewayDeploymentStageDescriptionMethodSetting{}
+	list := []APIGatewayDeploymentMethodSetting{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = APIGatewayDeploymentStageDescriptionMethodSettingList(list)
+		*l = APIGatewayDeploymentMethodSettingList(list)
+		return nil
+	}
+	return err
+}
+
+// APIGatewayDocumentationPartLocation represents Amazon API Gateway DocumentationPart Location
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-documentationpart-location.html
+type APIGatewayDocumentationPartLocation struct {
+	// The HTTP verb of a method.
+	Method *StringExpr `json:"Method,omitempty"`
+
+	// The name of the targeted API entity.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The URL path of the target.
+	Path *StringExpr `json:"Path,omitempty"`
+
+	// The HTTP status code of a response.
+	StatusCode *StringExpr `json:"StatusCode,omitempty"`
+
+	// The type of API entity that the documentation content applies to.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// APIGatewayDocumentationPartLocationList represents a list of APIGatewayDocumentationPartLocation
+type APIGatewayDocumentationPartLocationList []APIGatewayDocumentationPartLocation
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *APIGatewayDocumentationPartLocationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := APIGatewayDocumentationPartLocation{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = APIGatewayDocumentationPartLocationList{item}
+		return nil
+	}
+	list := []APIGatewayDocumentationPartLocation{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = APIGatewayDocumentationPartLocationList(list)
+		return nil
+	}
+	return err
+}
+
+// APIGatewayDomainNameEndpointConfiguration represents Amazon API Gateway DomainName EndpointConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-domainname-endpointconfiguration.html
+type APIGatewayDomainNameEndpointConfiguration struct {
+	// A list of endpoint types of an API or its custom domain name. For an
+	// edge-optimized API and its custom domain name, the endpoint type is
+	// EDGE. For a regional API and its custom domain name, the endpoint type
+	// is REGIONAL.
+	Types interface{} `json:"Types,omitempty"`
+}
+
+// APIGatewayDomainNameEndpointConfigurationList represents a list of APIGatewayDomainNameEndpointConfiguration
+type APIGatewayDomainNameEndpointConfigurationList []APIGatewayDomainNameEndpointConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *APIGatewayDomainNameEndpointConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := APIGatewayDomainNameEndpointConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = APIGatewayDomainNameEndpointConfigurationList{item}
+		return nil
+	}
+	list := []APIGatewayDomainNameEndpointConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = APIGatewayDomainNameEndpointConfigurationList(list)
 		return nil
 	}
 	return err
@@ -6624,53 +9072,57 @@ func (l *APIGatewayDeploymentStageDescriptionMethodSettingList) UnmarshalJSON(bu
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apitgateway-method-integration.html
 type APIGatewayMethodIntegration struct {
-	// A list of request parameters whose values API Gateway will cache.
-	CacheKeyParameters *StringListExpr `json:"CacheKeyParameters,omitempty"`
+	// A list of request parameters whose values API Gateway caches.
+	CacheKeyParameters interface{} `json:"CacheKeyParameters,omitempty"`
 
 	// An API-specific tag group of related cached parameters.
 	CacheNamespace *StringExpr `json:"CacheNamespace,omitempty"`
 
-	// The credentials required for the integration. To specify an AWS
-	// Identity and Access Management (IAM) role that API Gateway assumes,
-	// specify the role's Amazon Resource Name (ARN). To require that the
-	// caller's identity be passed through from the request, specify
+	// Specifies how to handle request payload content type conversions.
+	// Valid values are:
+	ContentHandling *StringExpr `json:"ContentHandling,omitempty"`
+
+	// The credentials that are required for the integration. To specify an
+	// AWS Identity and Access Management (IAM) role that API Gateway
+	// assumes, specify the role's Amazon Resource Name (ARN). To require
+	// that the caller's identity be passed through from the request, specify
 	// arn:aws:iam::*:user/*.
 	Credentials *StringExpr `json:"Credentials,omitempty"`
 
 	// The integration's HTTP method type.
 	IntegrationHttpMethod *StringExpr `json:"IntegrationHttpMethod,omitempty"`
 
-	// The response that API Gateway provides after a method's back end
-	// completes processing a request. API Gateway intercepts the back end's
-	// response so that you can control how API Gateway surfaces back-end
-	// responses. For example, you can map the back-end status codes to codes
-	// that you define.
+	// The response that API Gateway provides after a method's backend
+	// completes processing a request. API Gateway intercepts the response
+	// from the backend so that you can control how API Gateway surfaces
+	// backend responses. For example, you can map the backend status codes
+	// to codes that you define.
 	IntegrationResponses *APIGatewayMethodIntegrationIntegrationResponseList `json:"IntegrationResponses,omitempty"`
 
-	// Indicates when API Gateway passes requests to the targeted back end.
+	// Indicates when API Gateway passes requests to the targeted backend.
 	// This behavior depends on the request's Content-Type header and whether
 	// you defined a mapping template for it.
 	PassthroughBehavior *StringExpr `json:"PassthroughBehavior,omitempty"`
 
-	// The request parameters that API Gateway sends with the back-end
+	// The request parameters that API Gateway sends with the backend
 	// request. Specify request parameters as key-value pairs
-	// (string-to-string maps), with a destination as the key and a source as
-	// the value.
+	// (string-to-string mappings), with a destination as the key and a
+	// source as the value.
 	RequestParameters interface{} `json:"RequestParameters,omitempty"`
 
 	// A map of Apache Velocity templates that are applied on the request
 	// payload. The template that API Gateway uses is based on the value of
-	// the Content-Type header sent by the client. The content type value is
-	// the key, and the template is the value (specified as a string), such
-	// as the following snippet:
+	// the Content-Type header that's sent by the client. The content type
+	// value is the key, and the template is the value (specified as a
+	// string), such as the following snippet:
 	RequestTemplates interface{} `json:"RequestTemplates,omitempty"`
 
-	// The type of back end your method is running, such as HTTP or MOCK. For
-	// all of the valid values, see the type property for the Integration
+	// The type of backend that your method is running, such as HTTP or MOCK.
+	// For all of the valid values, see the type property for the Integration
 	// resource in the Amazon API Gateway REST API Reference.
 	Type *StringExpr `json:"Type,omitempty"`
 
-	// The integration's Uniform Resource Identifier (URI).
+	// The Uniform Resource Identifier (URI) for the integration.
 	Uri *StringExpr `json:"Uri,omitempty"`
 }
 
@@ -6698,20 +9150,24 @@ func (l *APIGatewayMethodIntegrationList) UnmarshalJSON(buf []byte) error {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apitgateway-method-integration-integrationresponse.html
 type APIGatewayMethodIntegrationIntegrationResponse struct {
-	// The response parameters from the back-end response that API Gateway
+	// Specifies how to handle request payload content type conversions.
+	// Valid values are:
+	ContentHandling *StringExpr `json:"ContentHandling,omitempty"`
+
+	// The response parameters from the backend response that API Gateway
 	// sends to the method response. Specify response parameters as key-value
 	// pairs (string-to-string mappings).
 	ResponseParameters interface{} `json:"ResponseParameters,omitempty"`
 
-	// The templates used to transform the integration response body. Specify
-	// templates as key-value pairs (string-to-string maps), with a content
-	// type as the key and a template as the value. For more information, see
-	// API Gateway API Request and Response Payload-Mapping Template
-	// Reference in the API Gateway Developer Guide.
+	// The templates that are used to transform the integration response
+	// body. Specify templates as key-value pairs (string-to-string
+	// mappings), with a content type as the key and a template as the value.
+	// For more information, see API Gateway API Request and Response
+	// Payload-Mapping Template Reference in the API Gateway Developer Guide.
 	ResponseTemplates interface{} `json:"ResponseTemplates,omitempty"`
 
 	// A regular expression that specifies which error strings or status
-	// codes from the back end map to the integration response.
+	// codes from the backend map to the integration response.
 	SelectionPattern *StringExpr `json:"SelectionPattern,omitempty"`
 
 	// The status code that API Gateway uses to map the integration response
@@ -6821,9 +9277,40 @@ func (l *APIGatewayRestApiS3LocationList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// APIGatewayRestApiEndpointConfiguration represents Amazon API Gateway RestApi EndpointConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-restapi-endpointconfiguration.html
+type APIGatewayRestApiEndpointConfiguration struct {
+	// A list of endpoint types of an API or its custom domain name. For an
+	// edge-optimized API and its custom domain name, the endpoint type is
+	// EDGE. For a regional API and its custom domain name, the endpoint type
+	// is REGIONAL.
+	Types interface{} `json:"Types,omitempty"`
+}
+
+// APIGatewayRestApiEndpointConfigurationList represents a list of APIGatewayRestApiEndpointConfiguration
+type APIGatewayRestApiEndpointConfigurationList []APIGatewayRestApiEndpointConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *APIGatewayRestApiEndpointConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := APIGatewayRestApiEndpointConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = APIGatewayRestApiEndpointConfigurationList{item}
+		return nil
+	}
+	list := []APIGatewayRestApiEndpointConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = APIGatewayRestApiEndpointConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
 // APIGatewayStageMethodSetting represents Amazon API Gateway Stage MethodSetting
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apitgateway-stage-methodsetting.html
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-stage-methodsetting.html
 type APIGatewayStageMethodSetting struct {
 	// Indicates whether the cached responses are encrypted.
 	CacheDataEncrypted *BoolExpr `json:"CacheDataEncrypted,omitempty"`
@@ -7002,6 +9489,108 @@ func (l *APIGatewayUsagePlanThrottleSettingsList) UnmarshalJSON(buf []byte) erro
 	return err
 }
 
+// ApplicationAutoScalingScalingPolicyCustomizedMetricSpecification represents Application Auto Scaling ScalingPolicy CustomizedMetricSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-applicationautoscaling-scalingpolicy-customizedmetricspecification.html
+type ApplicationAutoScalingScalingPolicyCustomizedMetricSpecification struct {
+	// The dimensions of the metric. Duplicates not allowed.
+	Dimensions *ApplicationAutoScalingScalingPolicyMetricDimensionList `json:"Dimensions,omitempty"`
+
+	// The name of the metric.
+	MetricName *StringExpr `json:"MetricName,omitempty"`
+
+	// The namespace of the metric.
+	Namespace *StringExpr `json:"Namespace,omitempty"`
+
+	// The statistic of the metric.
+	Statistic *StringExpr `json:"Statistic,omitempty"`
+
+	// The unit of the metric.
+	Unit *StringExpr `json:"Unit,omitempty"`
+}
+
+// ApplicationAutoScalingScalingPolicyCustomizedMetricSpecificationList represents a list of ApplicationAutoScalingScalingPolicyCustomizedMetricSpecification
+type ApplicationAutoScalingScalingPolicyCustomizedMetricSpecificationList []ApplicationAutoScalingScalingPolicyCustomizedMetricSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ApplicationAutoScalingScalingPolicyCustomizedMetricSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ApplicationAutoScalingScalingPolicyCustomizedMetricSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ApplicationAutoScalingScalingPolicyCustomizedMetricSpecificationList{item}
+		return nil
+	}
+	list := []ApplicationAutoScalingScalingPolicyCustomizedMetricSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ApplicationAutoScalingScalingPolicyCustomizedMetricSpecificationList(list)
+		return nil
+	}
+	return err
+}
+
+// ApplicationAutoScalingScalingPolicyMetricDimension represents Application Auto Scaling ScalingPolicy MetricDimension
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-applicationautoscaling-scalingpolicy-metricdimension.html
+type ApplicationAutoScalingScalingPolicyMetricDimension struct {
+	// The name of the dimension.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The value of the dimension.
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// ApplicationAutoScalingScalingPolicyMetricDimensionList represents a list of ApplicationAutoScalingScalingPolicyMetricDimension
+type ApplicationAutoScalingScalingPolicyMetricDimensionList []ApplicationAutoScalingScalingPolicyMetricDimension
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ApplicationAutoScalingScalingPolicyMetricDimensionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ApplicationAutoScalingScalingPolicyMetricDimension{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ApplicationAutoScalingScalingPolicyMetricDimensionList{item}
+		return nil
+	}
+	list := []ApplicationAutoScalingScalingPolicyMetricDimension{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ApplicationAutoScalingScalingPolicyMetricDimensionList(list)
+		return nil
+	}
+	return err
+}
+
+// ApplicationAutoScalingScalingPolicyPredefinedMetricSpecification represents Application Auto Scaling ScalingPolicy PredefinedMetricSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-applicationautoscaling-scalingpolicy-predefinedmetricspecification.html
+type ApplicationAutoScalingScalingPolicyPredefinedMetricSpecification struct {
+	// The metric type.
+	PredefinedMetricType *StringExpr `json:"PredefinedMetricType,omitempty"`
+
+	// This property is reserved for future use.
+	ResourceLabel *StringExpr `json:"ResourceLabel,omitempty"`
+}
+
+// ApplicationAutoScalingScalingPolicyPredefinedMetricSpecificationList represents a list of ApplicationAutoScalingScalingPolicyPredefinedMetricSpecification
+type ApplicationAutoScalingScalingPolicyPredefinedMetricSpecificationList []ApplicationAutoScalingScalingPolicyPredefinedMetricSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ApplicationAutoScalingScalingPolicyPredefinedMetricSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ApplicationAutoScalingScalingPolicyPredefinedMetricSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ApplicationAutoScalingScalingPolicyPredefinedMetricSpecificationList{item}
+		return nil
+	}
+	list := []ApplicationAutoScalingScalingPolicyPredefinedMetricSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ApplicationAutoScalingScalingPolicyPredefinedMetricSpecificationList(list)
+		return nil
+	}
+	return err
+}
+
 // ApplicationAutoScalingScalingPolicyStepScalingPolicyConfiguration represents Application Auto Scaling ScalingPolicy StepScalingPolicyConfiguration
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-applicationautoscaling-scalingpolicy-stepscalingpolicyconfiguration.html
@@ -7094,6 +9683,125 @@ func (l *ApplicationAutoScalingScalingPolicyStepScalingPolicyConfigurationStepAd
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
 		*l = ApplicationAutoScalingScalingPolicyStepScalingPolicyConfigurationStepAdjustmentList(list)
+		return nil
+	}
+	return err
+}
+
+// ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfiguration represents Application Auto Scaling ScalingPolicy TargetTrackingScalingPolicyConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-applicationautoscaling-scalingpolicy-targettrackingscalingpolicyconfiguration.html
+type ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfiguration struct {
+	// This property is reserved for future use.
+	CustomizedMetricSpecification *ApplicationAutoScalingScalingPolicyCustomizedMetricSpecification `json:"CustomizedMetricSpecification,omitempty"`
+
+	// A predefined metric.
+	PredefinedMetricSpecification *ApplicationAutoScalingScalingPolicyPredefinedMetricSpecification `json:"PredefinedMetricSpecification,omitempty"`
+
+	// The amount of time, in seconds, after a scale in activity completes
+	// before another scale in activity can start.
+	ScaleInCooldown *IntegerExpr `json:"ScaleInCooldown,omitempty"`
+
+	// The amount of time, in seconds, after a scale out activity completes
+	// before another scale out activity can start.
+	ScaleOutCooldown *IntegerExpr `json:"ScaleOutCooldown,omitempty"`
+
+	// The target value for the metric.
+	TargetValue interface{} `json:"TargetValue,omitempty"`
+}
+
+// ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfigurationList represents a list of ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfiguration
+type ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfigurationList []ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfigurationList{item}
+		return nil
+	}
+	list := []ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ApplicationAutoScalingScalingPolicyTargetTrackingScalingPolicyConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// ApplicationAutoScalingScalableTargetScalableTargetAction represents Application Auto Scaling ScalableTarget ScalableTargetAction
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-applicationautoscaling-scalabletarget-scalabletargetaction.html
+type ApplicationAutoScalingScalableTargetScalableTargetAction struct {
+	// The maximum capacity.
+	MaxCapacity interface{} `json:"MaxCapacity,omitempty"`
+
+	// The minimum capacity.
+	MinCapacity interface{} `json:"MinCapacity,omitempty"`
+}
+
+// ApplicationAutoScalingScalableTargetScalableTargetActionList represents a list of ApplicationAutoScalingScalableTargetScalableTargetAction
+type ApplicationAutoScalingScalableTargetScalableTargetActionList []ApplicationAutoScalingScalableTargetScalableTargetAction
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ApplicationAutoScalingScalableTargetScalableTargetActionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ApplicationAutoScalingScalableTargetScalableTargetAction{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ApplicationAutoScalingScalableTargetScalableTargetActionList{item}
+		return nil
+	}
+	list := []ApplicationAutoScalingScalableTargetScalableTargetAction{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ApplicationAutoScalingScalableTargetScalableTargetActionList(list)
+		return nil
+	}
+	return err
+}
+
+// ApplicationAutoScalingScalableTargetScheduledAction represents Application Auto Scaling ScalableTarget ScheduledAction
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-applicationautoscaling-scalabletarget-scheduledaction.html
+type ApplicationAutoScalingScalableTargetScheduledAction struct {
+	// The date and time that the action is scheduled to end.
+	EndTime interface{} `json:"EndTime,omitempty"`
+
+	// The new minimum and maximum capacity. You can set both values or just
+	// one. During the scheduled time, if the current capacity is below the
+	// minimum capacity, Application Auto Scaling scales out to the minimum
+	// capacity. If the current capacity is above the maximum capacity,
+	// Application Auto Scaling scales in to the maximum capacity.
+	ScalableTargetAction *ApplicationAutoScalingScalableTargetScalableTargetAction `json:"ScalableTargetAction,omitempty"`
+
+	// The schedule for this action. The following formats are supported:
+	Schedule interface{} `json:"Schedule,omitempty"`
+
+	// The name of the scheduled action. For constraints, see the
+	// ScheduledAction data type in the Application Auto Scaling API
+	// Reference.
+	ScheduledActionName interface{} `json:"ScheduledActionName,omitempty"`
+
+	// The date and time that the action is scheduled to begin.
+	StartTime interface{} `json:"StartTime,omitempty"`
+}
+
+// ApplicationAutoScalingScalableTargetScheduledActionList represents a list of ApplicationAutoScalingScalableTargetScheduledAction
+type ApplicationAutoScalingScalableTargetScheduledActionList []ApplicationAutoScalingScalableTargetScheduledAction
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ApplicationAutoScalingScalableTargetScheduledActionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ApplicationAutoScalingScalableTargetScheduledAction{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ApplicationAutoScalingScalableTargetScheduledActionList{item}
+		return nil
+	}
+	list := []ApplicationAutoScalingScalableTargetScheduledAction{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ApplicationAutoScalingScalableTargetScheduledActionList(list)
 		return nil
 	}
 	return err
@@ -7194,10 +9902,68 @@ func (l *AutoScalingEBSBlockDeviceList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// AutoScalingMetricsCollection represents Auto Scaling MetricsCollection
+// AutoScalingAutoScalingGroupLifecycleHookSpecification represents Auto Scaling AutoScalingGroup LifecycleHookSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-autoscaling-autoscalinggroup-lifecyclehookspecification.html
+type AutoScalingAutoScalingGroupLifecycleHookSpecification struct {
+	// The action that the Auto Scaling group should take when the lifecycle
+	// hook timeout elapses or if an unexpected failure occurs.
+	DefaultResult interface{} `json:"DefaultResult,omitempty"`
+
+	// The maximum time, in seconds, that can elapse before the lifecycle
+	// hook times out. If the lifecycle hook times out, Auto Scaling performs
+	// the default action.
+	HeartbeatTimeout interface{} `json:"HeartbeatTimeout,omitempty"`
+
+	// The name of the lifecycle hook. For constraints, see PutLifecycleHook
+	// in the Auto Scaling API Reference.
+	LifecycleHookName interface{} `json:"LifecycleHookName,omitempty"`
+
+	// The state of the EC2 instance to attach the lifecycle hook to. For a
+	// list of lifecycle hook types, see DescribeLifecycleHookTypes in the
+	// Auto Scaling API Reference.
+	LifecycleTransition interface{} `json:"LifecycleTransition,omitempty"`
+
+	// Additional information to include when Auto Scaling sends a message to
+	// the notification target. For constraints, see PutLifecycleHook in the
+	// Auto Scaling API Reference.
+	NotificationMetadata interface{} `json:"NotificationMetadata,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the target that Auto Scaling sends
+	// notifications to when an instance is in the transition state for the
+	// lifecycle hook. The notification target can be either an Amazon SQS
+	// queue or an Amazon SNS topic.
+	NotificationTargetARN interface{} `json:"NotificationTargetARN,omitempty"`
+
+	// The ARN of the IAM role that allows the Auto Scaling group to publish
+	// to the specified notification target.
+	RoleARN interface{} `json:"RoleARN,omitempty"`
+}
+
+// AutoScalingAutoScalingGroupLifecycleHookSpecificationList represents a list of AutoScalingAutoScalingGroupLifecycleHookSpecification
+type AutoScalingAutoScalingGroupLifecycleHookSpecificationList []AutoScalingAutoScalingGroupLifecycleHookSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *AutoScalingAutoScalingGroupLifecycleHookSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := AutoScalingAutoScalingGroupLifecycleHookSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = AutoScalingAutoScalingGroupLifecycleHookSpecificationList{item}
+		return nil
+	}
+	list := []AutoScalingAutoScalingGroupLifecycleHookSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = AutoScalingAutoScalingGroupLifecycleHookSpecificationList(list)
+		return nil
+	}
+	return err
+}
+
+// AutoScalingAutoScalingGroupMetricsCollection represents Auto Scaling AutoScalingGroup MetricsCollection
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-metricscollection.html
-type AutoScalingMetricsCollection struct {
+type AutoScalingAutoScalingGroupMetricsCollection struct {
 	// The frequency at which Auto Scaling sends aggregated data to
 	// CloudWatch. For example, you can specify 1Minute to send aggregated
 	// data to CloudWatch every minute.
@@ -7205,33 +9971,33 @@ type AutoScalingMetricsCollection struct {
 
 	// The list of metrics to collect. If you don't specify any metrics, all
 	// metrics are enabled.
-	Metrics *StringListExpr `json:"Metrics,omitempty"`
+	Metrics interface{} `json:"Metrics,omitempty"`
 }
 
-// AutoScalingMetricsCollectionList represents a list of AutoScalingMetricsCollection
-type AutoScalingMetricsCollectionList []AutoScalingMetricsCollection
+// AutoScalingAutoScalingGroupMetricsCollectionList represents a list of AutoScalingAutoScalingGroupMetricsCollection
+type AutoScalingAutoScalingGroupMetricsCollectionList []AutoScalingAutoScalingGroupMetricsCollection
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *AutoScalingMetricsCollectionList) UnmarshalJSON(buf []byte) error {
+func (l *AutoScalingAutoScalingGroupMetricsCollectionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := AutoScalingMetricsCollection{}
+	item := AutoScalingAutoScalingGroupMetricsCollection{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = AutoScalingMetricsCollectionList{item}
+		*l = AutoScalingAutoScalingGroupMetricsCollectionList{item}
 		return nil
 	}
-	list := []AutoScalingMetricsCollection{}
+	list := []AutoScalingAutoScalingGroupMetricsCollection{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = AutoScalingMetricsCollectionList(list)
+		*l = AutoScalingAutoScalingGroupMetricsCollectionList(list)
 		return nil
 	}
 	return err
 }
 
-// AutoScalingNotificationConfigurations represents Auto Scaling NotificationConfigurations
+// AutoScalingAutoScalingGroupNotificationConfiguration represents Auto Scaling AutoScalingGroup NotificationConfiguration
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-notificationconfigurations.html
-type AutoScalingNotificationConfigurations struct {
+type AutoScalingAutoScalingGroupNotificationConfiguration struct {
 	// A list of event types that trigger a notification. Event types can
 	// include any of the following types: autoscaling:EC2_INSTANCE_LAUNCH,
 	// autoscaling:EC2_INSTANCE_LAUNCH_ERROR,
@@ -7240,28 +10006,168 @@ type AutoScalingNotificationConfigurations struct {
 	// autoscaling:TEST_NOTIFICATION. For more information about event types,
 	// see DescribeAutoScalingNotificationTypes in the Auto Scaling API
 	// Reference.
-	NotificationTypes *StringListExpr `json:"NotificationTypes,omitempty"`
+	NotificationTypes interface{} `json:"NotificationTypes,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Amazon Simple Notification
 	// Service (SNS) topic.
 	TopicARN *StringExpr `json:"TopicARN,omitempty"`
 }
 
-// AutoScalingNotificationConfigurationsList represents a list of AutoScalingNotificationConfigurations
-type AutoScalingNotificationConfigurationsList []AutoScalingNotificationConfigurations
+// AutoScalingAutoScalingGroupNotificationConfigurationList represents a list of AutoScalingAutoScalingGroupNotificationConfiguration
+type AutoScalingAutoScalingGroupNotificationConfigurationList []AutoScalingAutoScalingGroupNotificationConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *AutoScalingNotificationConfigurationsList) UnmarshalJSON(buf []byte) error {
+func (l *AutoScalingAutoScalingGroupNotificationConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := AutoScalingNotificationConfigurations{}
+	item := AutoScalingAutoScalingGroupNotificationConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = AutoScalingNotificationConfigurationsList{item}
+		*l = AutoScalingAutoScalingGroupNotificationConfigurationList{item}
 		return nil
 	}
-	list := []AutoScalingNotificationConfigurations{}
+	list := []AutoScalingAutoScalingGroupNotificationConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = AutoScalingNotificationConfigurationsList(list)
+		*l = AutoScalingAutoScalingGroupNotificationConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// AutoScalingAutoScalingGroupTagProperty represents Auto Scaling AutoScalingGroup TagProperty
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-tags.html
+type AutoScalingAutoScalingGroupTagProperty struct {
+	// The key name of the tag.
+	Key *StringExpr `json:"Key,omitempty"`
+
+	// The value for the tag.
+	Value *StringExpr `json:"Value,omitempty"`
+
+	// Set to true if you want AWS CloudFormation to copy the tag to EC2
+	// instances that are launched as part of the auto scaling group. Set to
+	// false if you want the tag attached only to the auto scaling group and
+	// not copied to any instances launched as part of the auto scaling
+	// group.
+	PropagateAtLaunch *BoolExpr `json:"PropagateAtLaunch,omitempty"`
+}
+
+// AutoScalingAutoScalingGroupTagPropertyList represents a list of AutoScalingAutoScalingGroupTagProperty
+type AutoScalingAutoScalingGroupTagPropertyList []AutoScalingAutoScalingGroupTagProperty
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *AutoScalingAutoScalingGroupTagPropertyList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := AutoScalingAutoScalingGroupTagProperty{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = AutoScalingAutoScalingGroupTagPropertyList{item}
+		return nil
+	}
+	list := []AutoScalingAutoScalingGroupTagProperty{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = AutoScalingAutoScalingGroupTagPropertyList(list)
+		return nil
+	}
+	return err
+}
+
+// AutoScalingScalingPolicyCustomizedMetricSpecification represents Auto Scaling ScalingPolicy CustomizedMetricSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-autoscaling-scalingpolicy-customizedmetricspecification.html
+type AutoScalingScalingPolicyCustomizedMetricSpecification struct {
+	// The dimensions of the metric. Duplicates not allowed.
+	Dimensions *AutoScalingScalingPolicyMetricDimensionList `json:"Dimensions,omitempty"`
+
+	// The name of the metric.
+	MetricName *StringExpr `json:"MetricName,omitempty"`
+
+	// The namespace of the metric.
+	Namespace *StringExpr `json:"Namespace,omitempty"`
+
+	// The statistic of the metric.
+	Statistic *StringExpr `json:"Statistic,omitempty"`
+
+	// The unit of the metric.
+	Unit *StringExpr `json:"Unit,omitempty"`
+}
+
+// AutoScalingScalingPolicyCustomizedMetricSpecificationList represents a list of AutoScalingScalingPolicyCustomizedMetricSpecification
+type AutoScalingScalingPolicyCustomizedMetricSpecificationList []AutoScalingScalingPolicyCustomizedMetricSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *AutoScalingScalingPolicyCustomizedMetricSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := AutoScalingScalingPolicyCustomizedMetricSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = AutoScalingScalingPolicyCustomizedMetricSpecificationList{item}
+		return nil
+	}
+	list := []AutoScalingScalingPolicyCustomizedMetricSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = AutoScalingScalingPolicyCustomizedMetricSpecificationList(list)
+		return nil
+	}
+	return err
+}
+
+// AutoScalingScalingPolicyMetricDimension represents Auto Scaling ScalingPolicy MetricDimension
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-autoscaling-scalingpolicy-metricdimension.html
+type AutoScalingScalingPolicyMetricDimension struct {
+	// The name of the dimension.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The value of the dimension.
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// AutoScalingScalingPolicyMetricDimensionList represents a list of AutoScalingScalingPolicyMetricDimension
+type AutoScalingScalingPolicyMetricDimensionList []AutoScalingScalingPolicyMetricDimension
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *AutoScalingScalingPolicyMetricDimensionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := AutoScalingScalingPolicyMetricDimension{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = AutoScalingScalingPolicyMetricDimensionList{item}
+		return nil
+	}
+	list := []AutoScalingScalingPolicyMetricDimension{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = AutoScalingScalingPolicyMetricDimensionList(list)
+		return nil
+	}
+	return err
+}
+
+// AutoScalingScalingPolicyPredefinedMetricSpecification represents Auto Scaling ScalingPolicy PredefinedMetricSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-autoscaling-scalingpolicy-predefinedmetricspecification.html
+type AutoScalingScalingPolicyPredefinedMetricSpecification struct {
+	// The metric type.
+	PredefinedMetricType *StringExpr `json:"PredefinedMetricType,omitempty"`
+
+	// Identifies the resource associated with the metric type.
+	ResourceLabel *StringExpr `json:"ResourceLabel,omitempty"`
+}
+
+// AutoScalingScalingPolicyPredefinedMetricSpecificationList represents a list of AutoScalingScalingPolicyPredefinedMetricSpecification
+type AutoScalingScalingPolicyPredefinedMetricSpecificationList []AutoScalingScalingPolicyPredefinedMetricSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *AutoScalingScalingPolicyPredefinedMetricSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := AutoScalingScalingPolicyPredefinedMetricSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = AutoScalingScalingPolicyPredefinedMetricSpecificationList{item}
+		return nil
+	}
+	list := []AutoScalingScalingPolicyPredefinedMetricSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = AutoScalingScalingPolicyPredefinedMetricSpecificationList(list)
 		return nil
 	}
 	return err
@@ -7310,39 +10216,481 @@ func (l *AutoScalingScalingPolicyStepAdjustmentsList) UnmarshalJSON(buf []byte) 
 	return err
 }
 
-// AutoScalingTags represents Auto Scaling Tags Property Type
+// AutoScalingScalingPolicyTargetTrackingConfiguration represents Auto Scaling ScalingPolicy TargetTrackingConfiguration
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-tags.html
-type AutoScalingTags struct {
-	// The key name of the tag.
-	Key *StringExpr `json:"Key,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-autoscaling-scalingpolicy-targettrackingconfiguration.html
+type AutoScalingScalingPolicyTargetTrackingConfiguration struct {
+	// A customized metric.
+	CustomizedMetricSpecification *AutoScalingScalingPolicyCustomizedMetricSpecification `json:"CustomizedMetricSpecification,omitempty"`
 
-	// The value for the tag.
-	Value *StringExpr `json:"Value,omitempty"`
+	// Indicates whether to disable scale-in for the target tracking policy.
+	// If true, the target tracking policy will not scale in the Auto Scaling
+	// group. The default value is false.
+	DisableScaleIn *BoolExpr `json:"DisableScaleIn,omitempty"`
 
-	// Set to true if you want AWS CloudFormation to copy the tag to EC2
-	// instances that are launched as part of the auto scaling group. Set to
-	// false if you want the tag attached only to the auto scaling group and
-	// not copied to any instances launched as part of the auto scaling
-	// group.
-	PropagateAtLaunch *BoolExpr `json:"PropagateAtLaunch,omitempty"`
+	// A predefined metric.
+	PredefinedMetricSpecification *AutoScalingScalingPolicyPredefinedMetricSpecification `json:"PredefinedMetricSpecification,omitempty"`
+
+	// The target value for the metric.
+	TargetValue interface{} `json:"TargetValue,omitempty"`
 }
 
-// AutoScalingTagsList represents a list of AutoScalingTags
-type AutoScalingTagsList []AutoScalingTags
+// AutoScalingScalingPolicyTargetTrackingConfigurationList represents a list of AutoScalingScalingPolicyTargetTrackingConfiguration
+type AutoScalingScalingPolicyTargetTrackingConfigurationList []AutoScalingScalingPolicyTargetTrackingConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *AutoScalingTagsList) UnmarshalJSON(buf []byte) error {
+func (l *AutoScalingScalingPolicyTargetTrackingConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := AutoScalingTags{}
+	item := AutoScalingScalingPolicyTargetTrackingConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = AutoScalingTagsList{item}
+		*l = AutoScalingScalingPolicyTargetTrackingConfigurationList{item}
 		return nil
 	}
-	list := []AutoScalingTags{}
+	list := []AutoScalingScalingPolicyTargetTrackingConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = AutoScalingTagsList(list)
+		*l = AutoScalingScalingPolicyTargetTrackingConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchComputeEnvironmentComputeResources represents AWS Batch ComputeEnvironment ComputeResources
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-computeenvironment-computeresources.html
+type BatchComputeEnvironmentComputeResources struct {
+	// The Amazon Resource Name (ARN) of the Amazon EC2 Spot Fleet IAM role
+	// applied to a SPOT compute environment.
+	SpotIamFleetRole *StringExpr `json:"SpotIamFleetRole,omitempty"`
+
+	// The maximum number of EC2 vCPUs that an environment can reach.
+	MaxvCpus *IntegerExpr `json:"MaxvCpus,omitempty"`
+
+	// The EC2 security group that is associated with instances launched in
+	// the compute environment.
+	SecurityGroupIds interface{} `json:"SecurityGroupIds,omitempty"`
+
+	// The minimum percentage that a Spot Instance price must be when
+	// compared with the On-Demand price for that instance type before
+	// instances are launched. For example, if your bid percentage is 20%,
+	// then the Spot price must be below 20% of the current On-Demand price
+	// for that EC2 instance.
+	BidPercentage *IntegerExpr `json:"BidPercentage,omitempty"`
+
+	// The type of compute environment: EC2 or SPOT.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// The VPC subnets into which the compute resources are launched.
+	Subnets interface{} `json:"Subnets,omitempty"`
+
+	// The minimum number of EC2 vCPUs that an environment should maintain.
+	MinvCpus *IntegerExpr `json:"MinvCpus,omitempty"`
+
+	// The Amazon Machine Image (AMI) ID used for instances launched in the
+	// compute environment.
+	ImageId *StringExpr `json:"ImageId,omitempty"`
+
+	// The Amazon ECS instance profile applied to Amazon EC2 instances in a
+	// compute environment.
+	InstanceRole *StringExpr `json:"InstanceRole,omitempty"`
+
+	// The instances types that may launched.
+	InstanceTypes interface{} `json:"InstanceTypes,omitempty"`
+
+	// The EC2 key pair that is used for instances launched in the compute
+	// environment.
+	Ec2KeyPair *StringExpr `json:"Ec2KeyPair,omitempty"`
+
+	// Key-value pair tags to be applied to instances that are launched in
+	// the compute environment. For AWS Batch, these take the form of
+	// "String1": "String2", where String1 is the tag key and String2 is the
+	// tag value—for example, { "Name": "AWS Batch Instance - C4OnDemand"
+	// }.
+	Tags interface{} `json:"Tags,omitempty"`
+
+	// The desired number of EC2 vCPUS in the compute environment.
+	DesiredvCpus *IntegerExpr `json:"DesiredvCpus,omitempty"`
+}
+
+// BatchComputeEnvironmentComputeResourcesList represents a list of BatchComputeEnvironmentComputeResources
+type BatchComputeEnvironmentComputeResourcesList []BatchComputeEnvironmentComputeResources
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchComputeEnvironmentComputeResourcesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchComputeEnvironmentComputeResources{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchComputeEnvironmentComputeResourcesList{item}
+		return nil
+	}
+	list := []BatchComputeEnvironmentComputeResources{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchComputeEnvironmentComputeResourcesList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchJobDefinitionContainerProperties represents AWS Batch JobDefinition ContainerProperties
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-jobdefinition-containerproperties.html
+type BatchJobDefinitionContainerProperties struct {
+	// The mount points for data volumes in your container. This parameter
+	// maps to Volumes in the Create a container section of the Docker Remote
+	// API and the --volume option to docker run.
+	MountPoints *BatchJobDefinitionMountPointsList `json:"MountPoints,omitempty"`
+
+	// The user name to use inside the container. This parameter maps to User
+	// in the Create a container section of the Docker Remote API and the
+	// --user option to docker run.
+	User *StringExpr `json:"User,omitempty"`
+
+	// A list of data volumes used in a job.
+	Volumes *BatchJobDefinitionVolumesList `json:"Volumes,omitempty"`
+
+	// The command that is passed to the container. This parameter maps to
+	// Cmd in the Create a container section of the Docker Remote API and the
+	// COMMAND parameter to docker run.
+	Command interface{} `json:"Command,omitempty"`
+
+	// The hard limit (in MiB) of memory to present to the container. If your
+	// container attempts to exceed the memory specified here, the container
+	// is killed. This parameter maps to Memory in the Create a container
+	// section of the Docker Remote API and the --memory option to docker
+	// run.
+	Memory *IntegerExpr `json:"Memory,omitempty"`
+
+	// When this parameter is true, the container is given elevated
+	// privileges on the host container instance (similar to the root user).
+	// This parameter maps to Privileged in the Create a container section of
+	// the Docker Remote API and the --privileged option to docker run.
+	Privileged *BoolExpr `json:"Privileged,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the IAM role that the container can
+	// assume for AWS permissions.
+	JobRoleArn *StringExpr `json:"JobRoleArn,omitempty"`
+
+	// The environment variables to pass to a container. This parameter maps
+	// to Env in the Create a container section of the Docker Remote API and
+	// the --env option to docker run.
+	Environment *BatchJobDefinitionEnvironmentList `json:"Environment,omitempty"`
+
+	// When this parameter is true, the container is given read-only access
+	// to its root file system. This parameter maps to ReadonlyRootfs in the
+	// Create a container section of the Docker Remote API and the
+	// --read-only option to docker run.
+	ReadonlyRootFilesystem *BoolExpr `json:"ReadonlyRootFilesystem,omitempty"`
+
+	// A list of ulimits to set in the container. This parameter maps to
+	// Ulimits in the Create a container section of the Docker Remote API and
+	// the --ulimit option to docker run.
+	Ulimits *BatchJobDefinitionUlimitList `json:"Ulimits,omitempty"`
+
+	// The number of vCPUs reserved for the container. This parameter maps to
+	// CpuShares in the Create a container section of the Docker Remote API
+	// and the --cpu-shares option to docker run. Each vCPU is equivalent to
+	// 1,024 CPU shares.
+	Vcpus *IntegerExpr `json:"Vcpus,omitempty"`
+
+	// The image used to start a container. This string is passed directly to
+	// the Docker daemon. Images in the Docker Hub registry are available by
+	// default. Other repositories are specified with
+	// repository-url/image:tag . Up to 255 letters (uppercase and
+	// lowercase), numbers, hyphens, underscores, colons, periods, forward
+	// slashes, and number signs are allowed. This parameter maps to Image in
+	// the Create a container section of the Docker Remote API and the IMAGE
+	// parameter of docker run.
+	Image *StringExpr `json:"Image,omitempty"`
+}
+
+// BatchJobDefinitionContainerPropertiesList represents a list of BatchJobDefinitionContainerProperties
+type BatchJobDefinitionContainerPropertiesList []BatchJobDefinitionContainerProperties
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchJobDefinitionContainerPropertiesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchJobDefinitionContainerProperties{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchJobDefinitionContainerPropertiesList{item}
+		return nil
+	}
+	list := []BatchJobDefinitionContainerProperties{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchJobDefinitionContainerPropertiesList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchJobDefinitionEnvironment represents AWS Batch JobDefinition Environment
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-jobdefinition-environment.html
+type BatchJobDefinitionEnvironment struct {
+	// The value of the environment variable.
+	Value *StringExpr `json:"Value,omitempty"`
+
+	// The name of the environment variable.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// BatchJobDefinitionEnvironmentList represents a list of BatchJobDefinitionEnvironment
+type BatchJobDefinitionEnvironmentList []BatchJobDefinitionEnvironment
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchJobDefinitionEnvironmentList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchJobDefinitionEnvironment{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchJobDefinitionEnvironmentList{item}
+		return nil
+	}
+	list := []BatchJobDefinitionEnvironment{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchJobDefinitionEnvironmentList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchJobDefinitionMountPoints represents AWS Batch JobDefinition MountPoints
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-jobdefinition-mountpoints.html
+type BatchJobDefinitionMountPoints struct {
+	// If this value is true, the container has read-only access to the
+	// volume; otherwise, the container can write to the volume. The default
+	// value is false.
+	ReadOnly *BoolExpr `json:"ReadOnly,omitempty"`
+
+	// The name of the volume to mount.
+	SourceVolume *StringExpr `json:"SourceVolume,omitempty"`
+
+	// The path on the container at which to mount the host volume.
+	ContainerPath *StringExpr `json:"ContainerPath,omitempty"`
+}
+
+// BatchJobDefinitionMountPointsList represents a list of BatchJobDefinitionMountPoints
+type BatchJobDefinitionMountPointsList []BatchJobDefinitionMountPoints
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchJobDefinitionMountPointsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchJobDefinitionMountPoints{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchJobDefinitionMountPointsList{item}
+		return nil
+	}
+	list := []BatchJobDefinitionMountPoints{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchJobDefinitionMountPointsList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchJobDefinitionRetryStrategy represents AWS Batch JobDefinition RetryStrategy
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-jobdefinition-retrystrategy.html
+type BatchJobDefinitionRetryStrategy struct {
+	// The number of times to move a job to the RUNNABLE status. You may
+	// specify between 1 and 10 attempts. If attempts is greater than one,
+	// the job is retried if it fails until it has moved to RUNNABLE that
+	// many times.
+	Attempts *IntegerExpr `json:"Attempts,omitempty"`
+}
+
+// BatchJobDefinitionRetryStrategyList represents a list of BatchJobDefinitionRetryStrategy
+type BatchJobDefinitionRetryStrategyList []BatchJobDefinitionRetryStrategy
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchJobDefinitionRetryStrategyList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchJobDefinitionRetryStrategy{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchJobDefinitionRetryStrategyList{item}
+		return nil
+	}
+	list := []BatchJobDefinitionRetryStrategy{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchJobDefinitionRetryStrategyList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchJobDefinitionUlimit represents AWS Batch JobDefinition Ulimit
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-jobdefinition-ulimit.html
+type BatchJobDefinitionUlimit struct {
+	// The soft limit for the ulimit type.
+	SoftLimit *IntegerExpr `json:"SoftLimit,omitempty"`
+
+	// The hard limit for the ulimit type.
+	HardLimit *IntegerExpr `json:"HardLimit,omitempty"`
+
+	// The type of the ulimit.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// BatchJobDefinitionUlimitList represents a list of BatchJobDefinitionUlimit
+type BatchJobDefinitionUlimitList []BatchJobDefinitionUlimit
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchJobDefinitionUlimitList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchJobDefinitionUlimit{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchJobDefinitionUlimitList{item}
+		return nil
+	}
+	list := []BatchJobDefinitionUlimit{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchJobDefinitionUlimitList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchJobDefinitionVolumes represents AWS Batch JobDefinition Volumes
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-jobdefinition-volumes.html
+type BatchJobDefinitionVolumes struct {
+	// The contents of the Host parameter determine whether your data volume
+	// persists on the host container instance and where it is stored. If the
+	// host parameter is empty, then the Docker daemon assigns a host path
+	// for your data volume, but the data is not guaranteed to persist after
+	// the containers associated with it stop running.
+	Host *BatchJobDefinitionVolumesHost `json:"Host,omitempty"`
+
+	// The name of the volume. Up to 255 letters (uppercase and lowercase),
+	// numbers, hyphens, and underscores are allowed. This name is referenced
+	// in the SourceVolume parameter of container definition MountPoints.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// BatchJobDefinitionVolumesList represents a list of BatchJobDefinitionVolumes
+type BatchJobDefinitionVolumesList []BatchJobDefinitionVolumes
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchJobDefinitionVolumesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchJobDefinitionVolumes{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchJobDefinitionVolumesList{item}
+		return nil
+	}
+	list := []BatchJobDefinitionVolumes{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchJobDefinitionVolumesList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchJobDefinitionVolumesHost represents AWS Batch JobDefinition VolumesHost
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-jobdefinition-volumeshost.html
+type BatchJobDefinitionVolumesHost struct {
+	// The path on the host container instance that is presented to the
+	// container. If this parameter is empty, then the Docker daemon has
+	// assigned a host path for you. If the VolumesHost parameter contains a
+	// SourcePath file location, then the data volume persists at the
+	// specified location on the host container instance until you delete it
+	// manually. If the SourcePath value does not exist on the host container
+	// instance, the Docker daemon creates it. If the location does exist,
+	// the contents of the source path folder are exported.
+	SourcePath *StringExpr `json:"SourcePath,omitempty"`
+}
+
+// BatchJobDefinitionVolumesHostList represents a list of BatchJobDefinitionVolumesHost
+type BatchJobDefinitionVolumesHostList []BatchJobDefinitionVolumesHost
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchJobDefinitionVolumesHostList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchJobDefinitionVolumesHost{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchJobDefinitionVolumesHostList{item}
+		return nil
+	}
+	list := []BatchJobDefinitionVolumesHost{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchJobDefinitionVolumesHostList(list)
+		return nil
+	}
+	return err
+}
+
+// BatchJobQueueComputeEnvironmentOrder represents AWS Batch JobQueue ComputeEnvironmentOrder
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-jobqueue-computeenvironmentorder.html
+type BatchJobQueueComputeEnvironmentOrder struct {
+	// The Amazon Resource Name (ARN) of the compute environment.
+	ComputeEnvironment *StringExpr `json:"ComputeEnvironment,omitempty"`
+
+	// The order of the compute environment.
+	Order *IntegerExpr `json:"Order,omitempty"`
+}
+
+// BatchJobQueueComputeEnvironmentOrderList represents a list of BatchJobQueueComputeEnvironmentOrder
+type BatchJobQueueComputeEnvironmentOrderList []BatchJobQueueComputeEnvironmentOrder
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *BatchJobQueueComputeEnvironmentOrderList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := BatchJobQueueComputeEnvironmentOrder{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = BatchJobQueueComputeEnvironmentOrderList{item}
+		return nil
+	}
+	list := []BatchJobQueueComputeEnvironmentOrder{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = BatchJobQueueComputeEnvironmentOrderList(list)
+		return nil
+	}
+	return err
+}
+
+// Cloud9EnvironmentEC2Repository represents AWS Cloud9 EnvironmentEC2 Repository
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloud9-environmentec2-repository.html
+type Cloud9EnvironmentEC2Repository struct {
+	// The path within the development environment's default filesystem
+	// location to clone the AWS CodeCommit repository into. For example,
+	// /repository-name would clone the repository into the
+	// /home/ec2-user/environment/repository-name directory in the
+	// environment.
+	PathComponent interface{} `json:"PathComponent,omitempty"`
+
+	// The clone URL of the AWS CodeCommit repository to be cloned. For
+	// example, for an AWS CodeCommit repository this might be
+	// https://git-codecommit.us-east-2.amazonaws.com/v1/repos/repository-name.
+	RepositoryUrl interface{} `json:"RepositoryUrl,omitempty"`
+}
+
+// Cloud9EnvironmentEC2RepositoryList represents a list of Cloud9EnvironmentEC2Repository
+type Cloud9EnvironmentEC2RepositoryList []Cloud9EnvironmentEC2Repository
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *Cloud9EnvironmentEC2RepositoryList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := Cloud9EnvironmentEC2Repository{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = Cloud9EnvironmentEC2RepositoryList{item}
+		return nil
+	}
+	list := []Cloud9EnvironmentEC2Repository{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = Cloud9EnvironmentEC2RepositoryList(list)
 		return nil
 	}
 	return err
@@ -7385,27 +10733,27 @@ func (l *CertificateManagerCertificateDomainValidationOptionList) UnmarshalJSON(
 	return err
 }
 
-// CloudFormationStackParameters represents CloudFormation Stack Parameters Property Type
+// StackParameters represents AWS CloudFormation Stack Parameters
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-stack-parameters.html
-type CloudFormationStackParameters struct {
+type StackParameters struct {
 }
 
-// CloudFormationStackParametersList represents a list of CloudFormationStackParameters
-type CloudFormationStackParametersList []CloudFormationStackParameters
+// StackParametersList represents a list of StackParameters
+type StackParametersList []StackParameters
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *CloudFormationStackParametersList) UnmarshalJSON(buf []byte) error {
+func (l *StackParametersList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := CloudFormationStackParameters{}
+	item := StackParameters{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = CloudFormationStackParametersList{item}
+		*l = StackParametersList{item}
 		return nil
 	}
-	list := []CloudFormationStackParameters{}
+	list := []StackParameters{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = CloudFormationStackParametersList(list)
+		*l = StackParametersList(list)
 		return nil
 	}
 	return err
@@ -7450,7 +10798,7 @@ type InterfaceParameterGroup struct {
 	// A list of case-sensitive parameter logical IDs to include in the
 	// group. Parameters must already be defined in the Parameters section of
 	// the template. A parameter can be included in only one parameter group.
-	Parameters *StringListExpr `json:"Parameters,omitempty"`
+	Parameters interface{} `json:"Parameters,omitempty"`
 }
 
 // InterfaceParameterGroupList represents a list of InterfaceParameterGroup
@@ -7506,17 +10854,46 @@ func (l *InterfaceParameterLabelList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfig represents Amazon CloudFront CloudFrontOriginAccessIdentity CloudFrontOriginAccessIdentityConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-cloudfrontoriginaccessidentity-cloudfrontoriginaccessidentityconfig.html
+type CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfig struct {
+	// A comment to associate with this CloudFront origin access identity.
+	Comment interface{} `json:"Comment,omitempty"`
+}
+
+// CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfigList represents a list of CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfig
+type CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfigList []CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfigList{item}
+		return nil
+	}
+	list := []CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudFrontCloudFrontOriginAccessIdentityCloudFrontOriginAccessIdentityConfigList(list)
+		return nil
+	}
+	return err
+}
+
 // CloudFrontDistributionConfig represents CloudFront DistributionConfig
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distributionconfig.html
 type CloudFrontDistributionConfig struct {
 	// CNAMEs (alternate domain names), if any, for the distribution.
-	Aliases *StringListExpr `json:"Aliases,omitempty"`
+	Aliases interface{} `json:"Aliases,omitempty"`
 
 	// A list of CacheBehavior types for the distribution.
 	CacheBehaviors *CloudFrontDistributionConfigCacheBehaviorList `json:"CacheBehaviors,omitempty"`
 
 	// Any comments that you want to include about the distribution.
+	// Optional.
 	Comment *StringExpr `json:"Comment,omitempty"`
 
 	// Whether CloudFront replaces HTTP status codes in the 4xx and 5xx range
@@ -7543,6 +10920,15 @@ type CloudFrontDistributionConfig struct {
 	// automatically use an earlier HTTP version. By default, AWS
 	// CloudFormation specifies http1.1.
 	HttpVersion *StringExpr `json:"HttpVersion,omitempty"`
+
+	// If you want CloudFront to respond to IPv6 DNS requests with an IPv6
+	// address for your distribution, specify true. If you specify false,
+	// CloudFront responds to IPv6 DNS requests with the DNS response code
+	// NOERROR and with no IP addresses. This allows viewers to submit a
+	// second request, for an IPv4 address for your distribution. For more
+	// information and usage guidance, see CreateDistribution in the Amazon
+	// CloudFront API Reference.
+	IPV6Enabled interface{} `json:"IPV6Enabled,omitempty"`
 
 	// Controls whether access logs are written for the distribution. To turn
 	// on access logs, specify this property.
@@ -7601,12 +10987,12 @@ type CloudFrontDistributionConfigCacheBehavior struct {
 	// "HEAD", "OPTIONS"], or ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH",
 	// "POST", "PUT"]. If you don't specify a value, AWS CloudFormation
 	// specifies ["HEAD", "GET"].
-	AllowedMethods *StringListExpr `json:"AllowedMethods,omitempty"`
+	AllowedMethods interface{} `json:"AllowedMethods,omitempty"`
 
 	// HTTP methods for which CloudFront caches responses. You can specify
 	// ["HEAD", "GET"] or ["GET", "HEAD", "OPTIONS"]. If you don't specify a
 	// value, AWS CloudFormation specifies ["HEAD", "GET"].
-	CachedMethods *StringListExpr `json:"CachedMethods,omitempty"`
+	CachedMethods interface{} `json:"CachedMethods,omitempty"`
 
 	// Indicates whether CloudFront automatically compresses certain files
 	// for this cache behavior. For more information, see Serving Compressed
@@ -7622,6 +11008,9 @@ type CloudFrontDistributionConfigCacheBehavior struct {
 
 	// Specifies how CloudFront handles query strings or cookies.
 	ForwardedValues *CloudFrontForwardedValues `json:"ForwardedValues,omitempty"`
+
+	// Lambda function associations for the Amazon CloudFront distribution.
+	LambdaFunctionAssociations *CloudFrontDistributionLambdaFunctionAssociationList `json:"LambdaFunctionAssociations,omitempty"`
 
 	// The maximum time in seconds that objects stay in CloudFront caches
 	// before CloudFront forwards another request to your custom origin to
@@ -7651,7 +11040,7 @@ type CloudFrontDistributionConfigCacheBehavior struct {
 
 	// A list of AWS accounts that can create signed URLs in order to access
 	// private content.
-	TrustedSigners *StringListExpr `json:"TrustedSigners,omitempty"`
+	TrustedSigners interface{} `json:"TrustedSigners,omitempty"`
 
 	// The protocol that users can use to access the files in the origin that
 	// you specified in the TargetOriginId property when a request matches
@@ -7735,13 +11124,13 @@ type CloudFrontDefaultCacheBehavior struct {
 	// specify ["HEAD", "GET"], ["GET", "HEAD", "OPTIONS"], or ["DELETE",
 	// "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]. If you don't
 	// specify a value, AWS CloudFormation specifies ["HEAD", "GET"].
-	AllowedMethods *StringListExpr `json:"AllowedMethods,omitempty"`
+	AllowedMethods interface{} `json:"AllowedMethods,omitempty"`
 
 	// HTTP methods for which CloudFront caches responses. In AWS
 	// CloudFormation templates, you can specify ["HEAD", "GET"] or ["GET",
 	// "HEAD", "OPTIONS"]. If you don't specify a value, AWS CloudFormation
 	// specifies ["HEAD", "GET"].
-	CachedMethods *StringListExpr `json:"CachedMethods,omitempty"`
+	CachedMethods interface{} `json:"CachedMethods,omitempty"`
 
 	// Indicates whether CloudFront automatically compresses certain files
 	// for this cache behavior. For more information, see Serving Compressed
@@ -7758,17 +11147,20 @@ type CloudFrontDefaultCacheBehavior struct {
 	// Specifies how CloudFront handles query strings or cookies.
 	ForwardedValues *CloudFrontForwardedValues `json:"ForwardedValues,omitempty"`
 
+	// Lambda function associations for the Amazon CloudFront distribution.
+	LambdaFunctionAssociations *CloudFrontDistributionLambdaFunctionAssociationList `json:"LambdaFunctionAssociations,omitempty"`
+
 	// The maximum time in seconds that objects stay in CloudFront caches
 	// before CloudFront forwards another request to your custom origin to
 	// determine whether the object has been updated. This value applies only
-	// when your custom origin does not add HTTP headers, such as
-	// Cache-Control max-age, Cache-Control s-maxage, and Expires to objects.
+	// when your custom origin adds HTTP headers, such as Cache-Control
+	// max-age, Cache-Control s-maxage, and Expires to objects.
 	MaxTTL *IntegerExpr `json:"MaxTTL,omitempty"`
 
 	// The minimum amount of time that you want objects to stay in the cache
 	// before CloudFront queries your origin to see whether the object has
 	// been updated.
-	MinTTL *StringExpr `json:"MinTTL,omitempty"`
+	MinTTL *IntegerExpr `json:"MinTTL,omitempty"`
 
 	// Indicates whether to use the origin that is associated with this cache
 	// behavior to distribute media files in the Microsoft Smooth Streaming
@@ -7781,7 +11173,7 @@ type CloudFrontDefaultCacheBehavior struct {
 
 	// A list of AWS accounts that can create signed URLs in order to access
 	// private content.
-	TrustedSigners *StringListExpr `json:"TrustedSigners,omitempty"`
+	TrustedSigners interface{} `json:"TrustedSigners,omitempty"`
 
 	// The protocol that users can use to access the files in the origin that
 	// you specified in the TargetOriginId property when the default cache
@@ -7806,6 +11198,40 @@ func (l *CloudFrontDefaultCacheBehaviorList) UnmarshalJSON(buf []byte) error {
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
 		*l = CloudFrontDefaultCacheBehaviorList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudFrontDistributionLambdaFunctionAssociation represents Amazon CloudFront Distribution LambdaFunctionAssociation
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-lambdafunctionassociation.html
+type CloudFrontDistributionLambdaFunctionAssociation struct {
+	// Specifies the event type that triggers a Lambda function invocation.
+	// For valid values and definitions, see LambdaFunctionAssociation in the
+	// Amazon CloudFront API Reference.
+	EventType interface{} `json:"EventType,omitempty"`
+
+	// The ARN of the Lambda function. You must specify the ARN of a function
+	// version; you can't specify a Lambda alias or $LATEST.
+	LambdaFunctionARN interface{} `json:"LambdaFunctionARN,omitempty"`
+}
+
+// CloudFrontDistributionLambdaFunctionAssociationList represents a list of CloudFrontDistributionLambdaFunctionAssociation
+type CloudFrontDistributionLambdaFunctionAssociationList []CloudFrontDistributionLambdaFunctionAssociation
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudFrontDistributionLambdaFunctionAssociationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudFrontDistributionLambdaFunctionAssociation{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudFrontDistributionLambdaFunctionAssociationList{item}
+		return nil
+	}
+	list := []CloudFrontDistributionLambdaFunctionAssociation{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudFrontDistributionLambdaFunctionAssociationList(list)
 		return nil
 	}
 	return err
@@ -7851,7 +11277,7 @@ func (l *CloudFrontLoggingList) UnmarshalJSON(buf []byte) error {
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-origin.html
 type CloudFrontDistributionConfigOrigin struct {
 	// Origin information to specify a custom origin.
-	CustomOriginConfig *CloudFrontDistributionConfigOriginCustomOrigin `json:"CustomOriginConfig,omitempty"`
+	CustomOriginConfig *CloudFrontDistributionConfigOriginCustomOriginConfig `json:"CustomOriginConfig,omitempty"`
 
 	// The DNS name of the Amazon Simple Storage Service (S3) bucket or the
 	// HTTP server from which you want CloudFront to get objects for this
@@ -7896,40 +11322,52 @@ func (l *CloudFrontDistributionConfigOriginList) UnmarshalJSON(buf []byte) error
 	return err
 }
 
-// CloudFrontDistributionConfigOriginCustomOrigin represents CloudFront DistributionConfig Origin CustomOrigin
+// CloudFrontDistributionConfigOriginCustomOriginConfig represents CloudFront DistributionConfig Origin CustomOriginConfig
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-customorigin.html
-type CloudFrontDistributionConfigOriginCustomOrigin struct {
+type CloudFrontDistributionConfigOriginCustomOriginConfig struct {
 	// The HTTP port the custom origin listens on.
 	HTTPPort *IntegerExpr `json:"HTTPPort,omitempty"`
 
 	// The HTTPS port the custom origin listens on.
 	HTTPSPort *IntegerExpr `json:"HTTPSPort,omitempty"`
 
+	// You can create a custom keep-alive timeout. All timeout units are in
+	// seconds. The default keep-alive timeout is 5 seconds, but you can
+	// configure custom timeout lengths. The minimum timeout length is 1
+	// second; the maximum is 60 seconds.
+	OriginKeepaliveTimeout interface{} `json:"OriginKeepaliveTimeout,omitempty"`
+
 	// The origin protocol policy to apply to your origin.
 	OriginProtocolPolicy *StringExpr `json:"OriginProtocolPolicy,omitempty"`
+
+	// You can create a custom origin read timeout. All timeout units are in
+	// seconds. The default origin read timeout is 30 seconds, but you can
+	// configure custom timeout lengths. The minimum timeout length is 4
+	// seconds; the maximum is 60 seconds.
+	OriginReadTimeout interface{} `json:"OriginReadTimeout,omitempty"`
 
 	// The SSL protocols that CloudFront can use when establishing an HTTPS
 	// connection with your origin. By default, AWS CloudFormation specifies
 	// the TLSv1 and SSLv3 protocols.
-	OriginSSLProtocols *StringListExpr `json:"OriginSSLProtocols,omitempty"`
+	OriginSSLProtocols interface{} `json:"OriginSSLProtocols,omitempty"`
 }
 
-// CloudFrontDistributionConfigOriginCustomOriginList represents a list of CloudFrontDistributionConfigOriginCustomOrigin
-type CloudFrontDistributionConfigOriginCustomOriginList []CloudFrontDistributionConfigOriginCustomOrigin
+// CloudFrontDistributionConfigOriginCustomOriginConfigList represents a list of CloudFrontDistributionConfigOriginCustomOriginConfig
+type CloudFrontDistributionConfigOriginCustomOriginConfigList []CloudFrontDistributionConfigOriginCustomOriginConfig
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *CloudFrontDistributionConfigOriginCustomOriginList) UnmarshalJSON(buf []byte) error {
+func (l *CloudFrontDistributionConfigOriginCustomOriginConfigList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := CloudFrontDistributionConfigOriginCustomOrigin{}
+	item := CloudFrontDistributionConfigOriginCustomOriginConfig{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = CloudFrontDistributionConfigOriginCustomOriginList{item}
+		*l = CloudFrontDistributionConfigOriginCustomOriginConfigList{item}
 		return nil
 	}
-	list := []CloudFrontDistributionConfigOriginCustomOrigin{}
+	list := []CloudFrontDistributionConfigOriginCustomOriginConfig{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = CloudFrontDistributionConfigOriginCustomOriginList(list)
+		*l = CloudFrontDistributionConfigOriginCustomOriginConfigList(list)
 		return nil
 	}
 	return err
@@ -7974,8 +11412,7 @@ func (l *CloudFrontDistributionConfigOriginOriginCustomHeaderList) UnmarshalJSON
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-s3origin.html
 type CloudFrontDistributionConfigOriginS3Origin struct {
 	// The CloudFront origin access identity to associate with the origin.
-	// This is used to configure the origin so that end users can access
-	// objects in an Amazon S3 bucket through CloudFront only.
+	// You must specify the full origin ID—for example:
 	OriginAccessIdentity *StringExpr `json:"OriginAccessIdentity,omitempty"`
 }
 
@@ -8033,7 +11470,7 @@ func (l *CloudFrontDistributionConfigurationRestrictionsList) UnmarshalJSON(buf 
 type CloudFrontDistributionConfigRestrictionsGeoRestriction struct {
 	// The two-letter, uppercase country code for a country that you want to
 	// include in your blacklist or whitelist.
-	Locations *StringListExpr `json:"Locations,omitempty"`
+	Locations interface{} `json:"Locations,omitempty"`
 
 	// The method to restrict distribution of your content:
 	RestrictionType *StringExpr `json:"RestrictionType,omitempty"`
@@ -8139,7 +11576,7 @@ type CloudFrontForwardedValues struct {
 	// headers that you specify, Amazon CloudFront also caches separate
 	// versions of a specified object that is based on the header values in
 	// viewer requests.
-	Headers *StringListExpr `json:"Headers,omitempty"`
+	Headers interface{} `json:"Headers,omitempty"`
 
 	// Indicates whether you want CloudFront to forward query strings to the
 	// origin that is associated with this cache behavior. If so, specify
@@ -8152,7 +11589,7 @@ type CloudFrontForwardedValues struct {
 	// parameters that CloudFront uses to determine which content to cache.
 	// For more information, see Configuring CloudFront to Cache Based on
 	// Query String Parameters in the Amazon CloudFront Developer Guide.
-	QueryStringCacheKeys *StringListExpr `json:"QueryStringCacheKeys,omitempty"`
+	QueryStringCacheKeys interface{} `json:"QueryStringCacheKeys,omitempty"`
 }
 
 // CloudFrontForwardedValuesList represents a list of CloudFrontForwardedValues
@@ -8184,7 +11621,7 @@ type CloudFrontForwardedValuesCookies struct {
 	Forward *StringExpr `json:"Forward,omitempty"`
 
 	// The names of cookies to forward to the origin for the cache behavior.
-	WhitelistedNames *StringListExpr `json:"WhitelistedNames,omitempty"`
+	WhitelistedNames interface{} `json:"WhitelistedNames,omitempty"`
 }
 
 // CloudFrontForwardedValuesCookiesList represents a list of CloudFrontForwardedValuesCookies
@@ -8202,6 +11639,274 @@ func (l *CloudFrontForwardedValuesCookiesList) UnmarshalJSON(buf []byte) error {
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
 		*l = CloudFrontForwardedValuesCookiesList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudFrontStreamingDistributionLogging represents Amazon CloudFront StreamingDistribution Logging
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-streamingdistribution-logging.html
+type CloudFrontStreamingDistributionLogging struct {
+	// The Amazon S3 bucket to store the access logs in, for example,
+	// myawslogbucket.s3.amazonaws.com.
+	Bucket interface{} `json:"Bucket,omitempty"`
+
+	// Specifies whether you want CloudFront to save access logs to an Amazon
+	// S3 bucket. If you don't want to enable logging when you create a
+	// streaming distribution or if you want to disable logging for an
+	// existing streaming distribution, specify false for Enabled, and
+	// specify empty Bucket and Prefix elements. If you specify false for
+	// Enabled but you specify values for Bucket and Prefix, the values are
+	// automatically deleted.
+	Enabled interface{} `json:"Enabled,omitempty"`
+
+	// An optional string that you want CloudFront to prefix to the access
+	// log filenames for this streaming distribution, for example, myprefix/.
+	// If you want to enable logging, but you don't want to specify a prefix,
+	// you still must include an empty Prefix property in the Logging
+	// property.
+	Prefix interface{} `json:"Prefix,omitempty"`
+}
+
+// CloudFrontStreamingDistributionLoggingList represents a list of CloudFrontStreamingDistributionLogging
+type CloudFrontStreamingDistributionLoggingList []CloudFrontStreamingDistributionLogging
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudFrontStreamingDistributionLoggingList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudFrontStreamingDistributionLogging{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudFrontStreamingDistributionLoggingList{item}
+		return nil
+	}
+	list := []CloudFrontStreamingDistributionLogging{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudFrontStreamingDistributionLoggingList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudFrontStreamingDistributionS3Origin represents Amazon CloudFront StreamingDistribution S3Origin
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-streamingdistribution-s3origin.html
+type CloudFrontStreamingDistributionS3Origin struct {
+	// The DNS name of the Amazon S3 origin.
+	DomainName interface{} `json:"DomainName,omitempty"`
+
+	// The CloudFront origin access identity to associate with the RTMP
+	// distribution. Use an origin access identity to configure the
+	// distribution so that end users can only access objects in an Amazon S3
+	// bucket through CloudFront. For more information, see the
+	// OriginAccessIdentity property for S3Origin in Amazon CloudFront API
+	// Reference.
+	OriginAccessIdentity interface{} `json:"OriginAccessIdentity,omitempty"`
+}
+
+// CloudFrontStreamingDistributionS3OriginList represents a list of CloudFrontStreamingDistributionS3Origin
+type CloudFrontStreamingDistributionS3OriginList []CloudFrontStreamingDistributionS3Origin
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudFrontStreamingDistributionS3OriginList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudFrontStreamingDistributionS3Origin{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudFrontStreamingDistributionS3OriginList{item}
+		return nil
+	}
+	list := []CloudFrontStreamingDistributionS3Origin{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudFrontStreamingDistributionS3OriginList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudFrontStreamingDistributionStreamingDistributionConfig represents Amazon CloudFront StreamingDistribution StreamingDistributionConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-streamingdistribution-streamingdistributionconfig.html
+type CloudFrontStreamingDistributionStreamingDistributionConfig struct {
+	// Lists the CNAMEs (alternate domain names), if any, for this streaming
+	// distribution.
+	Aliases interface{} `json:"Aliases,omitempty"`
+
+	// Any comments you want to include about the streaming distribution.
+	Comment interface{} `json:"Comment,omitempty"`
+
+	// Whether the streaming distribution is enabled to accept user requests
+	// for content.
+	Enabled interface{} `json:"Enabled,omitempty"`
+
+	// Whether access logs are written for the streaming distribution.
+	Logging *CloudFrontStreamingDistributionLogging `json:"Logging,omitempty"`
+
+	// The price class for this streaming distribution.
+	PriceClass interface{} `json:"PriceClass,omitempty"`
+
+	// Information about the Amazon S3 bucket from which you want CloudFront
+	// to get your media files for distribution.
+	S3Origin *CloudFrontStreamingDistributionS3Origin `json:"S3Origin,omitempty"`
+
+	// Specifies any AWS accounts that you want to permit to create signed
+	// URLs for private content. If you want the distribution to use signed
+	// URLs, include this element; if you want the distribution to use public
+	// URLs, remove this property. For more information, see Serving Private
+	// Content through CloudFront in the Amazon CloudFront Developer Guide.
+	TrustedSigners *CloudFrontStreamingDistributionTrustedSigners `json:"TrustedSigners,omitempty"`
+}
+
+// CloudFrontStreamingDistributionStreamingDistributionConfigList represents a list of CloudFrontStreamingDistributionStreamingDistributionConfig
+type CloudFrontStreamingDistributionStreamingDistributionConfigList []CloudFrontStreamingDistributionStreamingDistributionConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudFrontStreamingDistributionStreamingDistributionConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudFrontStreamingDistributionStreamingDistributionConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudFrontStreamingDistributionStreamingDistributionConfigList{item}
+		return nil
+	}
+	list := []CloudFrontStreamingDistributionStreamingDistributionConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudFrontStreamingDistributionStreamingDistributionConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudFrontStreamingDistributionTag represents Amazon CloudFront StreamingDistribution Tag
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-streamingdistribution-tag.html
+type CloudFrontStreamingDistributionTag struct {
+	// A string that contains Tag key.
+	Key interface{} `json:"Key,omitempty"`
+
+	// A string that contains an optional Tag value.
+	Value interface{} `json:"Value,omitempty"`
+}
+
+// CloudFrontStreamingDistributionTagList represents a list of CloudFrontStreamingDistributionTag
+type CloudFrontStreamingDistributionTagList []CloudFrontStreamingDistributionTag
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudFrontStreamingDistributionTagList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudFrontStreamingDistributionTag{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudFrontStreamingDistributionTagList{item}
+		return nil
+	}
+	list := []CloudFrontStreamingDistributionTag{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudFrontStreamingDistributionTagList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudFrontStreamingDistributionTrustedSigners represents Amazon CloudFront StreamingDistribution TrustedSigners
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-streamingdistribution-trustedsigners.html
+type CloudFrontStreamingDistributionTrustedSigners struct {
+	// The trusted signers for this cache behavior.
+	AwsAccountNumbers interface{} `json:"AwsAccountNumbers,omitempty"`
+
+	// Specifies whether you want to require viewers to use signed URLs to
+	// access the files specified by PathPattern and TargetOriginId.
+	Enabled interface{} `json:"Enabled,omitempty"`
+}
+
+// CloudFrontStreamingDistributionTrustedSignersList represents a list of CloudFrontStreamingDistributionTrustedSigners
+type CloudFrontStreamingDistributionTrustedSignersList []CloudFrontStreamingDistributionTrustedSigners
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudFrontStreamingDistributionTrustedSignersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudFrontStreamingDistributionTrustedSigners{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudFrontStreamingDistributionTrustedSignersList{item}
+		return nil
+	}
+	list := []CloudFrontStreamingDistributionTrustedSigners{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudFrontStreamingDistributionTrustedSignersList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudTrailTrailEventSelector represents AWS CloudTrail Trail EventSelector
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudtrail-trail-eventselector.html
+type CloudTrailTrailEventSelector struct {
+	// The resources for data events. CloudTrail supports logging data events
+	// for Amazon S3 objects only. For more information, see Data Events in
+	// the AWS CloudTrail User Guide.
+	DataResources *CloudTrailTrailDataResourceList `json:"DataResources,omitempty"`
+
+	// Specifies whether the event selector includes management events for
+	// the trail. The default value is true. For more information, see
+	// Management Events in the AWS CloudTrail User Guide.
+	IncludeManagementEvents interface{} `json:"IncludeManagementEvents,omitempty"`
+
+	// Specifies whether to log read-only events, write-only events, or all
+	// events. The default value is All.
+	ReadWriteType interface{} `json:"ReadWriteType,omitempty"`
+}
+
+// CloudTrailTrailEventSelectorList represents a list of CloudTrailTrailEventSelector
+type CloudTrailTrailEventSelectorList []CloudTrailTrailEventSelector
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudTrailTrailEventSelectorList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudTrailTrailEventSelector{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudTrailTrailEventSelectorList{item}
+		return nil
+	}
+	list := []CloudTrailTrailEventSelector{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudTrailTrailEventSelectorList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudTrailTrailDataResource represents AWS CloudTrail Trail DataResource
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudtrail-trail-dataresource.html
+type CloudTrailTrailDataResource struct {
+	// The resource type to log data events for. You can specify only the
+	// following value: AWS::S3::Object.
+	Type interface{} `json:"Type,omitempty"`
+
+	// A list of ARN-like strings for the specified Amazon S3 objects.
+	Values interface{} `json:"Values,omitempty"`
+}
+
+// CloudTrailTrailDataResourceList represents a list of CloudTrailTrailDataResource
+type CloudTrailTrailDataResourceList []CloudTrailTrailDataResource
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudTrailTrailDataResourceList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudTrailTrailDataResource{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudTrailTrailDataResourceList{item}
+		return nil
+	}
+	list := []CloudTrailTrailDataResource{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudTrailTrailDataResourceList(list)
 		return nil
 	}
 	return err
@@ -8239,6 +11944,163 @@ func (l *CloudWatchMetricDimensionList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// CloudWatchEventsRuleEcsParameters represents Amazon CloudWatch Events Rule EcsParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-events-rule-ecsparameters.html
+type CloudWatchEventsRuleEcsParameters struct {
+	// The number of tasks to create based on the task definition. The
+	// default is 1.
+	TaskCount interface{} `json:"TaskCount,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the task definition to use.
+	TaskDefinitionArn interface{} `json:"TaskDefinitionArn,omitempty"`
+}
+
+// CloudWatchEventsRuleEcsParametersList represents a list of CloudWatchEventsRuleEcsParameters
+type CloudWatchEventsRuleEcsParametersList []CloudWatchEventsRuleEcsParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudWatchEventsRuleEcsParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudWatchEventsRuleEcsParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudWatchEventsRuleEcsParametersList{item}
+		return nil
+	}
+	list := []CloudWatchEventsRuleEcsParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudWatchEventsRuleEcsParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudWatchEventsRuleInputTransformer represents Amazon CloudWatch Events Rule InputTransformer
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-events-rule-inputtransformer.html
+type CloudWatchEventsRuleInputTransformer struct {
+	// The map of JSON paths to extract from the event, as key-value pairs
+	// where each value is a JSON path. You must use JSON dot notation, not
+	// bracket notation. Duplicates aren't allowed.
+	InputPathsMap interface{} `json:"InputPathsMap,omitempty"`
+
+	// The input template where you can use the values of the keys from
+	// InputPathsMap to customize the data that's sent to the target.
+	InputTemplate interface{} `json:"InputTemplate,omitempty"`
+}
+
+// CloudWatchEventsRuleInputTransformerList represents a list of CloudWatchEventsRuleInputTransformer
+type CloudWatchEventsRuleInputTransformerList []CloudWatchEventsRuleInputTransformer
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudWatchEventsRuleInputTransformerList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudWatchEventsRuleInputTransformer{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudWatchEventsRuleInputTransformerList{item}
+		return nil
+	}
+	list := []CloudWatchEventsRuleInputTransformer{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudWatchEventsRuleInputTransformerList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudWatchEventsRuleKinesisParameters represents Amazon CloudWatch Events Rule KinesisParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-events-rule-kinesisparameters.html
+type CloudWatchEventsRuleKinesisParameters struct {
+	// The JSON path to extract from the event and use as the partition key.
+	// The default is to use the eventId as the partition key. For more
+	// information, see Amazon Kinesis Streams Key Concepts in the Kinesis
+	// Streams Developer Guide.
+	PartitionKeyPath interface{} `json:"PartitionKeyPath,omitempty"`
+}
+
+// CloudWatchEventsRuleKinesisParametersList represents a list of CloudWatchEventsRuleKinesisParameters
+type CloudWatchEventsRuleKinesisParametersList []CloudWatchEventsRuleKinesisParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudWatchEventsRuleKinesisParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudWatchEventsRuleKinesisParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudWatchEventsRuleKinesisParametersList{item}
+		return nil
+	}
+	list := []CloudWatchEventsRuleKinesisParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudWatchEventsRuleKinesisParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudWatchEventsRuleRunCommandParameters represents Amazon CloudWatch Events Rule RunCommandParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-events-rule-runcommandparameters.html
+type CloudWatchEventsRuleRunCommandParameters struct {
+	// The criteria (either InstanceIds or a tag) that specifies which EC2
+	// instances that the command is sent to.
+	RunCommandTargets *CloudWatchEventsRuleRunCommandTargetList `json:"RunCommandTargets,omitempty"`
+}
+
+// CloudWatchEventsRuleRunCommandParametersList represents a list of CloudWatchEventsRuleRunCommandParameters
+type CloudWatchEventsRuleRunCommandParametersList []CloudWatchEventsRuleRunCommandParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudWatchEventsRuleRunCommandParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudWatchEventsRuleRunCommandParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudWatchEventsRuleRunCommandParametersList{item}
+		return nil
+	}
+	list := []CloudWatchEventsRuleRunCommandParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudWatchEventsRuleRunCommandParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// CloudWatchEventsRuleRunCommandTarget represents Amazon CloudWatch Events Rule RunCommandTarget
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-events-rule-runcommandtarget.html
+type CloudWatchEventsRuleRunCommandTarget struct {
+	// The key, either tag: tag-key or InstanceIds.
+	Key interface{} `json:"Key,omitempty"`
+
+	// A list of tag values or EC2 instance IDs.
+	Values interface{} `json:"Values,omitempty"`
+}
+
+// CloudWatchEventsRuleRunCommandTargetList represents a list of CloudWatchEventsRuleRunCommandTarget
+type CloudWatchEventsRuleRunCommandTargetList []CloudWatchEventsRuleRunCommandTarget
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CloudWatchEventsRuleRunCommandTargetList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CloudWatchEventsRuleRunCommandTarget{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CloudWatchEventsRuleRunCommandTargetList{item}
+		return nil
+	}
+	list := []CloudWatchEventsRuleRunCommandTarget{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CloudWatchEventsRuleRunCommandTargetList(list)
+		return nil
+	}
+	return err
+}
+
 // CloudWatchEventsRuleTarget represents Amazon CloudWatch Events Rule Target
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-events-rule-target.html
@@ -8246,8 +12108,12 @@ type CloudWatchEventsRuleTarget struct {
 	// The Amazon Resource Name (ARN) of the target.
 	Arn *StringExpr `json:"Arn,omitempty"`
 
+	// The Amazon ECS task definition and task count to use, if the event
+	// target is an Amazon ECS task.
+	EcsParameters *CloudWatchEventsRuleEcsParameters `json:"EcsParameters,omitempty"`
+
 	// A unique, user-defined identifier for the target. Acceptable values
-	// include alphanumeric characters, periods (.), hypens (-), and
+	// include alphanumeric characters, periods (.), hyphens (-), and
 	// underscores (_).
 	Id *StringExpr `json:"Id,omitempty"`
 
@@ -8258,6 +12124,26 @@ type CloudWatchEventsRuleTarget struct {
 	// When you don't want to pass the entire matched event, the JSONPath
 	// that describes which part of the event to pass to the target.
 	InputPath *StringExpr `json:"InputPath,omitempty"`
+
+	// Settings that provide custom input to a target based on certain event
+	// data. You can extract one or more key-value pairs from the event, and
+	// then use that data to send customized input to the target.
+	InputTransformer *CloudWatchEventsRuleInputTransformer `json:"InputTransformer,omitempty"`
+
+	// Settings that control shard assignment, when the target is a Kinesis
+	// stream. If you don't include this parameter, eventId is used as the
+	// partition key.
+	KinesisParameters *CloudWatchEventsRuleKinesisParameters `json:"KinesisParameters,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the AWS Identity and Access
+	// Management (IAM) role to use for this target when the rule is
+	// triggered. If one rule triggers multiple targets, you can use a
+	// different IAM role for each target.
+	RoleArn *StringExpr `json:"RoleArn,omitempty"`
+
+	// Parameters used when the rule invokes Amazon EC2 Systems Manager Run
+	// Command.
+	RunCommandParameters *CloudWatchEventsRuleRunCommandParameters `json:"RunCommandParameters,omitempty"`
 }
 
 // CloudWatchEventsRuleTargetList represents a list of CloudWatchEventsRuleTarget
@@ -8387,11 +12273,15 @@ type CodeBuildProjectEnvironment struct {
 	// The environment variables that your builds can use. For more
 	// information, see the environmentVariables field in the AWS CodeBuild
 	// User Guide.
-	EnvironmentVariables *CodeBuildProjectEnvironmentEnvironmentVariablesList `json:"EnvironmentVariables,omitempty"`
+	EnvironmentVariables *CodeBuildProjectEnvironmentVariableList `json:"EnvironmentVariables,omitempty"`
 
 	// The Docker image identifier that the build environment uses. For more
 	// information, see the image field in the AWS CodeBuild User Guide.
 	Image *StringExpr `json:"Image,omitempty"`
+
+	// Indicates how the project builds Docker images. Specify true to enable
+	// running the Docker daemon inside a Docker container.
+	PrivilegedMode *BoolExpr `json:"PrivilegedMode,omitempty"`
 
 	// The type of build environment. For valid values, see the
 	// environment-type field in the AWS CodeBuild User Guide.
@@ -8418,32 +12308,67 @@ func (l *CodeBuildProjectEnvironmentList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// CodeBuildProjectEnvironmentEnvironmentVariables represents AWS CodeBuild Project Environment EnvironmentVariables
+// CodeBuildProjectEnvironmentVariable represents AWS CodeBuild Project EnvironmentVariable
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codebuild-project-environment-environmentvariables.html
-type CodeBuildProjectEnvironmentEnvironmentVariables struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codebuild-project-environmentvariable.html
+type CodeBuildProjectEnvironmentVariable struct {
 	// The name of an environment variable.
 	Name *StringExpr `json:"Name,omitempty"`
+
+	// The type of environment variable. Valid values are:
+	Type *StringExpr `json:"Type,omitempty"`
 
 	// The value of the environment variable.
 	Value *StringExpr `json:"Value,omitempty"`
 }
 
-// CodeBuildProjectEnvironmentEnvironmentVariablesList represents a list of CodeBuildProjectEnvironmentEnvironmentVariables
-type CodeBuildProjectEnvironmentEnvironmentVariablesList []CodeBuildProjectEnvironmentEnvironmentVariables
+// CodeBuildProjectEnvironmentVariableList represents a list of CodeBuildProjectEnvironmentVariable
+type CodeBuildProjectEnvironmentVariableList []CodeBuildProjectEnvironmentVariable
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *CodeBuildProjectEnvironmentEnvironmentVariablesList) UnmarshalJSON(buf []byte) error {
+func (l *CodeBuildProjectEnvironmentVariableList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := CodeBuildProjectEnvironmentEnvironmentVariables{}
+	item := CodeBuildProjectEnvironmentVariable{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = CodeBuildProjectEnvironmentEnvironmentVariablesList{item}
+		*l = CodeBuildProjectEnvironmentVariableList{item}
 		return nil
 	}
-	list := []CodeBuildProjectEnvironmentEnvironmentVariables{}
+	list := []CodeBuildProjectEnvironmentVariable{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = CodeBuildProjectEnvironmentEnvironmentVariablesList(list)
+		*l = CodeBuildProjectEnvironmentVariableList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeBuildProjectProjectCache represents AWS CodeBuild Project ProjectCache
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codebuild-project-projectcache.html
+type CodeBuildProjectProjectCache struct {
+	// The Amazon S3 bucket name and prefix—for example, mybucket/prefix.
+	// This value is ignored when Type is set to NO_CACHE.
+	Location interface{} `json:"Location,omitempty"`
+
+	// The type of cache for the build project to use. Valid values are:
+	Type interface{} `json:"Type,omitempty"`
+}
+
+// CodeBuildProjectProjectCacheList represents a list of CodeBuildProjectProjectCache
+type CodeBuildProjectProjectCacheList []CodeBuildProjectProjectCache
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeBuildProjectProjectCacheList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeBuildProjectProjectCache{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeBuildProjectProjectCacheList{item}
+		return nil
+	}
+	list := []CodeBuildProjectProjectCache{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeBuildProjectProjectCacheList(list)
 		return nil
 	}
 	return err
@@ -8453,9 +12378,19 @@ func (l *CodeBuildProjectEnvironmentEnvironmentVariablesList) UnmarshalJSON(buf 
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codebuild-project-source.html
 type CodeBuildProjectSource struct {
-	// The build specification, specified as a single string. For more
-	// information, see the Build Spec Reference in the AWS CodeBuild User
-	// Guide.
+	// Information about the authorization settings for AWS CodeBuild to
+	// access the source code to be built.
+	Auth *CodeBuildProjectSourceAuth `json:"Auth,omitempty"`
+
+	// The build specification for the project. If this value is not
+	// provided, then the source code must contain a build spec file named
+	// buildspec.yml at the root level. If this value is provided, it can be
+	// either a single string containing the entire build specification, or
+	// the path to an alternate build spec file relative to the value of the
+	// built-in environment variable CODEBUILD_SRC_DIR. The alternate build
+	// spec file can have a name other than buildspec.yml, for example
+	// myspec.yml or build_spec_qa.yml or similar. For more information, see
+	// the Build Spec Reference in the AWS CodeBuild User Guide.
 	BuildSpec *StringExpr `json:"BuildSpec,omitempty"`
 
 	// The location of the source code in the specified repository type. For
@@ -8488,6 +12423,73 @@ func (l *CodeBuildProjectSourceList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// CodeBuildProjectSourceAuth represents AWS CodeBuild Project SourceAuth
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codebuild-project-sourceauth.html
+type CodeBuildProjectSourceAuth struct {
+	// The authorization type to use. The only valid value is OAUTH, which
+	// represents the OAuth authorization type.
+	Type interface{} `json:"Type,omitempty"`
+
+	// The resource value that applies to the specified authorization type.
+	Resource interface{} `json:"Resource,omitempty"`
+}
+
+// CodeBuildProjectSourceAuthList represents a list of CodeBuildProjectSourceAuth
+type CodeBuildProjectSourceAuthList []CodeBuildProjectSourceAuth
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeBuildProjectSourceAuthList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeBuildProjectSourceAuth{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeBuildProjectSourceAuthList{item}
+		return nil
+	}
+	list := []CodeBuildProjectSourceAuth{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeBuildProjectSourceAuthList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeBuildProjectVpcConfig represents AWS CodeBuild Project VpcConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codebuild-project-vpcconfig.html
+type CodeBuildProjectVpcConfig struct {
+	// The IDs of the security groups in the Amazon VPC. The maximum count is
+	// 5.
+	SecurityGroupIds interface{} `json:"SecurityGroupIds,omitempty"`
+
+	// The IDs of the subnets in the Amazon VPC. The maximum count is 16.
+	Subnets interface{} `json:"Subnets,omitempty"`
+
+	// The ID of the Amazon VPC.
+	VpcId interface{} `json:"VpcId,omitempty"`
+}
+
+// CodeBuildProjectVpcConfigList represents a list of CodeBuildProjectVpcConfig
+type CodeBuildProjectVpcConfigList []CodeBuildProjectVpcConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeBuildProjectVpcConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeBuildProjectVpcConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeBuildProjectVpcConfigList{item}
+		return nil
+	}
+	list := []CodeBuildProjectVpcConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeBuildProjectVpcConfigList(list)
+		return nil
+	}
+	return err
+}
+
 // CodeCommitRepositoryTrigger represents AWS CodeCommit Repository Trigger
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codecommit-repository-triggers.html
@@ -8495,7 +12497,7 @@ type CodeCommitRepositoryTrigger struct {
 	// The names of the branches in the AWS CodeCommit repository that
 	// contain events that you want to include in the trigger. If you don't
 	// specify at least one branch, the trigger applies to all branches.
-	Branches *StringListExpr `json:"Branches,omitempty"`
+	Branches interface{} `json:"Branches,omitempty"`
 
 	// When an event is triggered, additional information that AWS CodeCommit
 	// includes when it sends information to the target.
@@ -8511,7 +12513,7 @@ type CodeCommitRepositoryTrigger struct {
 	// don't specify events, the trigger runs for all repository events. For
 	// valid values, see the RepositoryTrigger data type in the AWS
 	// CodeCommit API Reference.
-	Events *StringListExpr `json:"Events,omitempty"`
+	Events interface{} `json:"Events,omitempty"`
 
 	// A name for the trigger.
 	Name *StringExpr `json:"Name,omitempty"`
@@ -8570,6 +12572,106 @@ func (l *CodeDeployDeploymentConfigMinimumHealthyHostsList) UnmarshalJSON(buf []
 	return err
 }
 
+// CodeDeployDeploymentGroupAlarm represents AWS CodeDeploy DeploymentGroup Alarm
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-alarm.html
+type CodeDeployDeploymentGroupAlarm struct {
+	// The name of the alarm. For more information, see Alarm in the AWS
+	// CodeDeploy API Reference.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// CodeDeployDeploymentGroupAlarmList represents a list of CodeDeployDeploymentGroupAlarm
+type CodeDeployDeploymentGroupAlarmList []CodeDeployDeploymentGroupAlarm
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeDeployDeploymentGroupAlarmList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeDeployDeploymentGroupAlarm{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeDeployDeploymentGroupAlarmList{item}
+		return nil
+	}
+	list := []CodeDeployDeploymentGroupAlarm{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeDeployDeploymentGroupAlarmList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeDeployDeploymentGroupAlarmConfiguration represents AWS CodeDeploy DeploymentGroup AlarmConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-alarmconfiguration.html
+type CodeDeployDeploymentGroupAlarmConfiguration struct {
+	// The list of alarms configured for the deployment group. Duplicates are
+	// not allowed.
+	Alarms *CodeDeployDeploymentGroupAlarmList `json:"Alarms,omitempty"`
+
+	// Indicates whether the alarm configuration is enabled.
+	Enabled *BoolExpr `json:"Enabled,omitempty"`
+
+	// Indicates whether a deployment should continue if information about
+	// the current state of alarms cannot be retrieved from CloudWatch. The
+	// default value is false.
+	IgnorePollAlarmFailure *BoolExpr `json:"IgnorePollAlarmFailure,omitempty"`
+}
+
+// CodeDeployDeploymentGroupAlarmConfigurationList represents a list of CodeDeployDeploymentGroupAlarmConfiguration
+type CodeDeployDeploymentGroupAlarmConfigurationList []CodeDeployDeploymentGroupAlarmConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeDeployDeploymentGroupAlarmConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeDeployDeploymentGroupAlarmConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeDeployDeploymentGroupAlarmConfigurationList{item}
+		return nil
+	}
+	list := []CodeDeployDeploymentGroupAlarmConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeDeployDeploymentGroupAlarmConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeDeployDeploymentGroupAutoRollbackConfiguration represents AWS CodeDeploy DeploymentGroup AutoRollbackConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-autorollbackconfiguration.html
+type CodeDeployDeploymentGroupAutoRollbackConfiguration struct {
+	// Indicates whether a defined automatic rollback configuration is
+	// currently enabled.
+	Enabled interface{} `json:"Enabled,omitempty"`
+
+	// The event type or types that trigger a rollback. Valid values are
+	// DEPLOYMENT_FAILURE, DEPLOYMENT_STOP_ON_ALARM, or
+	// DEPLOYMENT_STOP_ON_REQUEST.
+	Events interface{} `json:"Events,omitempty"`
+}
+
+// CodeDeployDeploymentGroupAutoRollbackConfigurationList represents a list of CodeDeployDeploymentGroupAutoRollbackConfiguration
+type CodeDeployDeploymentGroupAutoRollbackConfigurationList []CodeDeployDeploymentGroupAutoRollbackConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeDeployDeploymentGroupAutoRollbackConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeDeployDeploymentGroupAutoRollbackConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeDeployDeploymentGroupAutoRollbackConfigurationList{item}
+		return nil
+	}
+	list := []CodeDeployDeploymentGroupAutoRollbackConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeDeployDeploymentGroupAutoRollbackConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
 // CodeDeployDeploymentGroupDeployment represents AWS CodeDeploy DeploymentGroup Deployment
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-deployment.html
@@ -8605,6 +12707,128 @@ func (l *CodeDeployDeploymentGroupDeploymentList) UnmarshalJSON(buf []byte) erro
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
 		*l = CodeDeployDeploymentGroupDeploymentList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeDeployDeploymentGroupDeploymentStyle represents AWS CodeDeploy DeploymentGroup DeploymentStyle
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-deploymentstyle.html
+type CodeDeployDeploymentGroupDeploymentStyle struct {
+	// Indicates whether to route deployment traffic behind a load balancer.
+	DeploymentOption interface{} `json:"DeploymentOption,omitempty"`
+
+	// Indicates whether to run an in-place or blue/green deployment.
+	DeploymentType interface{} `json:"DeploymentType,omitempty"`
+}
+
+// CodeDeployDeploymentGroupDeploymentStyleList represents a list of CodeDeployDeploymentGroupDeploymentStyle
+type CodeDeployDeploymentGroupDeploymentStyleList []CodeDeployDeploymentGroupDeploymentStyle
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeDeployDeploymentGroupDeploymentStyleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeDeployDeploymentGroupDeploymentStyle{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeDeployDeploymentGroupDeploymentStyleList{item}
+		return nil
+	}
+	list := []CodeDeployDeploymentGroupDeploymentStyle{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeDeployDeploymentGroupDeploymentStyleList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeDeployDeploymentGroupELBInfo represents AWS CodeDeploy DeploymentGroup ELBInfo
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-elbinfo.html
+type CodeDeployDeploymentGroupELBInfo struct {
+	// The name of the load balancer that instances are deregistered from so
+	// they are not serving traffic during a deployment, and then
+	// re-registered with after the deployment completes. No duplicates
+	// allowed.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CodeDeployDeploymentGroupELBInfoList represents a list of CodeDeployDeploymentGroupELBInfo
+type CodeDeployDeploymentGroupELBInfoList []CodeDeployDeploymentGroupELBInfo
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeDeployDeploymentGroupELBInfoList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeDeployDeploymentGroupELBInfo{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeDeployDeploymentGroupELBInfoList{item}
+		return nil
+	}
+	list := []CodeDeployDeploymentGroupELBInfo{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeDeployDeploymentGroupELBInfoList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeDeployDeploymentGroupLoadBalancerInfo represents AWS CodeDeploy DeploymentGroup LoadBalancerInfo
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-loadbalancerinfo.html
+type CodeDeployDeploymentGroupLoadBalancerInfo struct {
+}
+
+// CodeDeployDeploymentGroupLoadBalancerInfoList represents a list of CodeDeployDeploymentGroupLoadBalancerInfo
+type CodeDeployDeploymentGroupLoadBalancerInfoList []CodeDeployDeploymentGroupLoadBalancerInfo
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeDeployDeploymentGroupLoadBalancerInfoList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeDeployDeploymentGroupLoadBalancerInfo{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeDeployDeploymentGroupLoadBalancerInfoList{item}
+		return nil
+	}
+	list := []CodeDeployDeploymentGroupLoadBalancerInfo{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeDeployDeploymentGroupLoadBalancerInfoList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeDeployDeploymentGroupTargetGroupInfo represents AWS CodeDeploy DeploymentGroup TargetGroupInfo
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-targetgroupinfo.html
+type CodeDeployDeploymentGroupTargetGroupInfo struct {
+	// For blue/green deployments, the name of the target group that
+	// instances in the original environment are deregistered from, and
+	// instances in the replacement environment registered with. For in-place
+	// deployments, the name of the target group that instances are
+	// deregistered from, so they are not serving traffic during a
+	// deployment, and then re-registered with after the deployment
+	// completes. No duplicates allowed.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// CodeDeployDeploymentGroupTargetGroupInfoList represents a list of CodeDeployDeploymentGroupTargetGroupInfo
+type CodeDeployDeploymentGroupTargetGroupInfoList []CodeDeployDeploymentGroupTargetGroupInfo
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeDeployDeploymentGroupTargetGroupInfoList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeDeployDeploymentGroupTargetGroupInfo{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeDeployDeploymentGroupTargetGroupInfoList{item}
+		return nil
+	}
+	list := []CodeDeployDeploymentGroupTargetGroupInfo{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeDeployDeploymentGroupTargetGroupInfoList(list)
 		return nil
 	}
 	return err
@@ -8792,6 +13016,42 @@ func (l *CodeDeployDeploymentGroupOnPremisesInstanceTagFiltersList) UnmarshalJSO
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
 		*l = CodeDeployDeploymentGroupOnPremisesInstanceTagFiltersList(list)
+		return nil
+	}
+	return err
+}
+
+// CodeDeployDeploymentGroupTriggerConfig represents AWS CodeDeploy DeploymentGroup TriggerConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codedeploy-deploymentgroup-triggerconfig.html
+type CodeDeployDeploymentGroupTriggerConfig struct {
+	// The event type or types that trigger notifications.
+	TriggerEvents interface{} `json:"TriggerEvents,omitempty"`
+
+	// The name of the notification trigger.
+	TriggerName *StringExpr `json:"TriggerName,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Amazon Simple Notification
+	// Service topic through which notifications about deployment or instance
+	// events are sent.
+	TriggerTargetArn *StringExpr `json:"TriggerTargetArn,omitempty"`
+}
+
+// CodeDeployDeploymentGroupTriggerConfigList represents a list of CodeDeployDeploymentGroupTriggerConfig
+type CodeDeployDeploymentGroupTriggerConfigList []CodeDeployDeploymentGroupTriggerConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CodeDeployDeploymentGroupTriggerConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CodeDeployDeploymentGroupTriggerConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CodeDeployDeploymentGroupTriggerConfigList{item}
+		return nil
+	}
+	list := []CodeDeployDeploymentGroupTriggerConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CodeDeployDeploymentGroupTriggerConfigList(list)
 		return nil
 	}
 	return err
@@ -9075,7 +13335,8 @@ type CodePipelinePipelineStagesActions struct {
 	ActionTypeId *CodePipelinePipelineStagesActionsActionTypeId `json:"ActionTypeId,omitempty"`
 
 	// The action's configuration. These are key-value pairs that specify
-	// input values for an action.
+	// input values for an action. For more information, see Action Structure
+	// Requirements in AWS CodePipeline in the AWS CodePipeline User Guide.
 	Configuration interface{} `json:"Configuration,omitempty"`
 
 	// The name or ID of the artifact that the action consumes, such as a
@@ -9121,7 +13382,7 @@ func (l *CodePipelinePipelineStagesActionsList) UnmarshalJSON(buf []byte) error 
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages-actions-actiontypeid.html
 type CodePipelinePipelineStagesActionsActionTypeId struct {
-	// A category that defines which action type the owner (the entitiy that
+	// A category that defines which action type the owner (the entity that
 	// performs the action) performs. The category that you select determine
 	// the providers that you can specify for the Provider property. For
 	// valid values, see ActionTypeId in the AWS CodePipeline API Reference.
@@ -9253,6 +13514,656 @@ func (l *CodePipelinePipelineStagesBlockersList) UnmarshalJSON(buf []byte) error
 	return err
 }
 
+// CognitoIdentityPoolCognitoStreams represents Amazon Cognito IdentityPool CognitoStreams
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-identitypool-cognitostreams.html
+type CognitoIdentityPoolCognitoStreams struct {
+	// The Amazon Resource Name (ARN) of the role Amazon Cognito can assume
+	// to publish to the stream. This role must grant access to Amazon
+	// Cognito (cognito-sync) to invoke PutRecord on your Amazon Cognito
+	// stream.
+	RoleArn *StringExpr `json:"RoleArn,omitempty"`
+
+	// Status of the Cognito streams. Valid values are: ENABLED or DISABLED.
+	StreamingStatus *StringExpr `json:"StreamingStatus,omitempty"`
+
+	// The name of the Amazon Cognito stream to receive updates. This stream
+	// must be in the developer's account and in the same region as the
+	// identity pool.
+	StreamName *StringExpr `json:"StreamName,omitempty"`
+}
+
+// CognitoIdentityPoolCognitoStreamsList represents a list of CognitoIdentityPoolCognitoStreams
+type CognitoIdentityPoolCognitoStreamsList []CognitoIdentityPoolCognitoStreams
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoIdentityPoolCognitoStreamsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoIdentityPoolCognitoStreams{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoIdentityPoolCognitoStreamsList{item}
+		return nil
+	}
+	list := []CognitoIdentityPoolCognitoStreams{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoIdentityPoolCognitoStreamsList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoIdentityPoolPushSync represents Amazon Cognito IdentityPool PushSync
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-identitypool-pushsync.html
+type CognitoIdentityPoolPushSync struct {
+	// List of Amazon SNS platform application ARNs that could be used by
+	// clients.
+	ApplicationArns interface{} `json:"ApplicationArns,omitempty"`
+
+	// An IAM role configured to allow Amazon Cognito to call SNS on behalf
+	// of the developer.
+	RoleArn *StringExpr `json:"RoleArn,omitempty"`
+}
+
+// CognitoIdentityPoolPushSyncList represents a list of CognitoIdentityPoolPushSync
+type CognitoIdentityPoolPushSyncList []CognitoIdentityPoolPushSync
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoIdentityPoolPushSyncList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoIdentityPoolPushSync{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoIdentityPoolPushSyncList{item}
+		return nil
+	}
+	list := []CognitoIdentityPoolPushSync{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoIdentityPoolPushSyncList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoIdentityPoolRoleAttachmentRoleMapping represents Amazon Cognito IdentityPoolRoleAttachment RoleMapping
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-identitypoolroleattachment-rolemapping.html
+type CognitoIdentityPoolRoleAttachmentRoleMapping struct {
+	// Specifies the action to be taken if either no rules match the claim
+	// value for the Rules type, or there is no cognito:preferred_role claim
+	// and there are multiple cognito:roles matches for the Token type. If
+	// you specify Token or Rules as the Type, AmbiguousRoleResolution is
+	// required.
+	AmbiguousRoleResolution *StringExpr `json:"AmbiguousRoleResolution,omitempty"`
+
+	// The rules to be used for mapping users to roles. If you specify Rules
+	// as the role mapping type, RulesConfiguration is required.
+	RulesConfiguration *CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfiguration `json:"RulesConfiguration,omitempty"`
+
+	// The role mapping type. Token will use cognito:roles and
+	// cognito:preferred_role claims from the Amazon Cognito identity
+	// provider token to map groups to roles. Rules will attempt to match
+	// claims from the token to map to a role.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// CognitoIdentityPoolRoleAttachmentRoleMappingList represents a list of CognitoIdentityPoolRoleAttachmentRoleMapping
+type CognitoIdentityPoolRoleAttachmentRoleMappingList []CognitoIdentityPoolRoleAttachmentRoleMapping
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoIdentityPoolRoleAttachmentRoleMappingList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoIdentityPoolRoleAttachmentRoleMapping{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoIdentityPoolRoleAttachmentRoleMappingList{item}
+		return nil
+	}
+	list := []CognitoIdentityPoolRoleAttachmentRoleMapping{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoIdentityPoolRoleAttachmentRoleMappingList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoIdentityPoolRoleAttachmentMappingRule represents Amazon Cognito IdentityPoolRoleAttachment MappingRule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-identitypoolroleattachment-mappingrule.html
+type CognitoIdentityPoolRoleAttachmentMappingRule struct {
+	// The claim name that must be present in the token, for example,
+	// "isAdmin" or "paid."
+	Claim *StringExpr `json:"Claim,omitempty"`
+
+	// The match condition that specifies how closely the claim value in the
+	// IdP token must match Value.
+	MatchType *StringExpr `json:"MatchType,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the role.
+	RoleARN *StringExpr `json:"RoleARN,omitempty"`
+
+	// A brief string that the claim must match, for example, "paid" or
+	// "yes."
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// CognitoIdentityPoolRoleAttachmentMappingRuleList represents a list of CognitoIdentityPoolRoleAttachmentMappingRule
+type CognitoIdentityPoolRoleAttachmentMappingRuleList []CognitoIdentityPoolRoleAttachmentMappingRule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoIdentityPoolRoleAttachmentMappingRuleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoIdentityPoolRoleAttachmentMappingRule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoIdentityPoolRoleAttachmentMappingRuleList{item}
+		return nil
+	}
+	list := []CognitoIdentityPoolRoleAttachmentMappingRule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoIdentityPoolRoleAttachmentMappingRuleList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoIdentityPoolCognitoIdentityProvider represents Amazon Cognito IdentityPool CognitoIdentityProvider
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-identitypool-cognitoidentityprovider.html
+type CognitoIdentityPoolCognitoIdentityProvider struct {
+	// The client ID for the Amazon Cognito user pool.
+	ClientId *StringExpr `json:"ClientId,omitempty"`
+
+	// The provider name for an Amazon Cognito user pool. For example,
+	// cognito-idp.us-east-2.amazonaws.com/us-east-2_123456789.
+	ProviderName *StringExpr `json:"ProviderName,omitempty"`
+
+	// TRUE if server-side token validation is enabled for the identity
+	// provider’s token.
+	ServerSideTokenCheck *BoolExpr `json:"ServerSideTokenCheck,omitempty"`
+}
+
+// CognitoIdentityPoolCognitoIdentityProviderList represents a list of CognitoIdentityPoolCognitoIdentityProvider
+type CognitoIdentityPoolCognitoIdentityProviderList []CognitoIdentityPoolCognitoIdentityProvider
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoIdentityPoolCognitoIdentityProviderList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoIdentityPoolCognitoIdentityProvider{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoIdentityPoolCognitoIdentityProviderList{item}
+		return nil
+	}
+	list := []CognitoIdentityPoolCognitoIdentityProvider{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoIdentityPoolCognitoIdentityProviderList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfiguration represents Amazon Cognito IdentityPoolRoleAttachment RoleMapping RulesConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-identitypoolroleattachment-rolemapping-rulesconfiguration.html
+type CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfiguration struct {
+	// A list of rules. You can specify up to 25 rules per identity provider.
+	Rules *CognitoIdentityPoolRoleAttachmentMappingRuleList `json:"Rules,omitempty"`
+}
+
+// CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfigurationList represents a list of CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfiguration
+type CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfigurationList []CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfigurationList{item}
+		return nil
+	}
+	list := []CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoIdentityPoolRoleAttachmentRoleMappingRulesConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolAdminCreateUserConfig represents Amazon Cognito UserPool AdminCreateUserConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-admincreateuserconfig.html
+type CognitoUserPoolAdminCreateUserConfig struct {
+	// Set to True if only the administrator is allowed to create user
+	// profiles. Set to False if users can sign themselves up via an app.
+	AllowAdminCreateUserOnly *BoolExpr `json:"AllowAdminCreateUserOnly,omitempty"`
+
+	// The message template to be used for the welcome message to new users.
+	InviteMessageTemplate *CognitoUserPoolInviteMessageTemplate `json:"InviteMessageTemplate,omitempty"`
+
+	// The user account expiration limit, in days, after which the account is
+	// no longer usable. To reset the account after that time limit, you must
+	// call AdminCreateUser again, specifying RESEND for the MessageAction
+	// parameter. The default value for this parameter is 7.
+	UnusedAccountValidityDays *IntegerExpr `json:"UnusedAccountValidityDays,omitempty"`
+}
+
+// CognitoUserPoolAdminCreateUserConfigList represents a list of CognitoUserPoolAdminCreateUserConfig
+type CognitoUserPoolAdminCreateUserConfigList []CognitoUserPoolAdminCreateUserConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolAdminCreateUserConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolAdminCreateUserConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolAdminCreateUserConfigList{item}
+		return nil
+	}
+	list := []CognitoUserPoolAdminCreateUserConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolAdminCreateUserConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolDeviceConfiguration represents Amazon Cognito UserPool DeviceConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-deviceconfiguration.html
+type CognitoUserPoolDeviceConfiguration struct {
+	// Indicates whether a challenge is required on a new device. Only
+	// applicable to a new device.
+	ChallengeRequiredOnNewDevice *BoolExpr `json:"ChallengeRequiredOnNewDevice,omitempty"`
+
+	// If true, a device is only remembered on user prompt.
+	DeviceOnlyRememberedOnUserPrompt *BoolExpr `json:"DeviceOnlyRememberedOnUserPrompt,omitempty"`
+}
+
+// CognitoUserPoolDeviceConfigurationList represents a list of CognitoUserPoolDeviceConfiguration
+type CognitoUserPoolDeviceConfigurationList []CognitoUserPoolDeviceConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolDeviceConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolDeviceConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolDeviceConfigurationList{item}
+		return nil
+	}
+	list := []CognitoUserPoolDeviceConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolDeviceConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolEmailConfiguration represents Amazon Cognito UserPool EmailConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-emailconfiguration.html
+type CognitoUserPoolEmailConfiguration struct {
+	// The REPLY-TO email address.
+	ReplyToEmailAddress *StringExpr `json:"ReplyToEmailAddress,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the email source.
+	SourceArn *StringExpr `json:"SourceArn,omitempty"`
+}
+
+// CognitoUserPoolEmailConfigurationList represents a list of CognitoUserPoolEmailConfiguration
+type CognitoUserPoolEmailConfigurationList []CognitoUserPoolEmailConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolEmailConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolEmailConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolEmailConfigurationList{item}
+		return nil
+	}
+	list := []CognitoUserPoolEmailConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolEmailConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolInviteMessageTemplate represents Amazon Cognito UserPool InviteMessageTemplate
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-invitemessagetemplate.html
+type CognitoUserPoolInviteMessageTemplate struct {
+	// The message template for email messages.
+	EmailMessage *StringExpr `json:"EmailMessage,omitempty"`
+
+	// The subject line for email messages.
+	EmailSubject *StringExpr `json:"EmailSubject,omitempty"`
+
+	// The message template for SMS messages.
+	SMSMessage *StringExpr `json:"SMSMessage,omitempty"`
+}
+
+// CognitoUserPoolInviteMessageTemplateList represents a list of CognitoUserPoolInviteMessageTemplate
+type CognitoUserPoolInviteMessageTemplateList []CognitoUserPoolInviteMessageTemplate
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolInviteMessageTemplateList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolInviteMessageTemplate{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolInviteMessageTemplateList{item}
+		return nil
+	}
+	list := []CognitoUserPoolInviteMessageTemplate{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolInviteMessageTemplateList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolLambdaConfig represents Amazon Cognito UserPool LambdaConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-lambdaconfig.html
+type CognitoUserPoolLambdaConfig struct {
+	// Creates an authentication challenge.
+	CreateAuthChallenge *StringExpr `json:"CreateAuthChallenge,omitempty"`
+
+	// A custom Message AWS Lambda trigger.
+	CustomMessage *StringExpr `json:"CustomMessage,omitempty"`
+
+	// Defines the authentication challenge.
+	DefineAuthChallenge *StringExpr `json:"DefineAuthChallenge,omitempty"`
+
+	// A post-authentication AWS Lambda trigger.
+	PostAuthentication *StringExpr `json:"PostAuthentication,omitempty"`
+
+	// A post-confirmation AWS Lambda trigger.
+	PostConfirmation *StringExpr `json:"PostConfirmation,omitempty"`
+
+	// A pre-authentication AWS Lambda trigger.
+	PreAuthentication *StringExpr `json:"PreAuthentication,omitempty"`
+
+	// A pre-registration AWS Lambda trigger.
+	PreSignUp *StringExpr `json:"PreSignUp,omitempty"`
+
+	// Verifies the authentication challenge response.
+	VerifyAuthChallengeResponse *StringExpr `json:"VerifyAuthChallengeResponse,omitempty"`
+}
+
+// CognitoUserPoolLambdaConfigList represents a list of CognitoUserPoolLambdaConfig
+type CognitoUserPoolLambdaConfigList []CognitoUserPoolLambdaConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolLambdaConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolLambdaConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolLambdaConfigList{item}
+		return nil
+	}
+	list := []CognitoUserPoolLambdaConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolLambdaConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolNumberAttributeConstraints represents Amazon Cognito UserPool NumberAttributeConstraints
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-numberattributeconstraints.html
+type CognitoUserPoolNumberAttributeConstraints struct {
+	// The maximum value of an attribute that is of the number data type.
+	MaxValue *StringExpr `json:"MaxValue,omitempty"`
+
+	// The minimum value of an attribute that is of the number data type.
+	MinValue *StringExpr `json:"MinValue,omitempty"`
+}
+
+// CognitoUserPoolNumberAttributeConstraintsList represents a list of CognitoUserPoolNumberAttributeConstraints
+type CognitoUserPoolNumberAttributeConstraintsList []CognitoUserPoolNumberAttributeConstraints
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolNumberAttributeConstraintsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolNumberAttributeConstraints{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolNumberAttributeConstraintsList{item}
+		return nil
+	}
+	list := []CognitoUserPoolNumberAttributeConstraints{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolNumberAttributeConstraintsList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolPasswordPolicy represents Amazon Cognito UserPool PasswordPolicy
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-passwordpolicy.html
+type CognitoUserPoolPasswordPolicy struct {
+	// The minimum length of the password policy that you have set. Cannot be
+	// less than 6.
+	MinimumLength *IntegerExpr `json:"MinimumLength,omitempty"`
+
+	// In the password policy that you have set, refers to whether you have
+	// required users to use at least one lowercase letter in their password.
+	RequireLowercase *BoolExpr `json:"RequireLowercase,omitempty"`
+
+	// In the password policy that you have set, refers to whether you have
+	// required users to use at least one number in their password.
+	RequireNumbers *BoolExpr `json:"RequireNumbers,omitempty"`
+
+	// In the password policy that you have set, refers to whether you have
+	// required users to use at least one symbol in their password.
+	RequireSymbols *BoolExpr `json:"RequireSymbols,omitempty"`
+
+	// In the password policy that you have set, refers to whether you have
+	// required users to use at least one uppercase letter in their password.
+	RequireUppercase *BoolExpr `json:"RequireUppercase,omitempty"`
+}
+
+// CognitoUserPoolPasswordPolicyList represents a list of CognitoUserPoolPasswordPolicy
+type CognitoUserPoolPasswordPolicyList []CognitoUserPoolPasswordPolicy
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolPasswordPolicyList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolPasswordPolicy{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolPasswordPolicyList{item}
+		return nil
+	}
+	list := []CognitoUserPoolPasswordPolicy{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolPasswordPolicyList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolPolicies represents Amazon Cognito UserPool Policies
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-policies.html
+type CognitoUserPoolPolicies struct {
+	// Specifies information about the user pool password policy.
+	PasswordPolicy *CognitoUserPoolPasswordPolicy `json:"PasswordPolicy,omitempty"`
+}
+
+// CognitoUserPoolPoliciesList represents a list of CognitoUserPoolPolicies
+type CognitoUserPoolPoliciesList []CognitoUserPoolPolicies
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolPoliciesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolPolicies{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolPoliciesList{item}
+		return nil
+	}
+	list := []CognitoUserPoolPolicies{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolPoliciesList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolSchemaAttribute represents Amazon Cognito UserPool SchemaAttribute
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-schemaattribute.html
+type CognitoUserPoolSchemaAttribute struct {
+	// The attribute data type. Can be one of the following: String, Number,
+	// DateTime, or Boolean.
+	AttributeDataType *StringExpr `json:"AttributeDataType,omitempty"`
+
+	// Specifies whether the attribute type is developer only.
+	DeveloperOnlyAttribute *BoolExpr `json:"DeveloperOnlyAttribute,omitempty"`
+
+	// Specifies whether the attribute can be changed after it has been
+	// created. True means mutable and False means immutable.
+	Mutable *BoolExpr `json:"Mutable,omitempty"`
+
+	// A schema attribute of the name type.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// Specifies the constraints for an attribute of the number type.
+	NumberAttributeConstraints *CognitoUserPoolNumberAttributeConstraints `json:"NumberAttributeConstraints,omitempty"`
+
+	// Specifies the constraints for an attribute of the string type.
+	StringAttributeConstraints *CognitoUserPoolStringAttributeConstraints `json:"StringAttributeConstraints,omitempty"`
+
+	// Specifies whether a user pool attribute is required. If the attribute
+	// is required and the user does not provide a value, registration or
+	// sign-in fails.
+	Required *BoolExpr `json:"Required,omitempty"`
+}
+
+// CognitoUserPoolSchemaAttributeList represents a list of CognitoUserPoolSchemaAttribute
+type CognitoUserPoolSchemaAttributeList []CognitoUserPoolSchemaAttribute
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolSchemaAttributeList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolSchemaAttribute{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolSchemaAttributeList{item}
+		return nil
+	}
+	list := []CognitoUserPoolSchemaAttribute{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolSchemaAttributeList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolSmsConfiguration represents Amazon Cognito UserPool SmsConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-smsconfiguration.html
+type CognitoUserPoolSmsConfiguration struct {
+	// The external ID used in IAM role trust relationships.
+	ExternalId *StringExpr `json:"ExternalId,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Amazon Simple Notification
+	// Service (SNS) caller.
+	SnsCallerArn *StringExpr `json:"SnsCallerArn,omitempty"`
+}
+
+// CognitoUserPoolSmsConfigurationList represents a list of CognitoUserPoolSmsConfiguration
+type CognitoUserPoolSmsConfigurationList []CognitoUserPoolSmsConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolSmsConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolSmsConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolSmsConfigurationList{item}
+		return nil
+	}
+	list := []CognitoUserPoolSmsConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolSmsConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolStringAttributeConstraints represents Amazon Cognito UserPool StringAttributeConstraints
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-stringattributeconstraints.html
+type CognitoUserPoolStringAttributeConstraints struct {
+	// The maximum value of an attribute that is of the string data type.
+	MaxLength *StringExpr `json:"MaxLength,omitempty"`
+
+	// The minimum value of an attribute that is of the string data type.
+	MinLength *StringExpr `json:"MinLength,omitempty"`
+}
+
+// CognitoUserPoolStringAttributeConstraintsList represents a list of CognitoUserPoolStringAttributeConstraints
+type CognitoUserPoolStringAttributeConstraintsList []CognitoUserPoolStringAttributeConstraints
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolStringAttributeConstraintsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolStringAttributeConstraints{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolStringAttributeConstraintsList{item}
+		return nil
+	}
+	list := []CognitoUserPoolStringAttributeConstraints{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolStringAttributeConstraintsList(list)
+		return nil
+	}
+	return err
+}
+
+// CognitoUserPoolUserAttribute represents Amazon Cognito UserPoolUser AttributeType
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpooluser-attributetype.html
+type CognitoUserPoolUserAttribute struct {
+	// The name of the attribute.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The value of the attribute.
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// CognitoUserPoolUserAttributeList represents a list of CognitoUserPoolUserAttribute
+type CognitoUserPoolUserAttributeList []CognitoUserPoolUserAttribute
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *CognitoUserPoolUserAttributeList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := CognitoUserPoolUserAttribute{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = CognitoUserPoolUserAttributeList{item}
+		return nil
+	}
+	list := []CognitoUserPoolUserAttribute{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = CognitoUserPoolUserAttributeList(list)
+		return nil
+	}
+	return err
+}
+
 // ConfigConfigRuleScope represents AWS Config ConfigRule Scope
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-config-configrule-scope.html
@@ -9264,8 +14175,9 @@ type ConfigConfigRuleScope struct {
 
 	// The types of AWS resources that you want AWS Config to evaluate
 	// against the rule. If you specify the ComplianceResourceId property,
-	// specify only one resource type.
-	ComplianceResourceTypes *StringListExpr `json:"ComplianceResourceTypes,omitempty"`
+	// specify only one resource type. For more information, see Supported
+	// Resources, Configuration Items, and Relationships.
+	ComplianceResourceTypes interface{} `json:"ComplianceResourceTypes,omitempty"`
 
 	// The tag key that is applied to the AWS resources that you want AWS
 	// Config to evaluate against the rule.
@@ -9306,7 +14218,7 @@ type ConfigConfigRuleSource struct {
 
 	// Provides the source and type of event that triggers AWS Config to
 	// evaluate your AWS resources.
-	SourceDetails *ConfigConfigRuleSourceSourceDetailsList `json:"SourceDetails,omitempty"`
+	SourceDetails *ConfigConfigRuleSourceDetailsList `json:"SourceDetails,omitempty"`
 
 	// For AWS managed rules, the identifier of the rule. For a list of
 	// identifiers, see AWS Managed Rules in the AWS Config Developer Guide.
@@ -9333,35 +14245,42 @@ func (l *ConfigConfigRuleSourceList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// ConfigConfigRuleSourceSourceDetails represents AWS Config ConfigRule Source SourceDetails
+// ConfigConfigRuleSourceDetails represents AWS Config ConfigRule SourceDetails
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-config-configrule-source-sourcedetails.html
-type ConfigConfigRuleSourceSourceDetails struct {
+type ConfigConfigRuleSourceDetails struct {
 	// The source, such as an AWS service, that generate events, triggering
-	// AWS Config to evaluate your AWS resources. For valid values, see the
-	// SourceDetail data type in the AWS Config API Reference.
+	// AWS Config to evaluate your AWS resources.
 	EventSource *StringExpr `json:"EventSource,omitempty"`
 
+	// The frequency that you want AWS Config to run evaluations for a custom
+	// rule with a periodic trigger. By default, rules with a periodic
+	// trigger are evaluated every 24 hours. If you specify a value for
+	// MaximumExecutionFrequency, then MessageType must use the
+	// ScheduledNotification value.
+	MaximumExecutionFrequency *StringExpr `json:"MaximumExecutionFrequency,omitempty"`
+
 	// The type of Amazon Simple Notification Service (Amazon SNS) message
-	// that triggers AWS Config to run an evaluation.
+	// that triggers AWS Config to run an evaluation. For more information,
+	// see the SourceDetail data type in the AWS Config API Reference.
 	MessageType *StringExpr `json:"MessageType,omitempty"`
 }
 
-// ConfigConfigRuleSourceSourceDetailsList represents a list of ConfigConfigRuleSourceSourceDetails
-type ConfigConfigRuleSourceSourceDetailsList []ConfigConfigRuleSourceSourceDetails
+// ConfigConfigRuleSourceDetailsList represents a list of ConfigConfigRuleSourceDetails
+type ConfigConfigRuleSourceDetailsList []ConfigConfigRuleSourceDetails
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *ConfigConfigRuleSourceSourceDetailsList) UnmarshalJSON(buf []byte) error {
+func (l *ConfigConfigRuleSourceDetailsList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := ConfigConfigRuleSourceSourceDetails{}
+	item := ConfigConfigRuleSourceDetails{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = ConfigConfigRuleSourceSourceDetailsList{item}
+		*l = ConfigConfigRuleSourceDetailsList{item}
 		return nil
 	}
-	list := []ConfigConfigRuleSourceSourceDetails{}
+	list := []ConfigConfigRuleSourceDetails{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = ConfigConfigRuleSourceSourceDetailsList(list)
+		*l = ConfigConfigRuleSourceDetailsList(list)
 		return nil
 	}
 	return err
@@ -9385,7 +14304,7 @@ type ConfigConfigurationRecorderRecordingGroup struct {
 	// this property, do not specify the AllSupported property. For a list of
 	// supported resource types, see Supported resource types in the AWS
 	// Config Developer Guide.
-	ResourceTypes *StringListExpr `json:"ResourceTypes,omitempty"`
+	ResourceTypes interface{} `json:"ResourceTypes,omitempty"`
 }
 
 // ConfigConfigurationRecorderRecordingGroupList represents a list of ConfigConfigurationRecorderRecordingGroup
@@ -9533,12 +14452,14 @@ func (l *DataPipelinePipelineParameterValuesList) UnmarshalJSON(buf []byte) erro
 	return err
 }
 
-// DataPipelinePipelineObjects represents AWS Data Pipeline PipelineObjects
+// DataPipelinePipelineObject represents AWS Data Pipeline PipelineObject
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-datapipeline-pipeline-pipelineobjects.html
-type DataPipelinePipelineObjects struct {
-	// Key-value pairs that define the properties of the object.
-	Fields *DataPipelineDataPipelineObjectFieldsList `json:"Fields,omitempty"`
+type DataPipelinePipelineObject struct {
+	// Key-value pairs that define the properties of the object. Duplicates
+	// allowed. You can use the same key multiple times within a field to
+	// define array attributes.
+	Fields *DataPipelinePipelineFieldList `json:"Fields,omitempty"`
 
 	// Identifier of the object.
 	Id *StringExpr `json:"Id,omitempty"`
@@ -9547,30 +14468,30 @@ type DataPipelinePipelineObjects struct {
 	Name *StringExpr `json:"Name,omitempty"`
 }
 
-// DataPipelinePipelineObjectsList represents a list of DataPipelinePipelineObjects
-type DataPipelinePipelineObjectsList []DataPipelinePipelineObjects
+// DataPipelinePipelineObjectList represents a list of DataPipelinePipelineObject
+type DataPipelinePipelineObjectList []DataPipelinePipelineObject
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DataPipelinePipelineObjectsList) UnmarshalJSON(buf []byte) error {
+func (l *DataPipelinePipelineObjectList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DataPipelinePipelineObjects{}
+	item := DataPipelinePipelineObject{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DataPipelinePipelineObjectsList{item}
+		*l = DataPipelinePipelineObjectList{item}
 		return nil
 	}
-	list := []DataPipelinePipelineObjects{}
+	list := []DataPipelinePipelineObject{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DataPipelinePipelineObjectsList(list)
+		*l = DataPipelinePipelineObjectList(list)
 		return nil
 	}
 	return err
 }
 
-// DataPipelineDataPipelineObjectFields represents AWS Data Pipeline Data Pipeline Object Fields
+// DataPipelinePipelineField represents AWS Data Pipeline Pipeline Field
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-datapipeline-pipeline-pipelineobjects-fields.html
-type DataPipelineDataPipelineObjectFields struct {
+type DataPipelinePipelineField struct {
 	// Specifies the name of a field for a particular object. To view fields
 	// for a data pipeline object, see Pipeline Object Reference in the AWS
 	// Data Pipeline Developer Guide.
@@ -9586,21 +14507,21 @@ type DataPipelineDataPipelineObjectFields struct {
 	StringValue *StringExpr `json:"StringValue,omitempty"`
 }
 
-// DataPipelineDataPipelineObjectFieldsList represents a list of DataPipelineDataPipelineObjectFields
-type DataPipelineDataPipelineObjectFieldsList []DataPipelineDataPipelineObjectFields
+// DataPipelinePipelineFieldList represents a list of DataPipelinePipelineField
+type DataPipelinePipelineFieldList []DataPipelinePipelineField
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DataPipelineDataPipelineObjectFieldsList) UnmarshalJSON(buf []byte) error {
+func (l *DataPipelinePipelineFieldList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DataPipelineDataPipelineObjectFields{}
+	item := DataPipelinePipelineField{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DataPipelineDataPipelineObjectFieldsList{item}
+		*l = DataPipelinePipelineFieldList{item}
 		return nil
 	}
-	list := []DataPipelineDataPipelineObjectFields{}
+	list := []DataPipelinePipelineField{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DataPipelineDataPipelineObjectFieldsList(list)
+		*l = DataPipelinePipelineFieldList(list)
 		return nil
 	}
 	return err
@@ -9637,6 +14558,149 @@ func (l *DataPipelinePipelinePipelineTagsList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// DMSEndpointDynamoDBSettings represents AWS DMS Endpoint DynamoDBSettings
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dms-endpoint-dynamodbsettings.html
+type DMSEndpointDynamoDBSettings struct {
+	// The Amazon Resource Name (ARN) used by the service access IAM role.
+	ServiceAccessRoleArn *StringExpr `json:"ServiceAccessRoleArn,omitempty"`
+}
+
+// DMSEndpointDynamoDBSettingsList represents a list of DMSEndpointDynamoDBSettings
+type DMSEndpointDynamoDBSettingsList []DMSEndpointDynamoDBSettings
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *DMSEndpointDynamoDBSettingsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := DMSEndpointDynamoDBSettings{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = DMSEndpointDynamoDBSettingsList{item}
+		return nil
+	}
+	list := []DMSEndpointDynamoDBSettings{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = DMSEndpointDynamoDBSettingsList(list)
+		return nil
+	}
+	return err
+}
+
+// DMSEndpointMongoDbSettings represents AWS DMS Endpoint MongoDbSettings
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dms-endpoint-mongodbsettings.html
+type DMSEndpointMongoDbSettings struct {
+	// The authentication mechanism you use to access the MongoDB source
+	// endpoint.
+	AuthMechanism *StringExpr `json:"AuthMechanism,omitempty"`
+
+	// The authentication type you use to access the MongoDB source endpoint.
+	AuthSource *StringExpr `json:"AuthSource,omitempty"`
+
+	// The database name on the MongoDB source endpoint.
+	DatabaseName *StringExpr `json:"DatabaseName,omitempty"`
+
+	// Indicates the number of documents to preview to determine the document
+	// organization. Use this attribute when NestingLevel is set to ONE.
+	DocsToInvestigate *StringExpr `json:"DocsToInvestigate,omitempty"`
+
+	// Specifies the document ID. Use this attribute when NestingLevel is set
+	// to NONE. Default value is false.
+	ExtractDocId *StringExpr `json:"ExtractDocId,omitempty"`
+
+	// The ID of the KMS key to be used.
+	KmsKeyId *StringExpr `json:"KmsKeyId,omitempty"`
+
+	// Specifies either document or table mode.
+	NestingLevel *StringExpr `json:"NestingLevel,omitempty"`
+
+	// The password for the user account you use to access the MongoDB source
+	// endpoint.
+	Password *StringExpr `json:"Password,omitempty"`
+
+	// The port value for the MongoDB source endpoint.
+	Port *IntegerExpr `json:"Port,omitempty"`
+
+	// The name of the server on the MongoDB source endpoint.
+	ServerName *StringExpr `json:"ServerName,omitempty"`
+
+	// The user name you use to access the MongoDB source endpoint.
+	Username *StringExpr `json:"Username,omitempty"`
+}
+
+// DMSEndpointMongoDbSettingsList represents a list of DMSEndpointMongoDbSettings
+type DMSEndpointMongoDbSettingsList []DMSEndpointMongoDbSettings
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *DMSEndpointMongoDbSettingsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := DMSEndpointMongoDbSettings{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = DMSEndpointMongoDbSettingsList{item}
+		return nil
+	}
+	list := []DMSEndpointMongoDbSettings{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = DMSEndpointMongoDbSettingsList(list)
+		return nil
+	}
+	return err
+}
+
+// DMSEndpointS3Settings represents AWS DMS Endpoint S3Settings
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dms-endpoint-s3settings.html
+type DMSEndpointS3Settings struct {
+	// An optional parameter to set a folder name in the S3 bucket. If
+	// provided, tables are created in the path
+	// <bucketFolder>/<schema_name>/<table_name>/. If this parameter is not
+	// specified, then the path used is <schema_name>/<table_name>/.
+	BucketFolder *StringExpr `json:"BucketFolder,omitempty"`
+
+	// The name of the Amazon S3 bucket.
+	BucketName *StringExpr `json:"BucketName,omitempty"`
+
+	// An optional parameter to use GZIP to compress the target files. Set to
+	// GZIP to compress the target files. Set to NONE (the default) or do not
+	// use to leave the files uncompressed.
+	CompressionType *StringExpr `json:"CompressionType,omitempty"`
+
+	// The delimiter used to separate columns in the source files. The
+	// default is a comma.
+	CsvDelimiter *StringExpr `json:"CsvDelimiter,omitempty"`
+
+	// The delimiter used to separate rows in the source files. The default
+	// is a carriage return (\n).
+	CsvRowDelimiter *StringExpr `json:"CsvRowDelimiter,omitempty"`
+
+	// The definition of the external table.
+	ExternalTableDefinition *StringExpr `json:"ExternalTableDefinition,omitempty"`
+
+	// The Amazon Resource Name (ARN) used by the service access IAM role.
+	ServiceAccessRoleArn *StringExpr `json:"ServiceAccessRoleArn,omitempty"`
+}
+
+// DMSEndpointS3SettingsList represents a list of DMSEndpointS3Settings
+type DMSEndpointS3SettingsList []DMSEndpointS3Settings
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *DMSEndpointS3SettingsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := DMSEndpointS3Settings{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = DMSEndpointS3SettingsList{item}
+		return nil
+	}
+	list := []DMSEndpointS3Settings{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = DMSEndpointS3SettingsList(list)
+		return nil
+	}
+	return err
+}
+
 // DirectoryServiceMicrosoftADVpcSettings represents AWS Directory Service MicrosoftAD VpcSettings
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-directoryservice-microsoftad-vpcsettings.html
@@ -9644,7 +14708,7 @@ type DirectoryServiceMicrosoftADVpcSettings struct {
 	// A list of two subnet IDs for the directory servers. Each subnet must
 	// be in different Availability Zones (AZs). AWS Directory Service
 	// creates a directory server and a DNS server in each subnet.
-	SubnetIds *StringListExpr `json:"SubnetIds,omitempty"`
+	SubnetIds interface{} `json:"SubnetIds,omitempty"`
 
 	// The VPC ID in which to create the Microsoft Active Directory server.
 	VpcId *StringExpr `json:"VpcId,omitempty"`
@@ -9677,7 +14741,7 @@ type DirectoryServiceSimpleADVpcSettings struct {
 	// A list of two subnet IDs for the directory servers. Each subnet must
 	// be in different Availability Zones (AZ). AWS Directory Service creates
 	// a directory server and a DNS server in each subnet.
-	SubnetIds *StringListExpr `json:"SubnetIds,omitempty"`
+	SubnetIds interface{} `json:"SubnetIds,omitempty"`
 
 	// The VPC ID in which to create the Simple AD directory.
 	VpcId *StringExpr `json:"VpcId,omitempty"`
@@ -9703,10 +14767,10 @@ func (l *DirectoryServiceSimpleADVpcSettingsList) UnmarshalJSON(buf []byte) erro
 	return err
 }
 
-// DynamoDBAttributeDefinitions represents DynamoDB Attribute Definitions
+// DynamoDBTableAttributeDefinition represents Amazon DynamoDB Table AttributeDefinition
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-attributedef.html
-type DynamoDBAttributeDefinitions struct {
+type DynamoDBTableAttributeDefinition struct {
 	// The name of an attribute. Attribute names can be 1 – 255 characters
 	// long and have no character restrictions.
 	AttributeName *StringExpr `json:"AttributeName,omitempty"`
@@ -9716,71 +14780,72 @@ type DynamoDBAttributeDefinitions struct {
 	AttributeType *StringExpr `json:"AttributeType,omitempty"`
 }
 
-// DynamoDBAttributeDefinitionsList represents a list of DynamoDBAttributeDefinitions
-type DynamoDBAttributeDefinitionsList []DynamoDBAttributeDefinitions
+// DynamoDBTableAttributeDefinitionList represents a list of DynamoDBTableAttributeDefinition
+type DynamoDBTableAttributeDefinitionList []DynamoDBTableAttributeDefinition
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DynamoDBAttributeDefinitionsList) UnmarshalJSON(buf []byte) error {
+func (l *DynamoDBTableAttributeDefinitionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DynamoDBAttributeDefinitions{}
+	item := DynamoDBTableAttributeDefinition{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DynamoDBAttributeDefinitionsList{item}
+		*l = DynamoDBTableAttributeDefinitionList{item}
 		return nil
 	}
-	list := []DynamoDBAttributeDefinitions{}
+	list := []DynamoDBTableAttributeDefinition{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DynamoDBAttributeDefinitionsList(list)
+		*l = DynamoDBTableAttributeDefinitionList(list)
 		return nil
 	}
 	return err
 }
 
-// DynamoDBGlobalSecondaryIndexes represents DynamoDB Global Secondary Indexes
+// DynamoDBTableGlobalSecondaryIndex represents Amazon DynamoDB Table GlobalSecondaryIndex
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-gsi.html
-type DynamoDBGlobalSecondaryIndexes struct {
+type DynamoDBTableGlobalSecondaryIndex struct {
 	// The name of the global secondary index. The index name can be 3 –
-	// 255 characters long and have no character restrictions.
+	// 255 characters long and must satisfy the regular expression pattern
+	// [a-zA-Z0-9_.-]+.
 	IndexName *StringExpr `json:"IndexName,omitempty"`
 
 	// The complete index key schema for the global secondary index, which
 	// consists of one or more pairs of attribute names and key types.
-	KeySchema *DynamoDBKeySchemaList `json:"KeySchema,omitempty"`
+	KeySchema *DynamoDBTableKeySchemaList `json:"KeySchema,omitempty"`
 
 	// Attributes that are copied (projected) from the source table into the
 	// index. These attributes are in addition to the primary key attributes
 	// and index key attributes, which are automatically projected.
-	Projection *DynamoDBProjectionObject `json:"Projection,omitempty"`
+	Projection *DynamoDBTableProjection `json:"Projection,omitempty"`
 
 	// The provisioned throughput settings for the index.
-	ProvisionedThroughput *DynamoDBProvisionedThroughput `json:"ProvisionedThroughput,omitempty"`
+	ProvisionedThroughput *DynamoDBTableProvisionedThroughput `json:"ProvisionedThroughput,omitempty"`
 }
 
-// DynamoDBGlobalSecondaryIndexesList represents a list of DynamoDBGlobalSecondaryIndexes
-type DynamoDBGlobalSecondaryIndexesList []DynamoDBGlobalSecondaryIndexes
+// DynamoDBTableGlobalSecondaryIndexList represents a list of DynamoDBTableGlobalSecondaryIndex
+type DynamoDBTableGlobalSecondaryIndexList []DynamoDBTableGlobalSecondaryIndex
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DynamoDBGlobalSecondaryIndexesList) UnmarshalJSON(buf []byte) error {
+func (l *DynamoDBTableGlobalSecondaryIndexList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DynamoDBGlobalSecondaryIndexes{}
+	item := DynamoDBTableGlobalSecondaryIndex{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DynamoDBGlobalSecondaryIndexesList{item}
+		*l = DynamoDBTableGlobalSecondaryIndexList{item}
 		return nil
 	}
-	list := []DynamoDBGlobalSecondaryIndexes{}
+	list := []DynamoDBTableGlobalSecondaryIndex{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DynamoDBGlobalSecondaryIndexesList(list)
+		*l = DynamoDBTableGlobalSecondaryIndexList(list)
 		return nil
 	}
 	return err
 }
 
-// DynamoDBKeySchema represents DynamoDB Key Schema
+// DynamoDBTableKeySchema represents Amazon DynamoDB Table KeySchema
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-keyschema.html
-type DynamoDBKeySchema struct {
+type DynamoDBTableKeySchema struct {
 	// The attribute name that is used as the primary key for this table.
 	// Primary key element names can be 1 – 255 characters long and have no
 	// character restrictions.
@@ -9791,30 +14856,30 @@ type DynamoDBKeySchema struct {
 	KeyType *StringExpr `json:"KeyType,omitempty"`
 }
 
-// DynamoDBKeySchemaList represents a list of DynamoDBKeySchema
-type DynamoDBKeySchemaList []DynamoDBKeySchema
+// DynamoDBTableKeySchemaList represents a list of DynamoDBTableKeySchema
+type DynamoDBTableKeySchemaList []DynamoDBTableKeySchema
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DynamoDBKeySchemaList) UnmarshalJSON(buf []byte) error {
+func (l *DynamoDBTableKeySchemaList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DynamoDBKeySchema{}
+	item := DynamoDBTableKeySchema{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DynamoDBKeySchemaList{item}
+		*l = DynamoDBTableKeySchemaList{item}
 		return nil
 	}
-	list := []DynamoDBKeySchema{}
+	list := []DynamoDBTableKeySchema{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DynamoDBKeySchemaList(list)
+		*l = DynamoDBTableKeySchemaList(list)
 		return nil
 	}
 	return err
 }
 
-// DynamoDBLocalSecondaryIndexes represents DynamoDB Local Secondary Indexes
+// DynamoDBTableLocalSecondaryIndex represents Amazon DynamoDB Table LocalSecondaryIndex
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-lsi.html
-type DynamoDBLocalSecondaryIndexes struct {
+type DynamoDBTableLocalSecondaryIndex struct {
 	// The name of the local secondary index. The index name can be 3 – 255
 	// characters long and have no character restrictions.
 	IndexName *StringExpr `json:"IndexName,omitempty"`
@@ -9823,40 +14888,40 @@ type DynamoDBLocalSecondaryIndexes struct {
 	// consists of one or more pairs of attribute names and key types. For
 	// local secondary indexes, the hash key must be the same as that of the
 	// source table.
-	KeySchema *DynamoDBKeySchemaList `json:"KeySchema,omitempty"`
+	KeySchema *DynamoDBTableKeySchemaList `json:"KeySchema,omitempty"`
 
 	// Attributes that are copied (projected) from the source table into the
 	// index. These attributes are additions to the primary key attributes
 	// and index key attributes, which are automatically projected.
-	Projection *DynamoDBProjectionObject `json:"Projection,omitempty"`
+	Projection *DynamoDBTableProjection `json:"Projection,omitempty"`
 }
 
-// DynamoDBLocalSecondaryIndexesList represents a list of DynamoDBLocalSecondaryIndexes
-type DynamoDBLocalSecondaryIndexesList []DynamoDBLocalSecondaryIndexes
+// DynamoDBTableLocalSecondaryIndexList represents a list of DynamoDBTableLocalSecondaryIndex
+type DynamoDBTableLocalSecondaryIndexList []DynamoDBTableLocalSecondaryIndex
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DynamoDBLocalSecondaryIndexesList) UnmarshalJSON(buf []byte) error {
+func (l *DynamoDBTableLocalSecondaryIndexList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DynamoDBLocalSecondaryIndexes{}
+	item := DynamoDBTableLocalSecondaryIndex{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DynamoDBLocalSecondaryIndexesList{item}
+		*l = DynamoDBTableLocalSecondaryIndexList{item}
 		return nil
 	}
-	list := []DynamoDBLocalSecondaryIndexes{}
+	list := []DynamoDBTableLocalSecondaryIndex{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DynamoDBLocalSecondaryIndexesList(list)
+		*l = DynamoDBTableLocalSecondaryIndexList(list)
 		return nil
 	}
 	return err
 }
 
-// DynamoDBProjectionObject represents DynamoDB Projection Object
+// DynamoDBTableProjection represents Amazon DynamoDB Table Projection
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-projectionobject.html
-type DynamoDBProjectionObject struct {
+type DynamoDBTableProjection struct {
 	// The non-key attribute names that are projected into the index.
-	NonKeyAttributes *StringListExpr `json:"NonKeyAttributes,omitempty"`
+	NonKeyAttributes interface{} `json:"NonKeyAttributes,omitempty"`
 
 	// The set of attributes that are projected into the index:
 	ProjectionType *StringExpr `json:"ProjectionType,omitempty"`
@@ -9872,30 +14937,30 @@ type DynamoDBProjectionObject struct {
 	ALL interface{} `json:"ALL,omitempty"`
 }
 
-// DynamoDBProjectionObjectList represents a list of DynamoDBProjectionObject
-type DynamoDBProjectionObjectList []DynamoDBProjectionObject
+// DynamoDBTableProjectionList represents a list of DynamoDBTableProjection
+type DynamoDBTableProjectionList []DynamoDBTableProjection
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DynamoDBProjectionObjectList) UnmarshalJSON(buf []byte) error {
+func (l *DynamoDBTableProjectionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DynamoDBProjectionObject{}
+	item := DynamoDBTableProjection{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DynamoDBProjectionObjectList{item}
+		*l = DynamoDBTableProjectionList{item}
 		return nil
 	}
-	list := []DynamoDBProjectionObject{}
+	list := []DynamoDBTableProjection{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DynamoDBProjectionObjectList(list)
+		*l = DynamoDBTableProjectionList(list)
 		return nil
 	}
 	return err
 }
 
-// DynamoDBProvisionedThroughput represents DynamoDB Provisioned Throughput
+// DynamoDBTableProvisionedThroughput represents Amazon DynamoDB Table ProvisionedThroughput
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-provisionedthroughput.html
-type DynamoDBProvisionedThroughput struct {
+type DynamoDBTableProvisionedThroughput struct {
 	// Sets the desired minimum number of consistent reads of items (up to
 	// 1KB in size) per second for the specified table before Amazon DynamoDB
 	// balances the load.
@@ -9907,27 +14972,27 @@ type DynamoDBProvisionedThroughput struct {
 	WriteCapacityUnits *IntegerExpr `json:"WriteCapacityUnits,omitempty"`
 }
 
-// DynamoDBProvisionedThroughputList represents a list of DynamoDBProvisionedThroughput
-type DynamoDBProvisionedThroughputList []DynamoDBProvisionedThroughput
+// DynamoDBTableProvisionedThroughputList represents a list of DynamoDBTableProvisionedThroughput
+type DynamoDBTableProvisionedThroughputList []DynamoDBTableProvisionedThroughput
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DynamoDBProvisionedThroughputList) UnmarshalJSON(buf []byte) error {
+func (l *DynamoDBTableProvisionedThroughputList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DynamoDBProvisionedThroughput{}
+	item := DynamoDBTableProvisionedThroughput{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DynamoDBProvisionedThroughputList{item}
+		*l = DynamoDBTableProvisionedThroughputList{item}
 		return nil
 	}
-	list := []DynamoDBProvisionedThroughput{}
+	list := []DynamoDBTableProvisionedThroughput{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DynamoDBProvisionedThroughputList(list)
+		*l = DynamoDBTableProvisionedThroughputList(list)
 		return nil
 	}
 	return err
 }
 
-// DynamoDBTableStreamSpecification represents DynamoDB Table StreamSpecification
+// DynamoDBTableStreamSpecification represents Amazon DynamoDB Table StreamSpecification
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-streamspecification.html
 type DynamoDBTableStreamSpecification struct {
@@ -9957,11 +15022,47 @@ func (l *DynamoDBTableStreamSpecificationList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// DynamoDBTableTimeToLiveSpecification represents Amazon DynamoDB Table TimeToLiveSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-table-timetolivespecification.html
+type DynamoDBTableTimeToLiveSpecification struct {
+	// The name of the TTL attribute that stores the expiration time for
+	// items in the table. The name can be 1–255 characters long, and has
+	// no character restrictions.
+	AttributeName *StringExpr `json:"AttributeName,omitempty"`
+
+	// Indicates whether to enable (by specifying true) or disable (by
+	// specifying false) TTL on the table.
+	Enabled *BoolExpr `json:"Enabled,omitempty"`
+}
+
+// DynamoDBTableTimeToLiveSpecificationList represents a list of DynamoDBTableTimeToLiveSpecification
+type DynamoDBTableTimeToLiveSpecificationList []DynamoDBTableTimeToLiveSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *DynamoDBTableTimeToLiveSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := DynamoDBTableTimeToLiveSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = DynamoDBTableTimeToLiveSpecificationList{item}
+		return nil
+	}
+	list := []DynamoDBTableTimeToLiveSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = DynamoDBTableTimeToLiveSpecificationList(list)
+		return nil
+	}
+	return err
+}
+
 // EC2BlockDeviceMappingProperty represents Amazon EC2 Block Device Mapping Property
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-blockdev-mapping.html
 type EC2BlockDeviceMappingProperty struct {
-	// The name of the device within Amazon EC2.
+	// The name of the device within Amazon EC2. For more information, see
+	// Device Naming on Linux Instances in the Amazon EC2 User Guide for
+	// Linux Instances.
 	DeviceName *StringExpr `json:"DeviceName,omitempty"`
 
 	// Required: Conditional You can specify either VirtualName or Ebs, but
@@ -9969,7 +15070,7 @@ type EC2BlockDeviceMappingProperty struct {
 	Ebs *ElasticBlockStoreBlockDeviceProperty `json:"Ebs,omitempty"`
 
 	// This property can be used to unmap a defined device.
-	NoDevice interface{} `json:"NoDevice,omitempty"`
+	NoDevice *BoolExpr `json:"NoDevice,omitempty"`
 
 	// The name of the virtual device. The name must be in the form
 	// ephemeralX where X is a number starting from zero (0); for example,
@@ -10016,7 +15117,7 @@ type ElasticBlockStoreBlockDeviceProperty struct {
 	Encrypted *BoolExpr `json:"Encrypted,omitempty"`
 
 	// The number of I/O operations per second (IOPS) that the volume
-	// supports. This can be an integer from 100 – 2000.
+	// supports. This can be an integer from 100 – 20000.
 	Iops *IntegerExpr `json:"Iops,omitempty"`
 
 	// The snapshot ID of the volume to use to create a block device.
@@ -10091,7 +15192,7 @@ type EC2InstanceSsmAssociationsAssociationParameters struct {
 	Key *StringExpr `json:"Key,omitempty"`
 
 	// The value of an input parameter.
-	Value *StringListExpr `json:"Value,omitempty"`
+	Value interface{} `json:"Value,omitempty"`
 }
 
 // EC2InstanceSsmAssociationsAssociationParametersList represents a list of EC2InstanceSsmAssociationsAssociationParameters
@@ -10365,6 +15466,9 @@ type EC2SecurityGroupRule struct {
 	// Specifies an IPv6 CIDR range.
 	CidrIpv6 *StringExpr `json:"CidrIpv6,omitempty"`
 
+	// Description of the security group rule.
+	Description *StringExpr `json:"Description,omitempty"`
+
 	// The AWS service prefix of an Amazon VPC endpoint. For more
 	// information, see VPC Endpoints in the Amazon VPC User Guide.
 	DestinationPrefixListIdXXSecurityGroupEgressXOnlyX *StringExpr `json:"DestinationPrefixListId (SecurityGroupEgress only),omitempty"`
@@ -10447,6 +15551,9 @@ type EC2SpotFleetSpotFleetRequestConfigData struct {
 	// The launch specifications for the Spot fleet request.
 	LaunchSpecifications *ElasticComputeCloudSpotFleetSpotFleetRequestConfigDataLaunchSpecificationsList `json:"LaunchSpecifications,omitempty"`
 
+	// Indicates whether the Spot fleet should replace unhealthy instances.
+	ReplaceUnhealthyInstances *BoolExpr `json:"ReplaceUnhealthyInstances,omitempty"`
+
 	// The bid price per unit hour. For more information, see How Spot Fleet
 	// Works in the Amazon EC2 User Guide for Linux Instances.
 	SpotPrice *StringExpr `json:"SpotPrice,omitempty"`
@@ -10461,6 +15568,12 @@ type EC2SpotFleetSpotFleetRequestConfigData struct {
 	// Indicates whether running Spot instances are terminated when the Spot
 	// fleet request expires.
 	TerminateInstancesWithExpiration *BoolExpr `json:"TerminateInstancesWithExpiration,omitempty"`
+
+	// The type of request, which indicates whether the fleet will only
+	// request the target capacity or also attempt to maintain it. For more
+	// information, see SpotFleetRequestConfigData in the Amazon EC2 API
+	// Reference.
+	Type *StringExpr `json:"Type,omitempty"`
 
 	// The start date and time of the request, in UTC format
 	// (YYYY-MM-DDTHH:MM:SSZ). By default, Amazon Elastic Compute Cloud
@@ -10762,7 +15875,7 @@ type ElasticComputeCloudSpotFleetSpotFleetRequestConfigDataLaunchSpecificationsN
 	DeviceIndex *IntegerExpr `json:"DeviceIndex,omitempty"`
 
 	// A list of security group IDs to associate with this network interface.
-	Groups *StringListExpr `json:"Groups,omitempty"`
+	Groups interface{} `json:"Groups,omitempty"`
 
 	// The number of IPv6 addresses to associate with the network interface.
 	// Amazon Elastic Compute Cloud automatically selects the IPv6 addresses
@@ -10901,10 +16014,114 @@ func (l *ElasticComputeCloudSpotFleetSpotFleetRequestConfigDataLaunchSpecificati
 	return err
 }
 
-// EC2ContainerServiceServiceDeploymentConfiguration represents Amazon EC2 Container Service Service DeploymentConfiguration
+// EC2VPNConnectionVpnTunnelOptionsSpecification represents Amazon EC2 VPNConnection VpnTunnelOptionsSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-vpnconnection-vpntunneloptionsspecification.html
+type EC2VPNConnectionVpnTunnelOptionsSpecification struct {
+	// The pre-shared key (PSK) to establish initial authentication between
+	// the virtual private gateway and customer gateway.
+	PreSharedKey interface{} `json:"PreSharedKey,omitempty"`
+
+	// The range of inside IP addresses for the tunnel. Any specified CIDR
+	// blocks must be unique across all VPN connections that use the same
+	// virtual private gateway.
+	TunnelInsideCidr interface{} `json:"TunnelInsideCidr,omitempty"`
+}
+
+// EC2VPNConnectionVpnTunnelOptionsSpecificationList represents a list of EC2VPNConnectionVpnTunnelOptionsSpecification
+type EC2VPNConnectionVpnTunnelOptionsSpecificationList []EC2VPNConnectionVpnTunnelOptionsSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2VPNConnectionVpnTunnelOptionsSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2VPNConnectionVpnTunnelOptionsSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2VPNConnectionVpnTunnelOptionsSpecificationList{item}
+		return nil
+	}
+	list := []EC2VPNConnectionVpnTunnelOptionsSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2VPNConnectionVpnTunnelOptionsSpecificationList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerServiceServiceAwsVpcConfiguration represents Amazon Elastic Container Service Service AwsVpcConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-service-awsvpcconfiguration.html
+type ElasticContainerServiceServiceAwsVpcConfiguration struct {
+	// Valid values include ENABLED and DISABLED.
+	AssignPublicIp *StringExpr `json:"AssignPublicIp,omitempty"`
+
+	// The security groups associated with the task or service. If you do not
+	// specify a security group, the default security group for the VPC is
+	// used.
+	SecurityGroups interface{} `json:"SecurityGroups,omitempty"`
+
+	// The subnets associated with the Amazon ECS task or service.
+	Subnets interface{} `json:"Subnets,omitempty"`
+}
+
+// ElasticContainerServiceServiceAwsVpcConfigurationList represents a list of ElasticContainerServiceServiceAwsVpcConfiguration
+type ElasticContainerServiceServiceAwsVpcConfigurationList []ElasticContainerServiceServiceAwsVpcConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticContainerServiceServiceAwsVpcConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticContainerServiceServiceAwsVpcConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticContainerServiceServiceAwsVpcConfigurationList{item}
+		return nil
+	}
+	list := []ElasticContainerServiceServiceAwsVpcConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticContainerServiceServiceAwsVpcConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerRegistryRepositoryLifecyclePolicy represents Amazon Elastic Container Registry Repository LifecyclePolicy
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecr-repository-lifecyclepolicy.html
+type ElasticContainerRegistryRepositoryLifecyclePolicy struct {
+	// The JSON repository policy text to apply to the repository. The length
+	// must be between 100 and 10,240 characters.
+	LifecyclePolicyText interface{} `json:"LifecyclePolicyText,omitempty"`
+
+	// The AWS account ID that's associated with the registry that contains
+	// the repository. If you do n't specify a registry, the default
+	// registry is used.
+	RegistryId interface{} `json:"RegistryId,omitempty"`
+}
+
+// ElasticContainerRegistryRepositoryLifecyclePolicyList represents a list of ElasticContainerRegistryRepositoryLifecyclePolicy
+type ElasticContainerRegistryRepositoryLifecyclePolicyList []ElasticContainerRegistryRepositoryLifecyclePolicy
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticContainerRegistryRepositoryLifecyclePolicyList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticContainerRegistryRepositoryLifecyclePolicy{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticContainerRegistryRepositoryLifecyclePolicyList{item}
+		return nil
+	}
+	list := []ElasticContainerRegistryRepositoryLifecyclePolicy{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticContainerRegistryRepositoryLifecyclePolicyList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerServiceServiceDeploymentConfiguration represents Amazon Elastic Container Service Service DeploymentConfiguration
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-service-deploymentconfiguration.html
-type EC2ContainerServiceServiceDeploymentConfiguration struct {
+type ElasticContainerServiceServiceDeploymentConfiguration struct {
 	// The maximum number of tasks, specified as a percentage of the Amazon
 	// ECS service's DesiredCount value, that can run in a service during a
 	// deployment. To calculate the maximum number of tasks, Amazon ECS uses
@@ -10921,30 +16138,127 @@ type EC2ContainerServiceServiceDeploymentConfiguration struct {
 	MinimumHealthyPercent *IntegerExpr `json:"MinimumHealthyPercent,omitempty"`
 }
 
-// EC2ContainerServiceServiceDeploymentConfigurationList represents a list of EC2ContainerServiceServiceDeploymentConfiguration
-type EC2ContainerServiceServiceDeploymentConfigurationList []EC2ContainerServiceServiceDeploymentConfiguration
+// ElasticContainerServiceServiceDeploymentConfigurationList represents a list of ElasticContainerServiceServiceDeploymentConfiguration
+type ElasticContainerServiceServiceDeploymentConfigurationList []ElasticContainerServiceServiceDeploymentConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceServiceDeploymentConfigurationList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceServiceDeploymentConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceServiceDeploymentConfiguration{}
+	item := ElasticContainerServiceServiceDeploymentConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceServiceDeploymentConfigurationList{item}
+		*l = ElasticContainerServiceServiceDeploymentConfigurationList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceServiceDeploymentConfiguration{}
+	list := []ElasticContainerServiceServiceDeploymentConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceServiceDeploymentConfigurationList(list)
+		*l = ElasticContainerServiceServiceDeploymentConfigurationList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceServiceLoadBalancers represents Amazon EC2 Container Service Service LoadBalancers
+// ElasticContainerServiceServiceNetworkConfiguration represents Amazon Elastic Container Service Service NetworkConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-service-networkconfiguration.html
+type ElasticContainerServiceServiceNetworkConfiguration struct {
+	// The VPC subnets and security groups associated with a task.
+	AwsvpcConfiguration *ElasticContainerServiceServiceAwsVpcConfiguration `json:"AwsvpcConfiguration,omitempty"`
+}
+
+// ElasticContainerServiceServiceNetworkConfigurationList represents a list of ElasticContainerServiceServiceNetworkConfiguration
+type ElasticContainerServiceServiceNetworkConfigurationList []ElasticContainerServiceServiceNetworkConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticContainerServiceServiceNetworkConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticContainerServiceServiceNetworkConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticContainerServiceServiceNetworkConfigurationList{item}
+		return nil
+	}
+	list := []ElasticContainerServiceServiceNetworkConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticContainerServiceServiceNetworkConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerServiceServicePlacementConstraint represents Amazon Elastic Container Service Service PlacementConstraint
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-service-placementconstraints-placementconstraint.html
+type ElasticContainerServiceServicePlacementConstraint struct {
+	// The type of constraint: distinctInstance or memberOf.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// A cluster query language expression to apply to the constraint. If the
+	// constraint type is distinctInstance, you can't specify an expression.
+	// For more information, see Cluster Query Language in the Amazon Elastic
+	// Container Service Developer Guide.
+	Expression *StringExpr `json:"Expression,omitempty"`
+}
+
+// ElasticContainerServiceServicePlacementConstraintList represents a list of ElasticContainerServiceServicePlacementConstraint
+type ElasticContainerServiceServicePlacementConstraintList []ElasticContainerServiceServicePlacementConstraint
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticContainerServiceServicePlacementConstraintList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticContainerServiceServicePlacementConstraint{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticContainerServiceServicePlacementConstraintList{item}
+		return nil
+	}
+	list := []ElasticContainerServiceServicePlacementConstraint{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticContainerServiceServicePlacementConstraintList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerServiceServicePlacementStrategies represents Amazon Elastic Container Service Service PlacementStrategies
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-service-placementstrategies-placementstrategy.html
+type ElasticContainerServiceServicePlacementStrategies struct {
+	// The type of placement strategy. Can be one of the following values:
+	// random, spread, or binpack.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// The field to apply the placement strategy against. For the spread
+	// placement strategy, valid values are instanceId (or host, which has
+	// the same effect), or any platform or custom attribute that is applied
+	// to a container instance, such as attribute:ecs.availability-zone.
+	Field *StringExpr `json:"Field,omitempty"`
+}
+
+// ElasticContainerServiceServicePlacementStrategiesList represents a list of ElasticContainerServiceServicePlacementStrategies
+type ElasticContainerServiceServicePlacementStrategiesList []ElasticContainerServiceServicePlacementStrategies
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticContainerServiceServicePlacementStrategiesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticContainerServiceServicePlacementStrategies{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticContainerServiceServicePlacementStrategiesList{item}
+		return nil
+	}
+	list := []ElasticContainerServiceServicePlacementStrategies{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticContainerServiceServicePlacementStrategiesList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerServiceServiceLoadBalancers represents Amazon Elastic Container Service Service LoadBalancers
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-service-loadbalancers.html
-type EC2ContainerServiceServiceLoadBalancers struct {
+type ElasticContainerServiceServiceLoadBalancers struct {
 	// The name of a container to use with the load balancer.
 	ContainerName *StringExpr `json:"ContainerName,omitempty"`
 
@@ -10961,40 +16275,40 @@ type EC2ContainerServiceServiceLoadBalancers struct {
 	TargetGroupArn *StringExpr `json:"TargetGroupArn,omitempty"`
 }
 
-// EC2ContainerServiceServiceLoadBalancersList represents a list of EC2ContainerServiceServiceLoadBalancers
-type EC2ContainerServiceServiceLoadBalancersList []EC2ContainerServiceServiceLoadBalancers
+// ElasticContainerServiceServiceLoadBalancersList represents a list of ElasticContainerServiceServiceLoadBalancers
+type ElasticContainerServiceServiceLoadBalancersList []ElasticContainerServiceServiceLoadBalancers
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceServiceLoadBalancersList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceServiceLoadBalancersList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceServiceLoadBalancers{}
+	item := ElasticContainerServiceServiceLoadBalancers{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceServiceLoadBalancersList{item}
+		*l = ElasticContainerServiceServiceLoadBalancersList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceServiceLoadBalancers{}
+	list := []ElasticContainerServiceServiceLoadBalancers{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceServiceLoadBalancersList(list)
+		*l = ElasticContainerServiceServiceLoadBalancersList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitions represents Amazon EC2 Container Service TaskDefinition ContainerDefinitions
+// ElasticContainerServiceTaskDefinitionContainerDefinition represents Amazon Elastic Container Service TaskDefinition ContainerDefinition
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions.html
-type EC2ContainerServiceTaskDefinitionContainerDefinitions struct {
+type ElasticContainerServiceTaskDefinitionContainerDefinition struct {
 	// The CMD value to pass to the container. For more information about the
 	// Docker CMD parameter, see
 	// https://docs.docker.com/engine/reference/builder/#cmd.
-	Command *StringListExpr `json:"Command,omitempty"`
+	Command interface{} `json:"Command,omitempty"`
 
 	// The minimum number of CPU units to reserve for the container.
 	// Containers share unallocated CPU units with other containers on the
 	// instance by using the same ratio as their allocated CPU units. For
 	// more information, see the cpu content for the ContainerDefinition data
-	// type in the Amazon EC2 Container Service API Reference.
+	// type in the Amazon Elastic Container Service API Reference.
 	Cpu *IntegerExpr `json:"Cpu,omitempty"`
 
 	// Indicates whether networking is disabled within the container.
@@ -11003,27 +16317,27 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitions struct {
 	// A list of DNS search domains that are provided to the container. The
 	// domain names that the DNS logic looks up when a process attempts to
 	// access a bare unqualified hostname.
-	DnsSearchDomains *StringListExpr `json:"DnsSearchDomains,omitempty"`
+	DnsSearchDomains interface{} `json:"DnsSearchDomains,omitempty"`
 
 	// A list of DNS servers that Amazon ECS provides to the container.
-	DnsServers *StringListExpr `json:"DnsServers,omitempty"`
+	DnsServers interface{} `json:"DnsServers,omitempty"`
 
 	// A key-value map of labels for the container.
 	DockerLabels interface{} `json:"DockerLabels,omitempty"`
 
 	// A list of custom labels for SELinux and AppArmor multi-level security
 	// systems. For more information, see the dockerSecurityOptions content
-	// for the ContainerDefinition data type in the Amazon EC2 Container
+	// for the ContainerDefinition data type in the Amazon Elastic Container
 	// Service API Reference.
-	DockerSecurityOptions *StringListExpr `json:"DockerSecurityOptions,omitempty"`
+	DockerSecurityOptions interface{} `json:"DockerSecurityOptions,omitempty"`
 
 	// The ENTRYPOINT value to pass to the container. For more information
 	// about the Docker ENTRYPOINT parameter, see
 	// https://docs.docker.com/engine/reference/builder/#entrypoint.
-	EntryPoint *StringListExpr `json:"EntryPoint,omitempty"`
+	EntryPoint interface{} `json:"EntryPoint,omitempty"`
 
 	// The environment variables to pass to the container.
-	Environment *EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironmentList `json:"Environment,omitempty"`
+	Environment *ElasticContainerServiceTaskDefinitionKeyValuePairList `json:"Environment,omitempty"`
 
 	// Indicates whether the task stops if this container fails. If you
 	// specify true and the container fails, all other containers in the task
@@ -11033,25 +16347,28 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitions struct {
 
 	// A list of hostnames and IP address mappings to append to the
 	// /etc/hosts file on the container.
-	ExtraHosts *EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntryList `json:"ExtraHosts,omitempty"`
+	ExtraHosts *ElasticContainerServiceTaskDefinitionHostEntryList `json:"ExtraHosts,omitempty"`
 
-	// The name that Docker will use for the container's hostname.
+	// The name that Docker uses for the container hostname.
 	Hostname *StringExpr `json:"Hostname,omitempty"`
 
-	// The image to use for a container, which is passed directly to the
+	// The image to use for a container. The image is passed directly to the
 	// Docker daemon. You can use images in the Docker Hub registry or
 	// specify other repositories (repository-url/image:tag).
 	Image *StringExpr `json:"Image,omitempty"`
 
 	// The name of another container to connect to. With links, containers
 	// can communicate with each other without using port mappings.
-	Links *StringListExpr `json:"Links,omitempty"`
+	Links interface{} `json:"Links,omitempty"`
+
+	// The Linux-specific options that are applied to the container.
+	LinuxParameters *ElasticContainerServiceTaskDefinitionLinuxParameters `json:"LinuxParameters,omitempty"`
 
 	// Configures a custom log driver for the container. For more
 	// information, see the logConfiguration content for the
-	// ContainerDefinition data type in the Amazon EC2 Container Service API
-	// Reference.
-	LogConfiguration *EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfiguration `json:"LogConfiguration,omitempty"`
+	// ContainerDefinition data type in the Amazon Elastic Container Service
+	// API Reference.
+	LogConfiguration *ElasticContainerServiceTaskDefinitionLogConfiguration `json:"LogConfiguration,omitempty"`
 
 	// The number of MiB of memory to reserve for the container. If your
 	// container attempts to exceed the allocated memory, the container is
@@ -11062,12 +16379,12 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitions struct {
 	// memory is under contention, Docker attempts to keep the container
 	// memory within the limit. If the container requires more memory, it can
 	// consume up to the value specified by the Memory property or all of the
-	// available memory on the container instance, whichever comes first.
+	// available memory on the container instance—whichever comes first.
 	// This is called a soft limit.
 	MemoryReservation *IntegerExpr `json:"MemoryReservation,omitempty"`
 
 	// The mount points for data volumes in the container.
-	MountPoints *EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPointsList `json:"MountPoints,omitempty"`
+	MountPoints *ElasticContainerServiceTaskDefinitionMountPointList `json:"MountPoints,omitempty"`
 
 	// A name for the container.
 	Name *StringExpr `json:"Name,omitempty"`
@@ -11075,7 +16392,7 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitions struct {
 	// A mapping of the container port to a host port. Port mappings enable
 	// containers to access ports on the host container instance to send or
 	// receive traffic.
-	PortMappings *EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappingsList `json:"PortMappings,omitempty"`
+	PortMappings *ElasticContainerServiceTaskDefinitionPortMappingList `json:"PortMappings,omitempty"`
 
 	// Indicates whether the container is given full access to the host
 	// container instance.
@@ -11086,75 +16403,80 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitions struct {
 	ReadonlyRootFilesystem *BoolExpr `json:"ReadonlyRootFilesystem,omitempty"`
 
 	// A list of ulimits to set in the container. The ulimits set constraints
-	// on how much resources a container can consume so that it doesn't
+	// on how many resources a container can consume so that it doesn't
 	// deplete all available resources on the host.
-	Ulimits *EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimitList `json:"Ulimits,omitempty"`
+	Ulimits *ElasticContainerServiceTaskDefinitionUlimitList `json:"Ulimits,omitempty"`
 
 	// The user name to use inside the container.
 	User *StringExpr `json:"User,omitempty"`
 
 	// The data volumes to mount from another container.
-	VolumesFrom *EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFromList `json:"VolumesFrom,omitempty"`
+	VolumesFrom *ElasticContainerServiceTaskDefinitionVolumeFromList `json:"VolumesFrom,omitempty"`
 
-	// The working directory in the container in which to run commands.
+	// The working directory in the container to run commands in.
 	WorkingDirectory *StringExpr `json:"WorkingDirectory,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsList represents a list of EC2ContainerServiceTaskDefinitionContainerDefinitions
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsList []EC2ContainerServiceTaskDefinitionContainerDefinitions
+// ElasticContainerServiceTaskDefinitionContainerDefinitionList represents a list of ElasticContainerServiceTaskDefinitionContainerDefinition
+type ElasticContainerServiceTaskDefinitionContainerDefinitionList []ElasticContainerServiceTaskDefinitionContainerDefinition
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionContainerDefinitionsList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionContainerDefinitionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionContainerDefinitions{}
+	item := ElasticContainerServiceTaskDefinitionContainerDefinition{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsList{item}
+		*l = ElasticContainerServiceTaskDefinitionContainerDefinitionList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionContainerDefinitions{}
+	list := []ElasticContainerServiceTaskDefinitionContainerDefinition{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsList(list)
+		*l = ElasticContainerServiceTaskDefinitionContainerDefinitionList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironment represents Amazon EC2 Container Service TaskDefinition ContainerDefinitions Environment
+// ElasticContainerServiceTaskDefinitionDevice represents Amazon Elastic Container Service TaskDefinition Device
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions-environment.html
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironment struct {
-	// The name of the environment variable.
-	Name *StringExpr `json:"Name,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-device.html
+type ElasticContainerServiceTaskDefinitionDevice struct {
+	// The path inside the container to expose the host device to.
+	ContainerPath interface{} `json:"ContainerPath,omitempty"`
 
-	// The value of the environment variable.
-	Value *StringExpr `json:"Value,omitempty"`
+	// The path for the device on the host container instance.
+	HostPath interface{} `json:"HostPath,omitempty"`
+
+	// The explicit permissions to provide to the container for the device.
+	// By default, the container is able to read, write, and mknod the
+	// device.
+	Permissions interface{} `json:"Permissions,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironmentList represents a list of EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironment
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironmentList []EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironment
+// ElasticContainerServiceTaskDefinitionDeviceList represents a list of ElasticContainerServiceTaskDefinitionDevice
+type ElasticContainerServiceTaskDefinitionDeviceList []ElasticContainerServiceTaskDefinitionDevice
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironmentList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionDeviceList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironment{}
+	item := ElasticContainerServiceTaskDefinitionDevice{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironmentList{item}
+		*l = ElasticContainerServiceTaskDefinitionDeviceList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironment{}
+	list := []ElasticContainerServiceTaskDefinitionDevice{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsEnvironmentList(list)
+		*l = ElasticContainerServiceTaskDefinitionDeviceList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntry represents Amazon EC2 Container Service TaskDefinition ContainerDefinitions HostEntry
+// ElasticContainerServiceTaskDefinitionHostEntry represents Amazon Elastic Container Service TaskDefinition HostEntry
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions-hostentry.html
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntry struct {
+type ElasticContainerServiceTaskDefinitionHostEntry struct {
 	// The hostname to use in the /etc/hosts file.
 	Hostname *StringExpr `json:"Hostname,omitempty"`
 
@@ -11162,34 +16484,143 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntry struct {
 	IpAddress *StringExpr `json:"IpAddress,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntryList represents a list of EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntry
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntryList []EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntry
+// ElasticContainerServiceTaskDefinitionHostEntryList represents a list of ElasticContainerServiceTaskDefinitionHostEntry
+type ElasticContainerServiceTaskDefinitionHostEntryList []ElasticContainerServiceTaskDefinitionHostEntry
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntryList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionHostEntryList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntry{}
+	item := ElasticContainerServiceTaskDefinitionHostEntry{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntryList{item}
+		*l = ElasticContainerServiceTaskDefinitionHostEntryList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntry{}
+	list := []ElasticContainerServiceTaskDefinitionHostEntry{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsHostEntryList(list)
+		*l = ElasticContainerServiceTaskDefinitionHostEntryList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfiguration represents Amazon EC2 Container Service TaskDefinition ContainerDefinitions LogConfiguration
+// ElasticContainerServiceTaskDefinitionKernelCapabilities represents Amazon Elastic Container Service TaskDefinition KernelCapabilities
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-kernelcapabilities.html
+type ElasticContainerServiceTaskDefinitionKernelCapabilities struct {
+	// The Linux capabilities to add to the default Docker configuration.
+	// This maps to CapAdd in the Create a container section of the Docker
+	// Remote API and the --cap-add option to docker run. For valid values,
+	// see KernelCapabilities in the Amazon Elastic Container Service API
+	// Reference.
+	Add interface{} `json:"Add,omitempty"`
+
+	// The Linux capabilities to remove from the default Docker
+	// configuration. This maps to CapDrop in the Create a container section
+	// of the Docker Remote API and the --cap-drop option to docker run. For
+	// valid values, see KernelCapabilities in the Amazon Elastic Container
+	// Service API Reference.
+	Drop interface{} `json:"Drop,omitempty"`
+}
+
+// ElasticContainerServiceTaskDefinitionKernelCapabilitiesList represents a list of ElasticContainerServiceTaskDefinitionKernelCapabilities
+type ElasticContainerServiceTaskDefinitionKernelCapabilitiesList []ElasticContainerServiceTaskDefinitionKernelCapabilities
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticContainerServiceTaskDefinitionKernelCapabilitiesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticContainerServiceTaskDefinitionKernelCapabilities{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticContainerServiceTaskDefinitionKernelCapabilitiesList{item}
+		return nil
+	}
+	list := []ElasticContainerServiceTaskDefinitionKernelCapabilities{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticContainerServiceTaskDefinitionKernelCapabilitiesList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerServiceTaskDefinitionKeyValuePair represents Amazon Elastic Container Service TaskDefinition KeyValuePair
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions-environment.html
+type ElasticContainerServiceTaskDefinitionKeyValuePair struct {
+	// The name of the environment variable.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The value of the environment variable.
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// ElasticContainerServiceTaskDefinitionKeyValuePairList represents a list of ElasticContainerServiceTaskDefinitionKeyValuePair
+type ElasticContainerServiceTaskDefinitionKeyValuePairList []ElasticContainerServiceTaskDefinitionKeyValuePair
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticContainerServiceTaskDefinitionKeyValuePairList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticContainerServiceTaskDefinitionKeyValuePair{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticContainerServiceTaskDefinitionKeyValuePairList{item}
+		return nil
+	}
+	list := []ElasticContainerServiceTaskDefinitionKeyValuePair{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticContainerServiceTaskDefinitionKeyValuePairList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerServiceTaskDefinitionLinuxParameters represents Amazon Elastic Container Service TaskDefinition LinuxParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-linuxparameters.html
+type ElasticContainerServiceTaskDefinitionLinuxParameters struct {
+	// The Linux capabilities for the container that are added to or dropped
+	// from the default configuration provided by Docker.
+	Capabilities *ElasticContainerServiceTaskDefinitionKernelCapabilities `json:"Capabilities,omitempty"`
+
+	// Any host devices to expose to the container. This maps to Devices in
+	// the Create a container section of the Docker Remote API and the
+	// --device option to docker run.
+	Devices *ElasticContainerServiceTaskDefinitionDeviceList `json:"Devices,omitempty"`
+
+	// Indicates whether to run an init process inside the container that
+	// forwards signals and reaps processes. This maps to the --init option
+	// to docker run.
+	InitProcessEnabled interface{} `json:"InitProcessEnabled,omitempty"`
+}
+
+// ElasticContainerServiceTaskDefinitionLinuxParametersList represents a list of ElasticContainerServiceTaskDefinitionLinuxParameters
+type ElasticContainerServiceTaskDefinitionLinuxParametersList []ElasticContainerServiceTaskDefinitionLinuxParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticContainerServiceTaskDefinitionLinuxParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticContainerServiceTaskDefinitionLinuxParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticContainerServiceTaskDefinitionLinuxParametersList{item}
+		return nil
+	}
+	list := []ElasticContainerServiceTaskDefinitionLinuxParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticContainerServiceTaskDefinitionLinuxParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticContainerServiceTaskDefinitionLogConfiguration represents Amazon Elastic Container Service TaskDefinition LogConfiguration
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions-logconfiguration.html
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfiguration struct {
+type ElasticContainerServiceTaskDefinitionLogConfiguration struct {
 	// The log driver to use for the container. This parameter requires that
 	// your container instance uses Docker Remote API Version 1.18 or
 	// greater. For more information, see the logDriver content for the
-	// LogConfiguration data type in the Amazon EC2 Container Service API
+	// LogConfiguration data type in the Amazon Elastic Container Service API
 	// Reference.
 	LogDriver *StringExpr `json:"LogDriver,omitempty"`
 
@@ -11199,30 +16630,30 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfiguration struc
 	Options interface{} `json:"Options,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfigurationList represents a list of EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfiguration
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfigurationList []EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfiguration
+// ElasticContainerServiceTaskDefinitionLogConfigurationList represents a list of ElasticContainerServiceTaskDefinitionLogConfiguration
+type ElasticContainerServiceTaskDefinitionLogConfigurationList []ElasticContainerServiceTaskDefinitionLogConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfigurationList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionLogConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfiguration{}
+	item := ElasticContainerServiceTaskDefinitionLogConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfigurationList{item}
+		*l = ElasticContainerServiceTaskDefinitionLogConfigurationList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfiguration{}
+	list := []ElasticContainerServiceTaskDefinitionLogConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsLogConfigurationList(list)
+		*l = ElasticContainerServiceTaskDefinitionLogConfigurationList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPoints represents Amazon EC2 Container Service TaskDefinition ContainerDefinitions MountPoints
+// ElasticContainerServiceTaskDefinitionMountPoint represents Amazon Elastic Container Service TaskDefinition MountPoint
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions-mountpoints.html
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPoints struct {
+type ElasticContainerServiceTaskDefinitionMountPoint struct {
 	// The path on the container that indicates where you want to mount the
 	// volume.
 	ContainerPath *StringExpr `json:"ContainerPath,omitempty"`
@@ -11237,30 +16668,30 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPoints struct {
 	ReadOnly *BoolExpr `json:"ReadOnly,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPointsList represents a list of EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPoints
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPointsList []EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPoints
+// ElasticContainerServiceTaskDefinitionMountPointList represents a list of ElasticContainerServiceTaskDefinitionMountPoint
+type ElasticContainerServiceTaskDefinitionMountPointList []ElasticContainerServiceTaskDefinitionMountPoint
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPointsList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionMountPointList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPoints{}
+	item := ElasticContainerServiceTaskDefinitionMountPoint{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPointsList{item}
+		*l = ElasticContainerServiceTaskDefinitionMountPointList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPoints{}
+	list := []ElasticContainerServiceTaskDefinitionMountPoint{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsMountPointsList(list)
+		*l = ElasticContainerServiceTaskDefinitionMountPointList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappings represents Amazon EC2 Container Service TaskDefinition ContainerDefinitions PortMappings
+// ElasticContainerServiceTaskDefinitionPortMapping represents Amazon Elastic Container Service TaskDefinition PortMapping
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions-portmappings.html
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappings struct {
+type ElasticContainerServiceTaskDefinitionPortMapping struct {
 	// The port number on the container bound to the host port.
 	ContainerPort *IntegerExpr `json:"ContainerPort,omitempty"`
 
@@ -11272,70 +16703,71 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappings struct {
 	HostPort *IntegerExpr `json:"HostPort,omitempty"`
 
 	// The protocol used for the port mapping. For valid values, see the
-	// protocol parameter in the Amazon EC2 Container Service Developer
+	// protocol parameter in the Amazon Elastic Container Service Developer
 	// Guide. By default, AWS CloudFormation specifies tcp.
 	Protocol *StringExpr `json:"Protocol,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappingsList represents a list of EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappings
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappingsList []EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappings
+// ElasticContainerServiceTaskDefinitionPortMappingList represents a list of ElasticContainerServiceTaskDefinitionPortMapping
+type ElasticContainerServiceTaskDefinitionPortMappingList []ElasticContainerServiceTaskDefinitionPortMapping
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappingsList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionPortMappingList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappings{}
+	item := ElasticContainerServiceTaskDefinitionPortMapping{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappingsList{item}
+		*l = ElasticContainerServiceTaskDefinitionPortMappingList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappings{}
+	list := []ElasticContainerServiceTaskDefinitionPortMapping{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsPortMappingsList(list)
+		*l = ElasticContainerServiceTaskDefinitionPortMappingList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimit represents Amazon EC2 Container Service TaskDefinition ContainerDefinitions Ulimit
+// ElasticContainerServiceTaskDefinitionUlimit represents Amazon Elastic Container Service TaskDefinition Ulimit
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions-ulimit.html
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimit struct {
+type ElasticContainerServiceTaskDefinitionUlimit struct {
 	// The hard limit for the ulimit type.
 	HardLimit *IntegerExpr `json:"HardLimit,omitempty"`
 
 	// The type of ulimit. For valid values, see the name content for the
-	// Ulimit data type in the Amazon EC2 Container Service API Reference.
+	// Ulimit data type in the Amazon Elastic Container Service API
+	// Reference.
 	Name *StringExpr `json:"Name,omitempty"`
 
 	// The soft limit for the ulimit type.
 	SoftLimit *IntegerExpr `json:"SoftLimit,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimitList represents a list of EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimit
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimitList []EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimit
+// ElasticContainerServiceTaskDefinitionUlimitList represents a list of ElasticContainerServiceTaskDefinitionUlimit
+type ElasticContainerServiceTaskDefinitionUlimitList []ElasticContainerServiceTaskDefinitionUlimit
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimitList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionUlimitList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimit{}
+	item := ElasticContainerServiceTaskDefinitionUlimit{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimitList{item}
+		*l = ElasticContainerServiceTaskDefinitionUlimitList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimit{}
+	list := []ElasticContainerServiceTaskDefinitionUlimit{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsUlimitList(list)
+		*l = ElasticContainerServiceTaskDefinitionUlimitList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFrom represents Amazon EC2 Container Service TaskDefinition ContainerDefinitions VolumesFrom
+// ElasticContainerServiceTaskDefinitionVolumeFrom represents Amazon Elastic Container Service TaskDefinition VolumeFrom
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinitions-volumesfrom.html
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFrom struct {
+type ElasticContainerServiceTaskDefinitionVolumeFrom struct {
 	// The name of the container that has the volumes to mount.
 	SourceContainer *StringExpr `json:"SourceContainer,omitempty"`
 
@@ -11346,82 +16778,82 @@ type EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFrom struct {
 	ReadOnly *BoolExpr `json:"ReadOnly,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFromList represents a list of EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFrom
-type EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFromList []EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFrom
+// ElasticContainerServiceTaskDefinitionVolumeFromList represents a list of ElasticContainerServiceTaskDefinitionVolumeFrom
+type ElasticContainerServiceTaskDefinitionVolumeFromList []ElasticContainerServiceTaskDefinitionVolumeFrom
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFromList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionVolumeFromList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFrom{}
+	item := ElasticContainerServiceTaskDefinitionVolumeFrom{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFromList{item}
+		*l = ElasticContainerServiceTaskDefinitionVolumeFromList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFrom{}
+	list := []ElasticContainerServiceTaskDefinitionVolumeFrom{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionContainerDefinitionsVolumesFromList(list)
+		*l = ElasticContainerServiceTaskDefinitionVolumeFromList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionVolumes represents Amazon EC2 Container Service TaskDefinition Volumes
+// ElasticContainerServiceTaskDefinitionVolumes represents Amazon Elastic Container Service TaskDefinition Volumes
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-volumes.html
-type EC2ContainerServiceTaskDefinitionVolumes struct {
+type ElasticContainerServiceTaskDefinitionVolumes struct {
 	// The name of the volume. To specify mount points in your container
 	// definitions, use the value of this property.
 	Name *StringExpr `json:"Name,omitempty"`
 
 	// Determines whether your data volume persists on the host container
 	// instance and at the location where it is stored.
-	Host *EC2ContainerServiceTaskDefinitionVolumesHost `json:"Host,omitempty"`
+	Host *ElasticContainerServiceTaskDefinitionVolumesHost `json:"Host,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionVolumesList represents a list of EC2ContainerServiceTaskDefinitionVolumes
-type EC2ContainerServiceTaskDefinitionVolumesList []EC2ContainerServiceTaskDefinitionVolumes
+// ElasticContainerServiceTaskDefinitionVolumesList represents a list of ElasticContainerServiceTaskDefinitionVolumes
+type ElasticContainerServiceTaskDefinitionVolumesList []ElasticContainerServiceTaskDefinitionVolumes
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionVolumesList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionVolumesList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionVolumes{}
+	item := ElasticContainerServiceTaskDefinitionVolumes{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionVolumesList{item}
+		*l = ElasticContainerServiceTaskDefinitionVolumesList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionVolumes{}
+	list := []ElasticContainerServiceTaskDefinitionVolumes{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionVolumesList(list)
+		*l = ElasticContainerServiceTaskDefinitionVolumesList(list)
 		return nil
 	}
 	return err
 }
 
-// EC2ContainerServiceTaskDefinitionVolumesHost represents Amazon EC2 Container Service TaskDefinition Volumes Host
+// ElasticContainerServiceTaskDefinitionVolumesHost represents Amazon Elastic Container Service TaskDefinition Volumes Host
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-volumes-host.html
-type EC2ContainerServiceTaskDefinitionVolumesHost struct {
+type ElasticContainerServiceTaskDefinitionVolumesHost struct {
 	// The data volume path on the host container instance.
 	SourcePath *StringExpr `json:"SourcePath,omitempty"`
 }
 
-// EC2ContainerServiceTaskDefinitionVolumesHostList represents a list of EC2ContainerServiceTaskDefinitionVolumesHost
-type EC2ContainerServiceTaskDefinitionVolumesHostList []EC2ContainerServiceTaskDefinitionVolumesHost
+// ElasticContainerServiceTaskDefinitionVolumesHostList represents a list of ElasticContainerServiceTaskDefinitionVolumesHost
+type ElasticContainerServiceTaskDefinitionVolumesHostList []ElasticContainerServiceTaskDefinitionVolumesHost
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EC2ContainerServiceTaskDefinitionVolumesHostList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticContainerServiceTaskDefinitionVolumesHostList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EC2ContainerServiceTaskDefinitionVolumesHost{}
+	item := ElasticContainerServiceTaskDefinitionVolumesHost{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EC2ContainerServiceTaskDefinitionVolumesHostList{item}
+		*l = ElasticContainerServiceTaskDefinitionVolumesHostList{item}
 		return nil
 	}
-	list := []EC2ContainerServiceTaskDefinitionVolumesHost{}
+	list := []ElasticContainerServiceTaskDefinitionVolumesHost{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EC2ContainerServiceTaskDefinitionVolumesHostList(list)
+		*l = ElasticContainerServiceTaskDefinitionVolumesHostList(list)
 		return nil
 	}
 	return err
@@ -11455,6 +16887,215 @@ func (l *ElasticFileSystemFileSystemFileSystemTagsList) UnmarshalJSON(buf []byte
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
 		*l = ElasticFileSystemFileSystemFileSystemTagsList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticBeanstalkApplicationApplicationResourceLifecycleConfig represents AWS Elastic Beanstalk Application ApplicationResourceLifecycleConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticbeanstalk-application-applicationresourcelifecycleconfig.html
+type ElasticBeanstalkApplicationApplicationResourceLifecycleConfig struct {
+	// The ARN of an IAM service role that Elastic Beanstalk has permission
+	// to assume.
+	ServiceRole interface{} `json:"ServiceRole,omitempty"`
+
+	// Defines lifecycle settings for application versions.
+	VersionLifecycleConfig *ElasticBeanstalkApplicationApplicationVersionLifecycleConfig `json:"VersionLifecycleConfig,omitempty"`
+}
+
+// ElasticBeanstalkApplicationApplicationResourceLifecycleConfigList represents a list of ElasticBeanstalkApplicationApplicationResourceLifecycleConfig
+type ElasticBeanstalkApplicationApplicationResourceLifecycleConfigList []ElasticBeanstalkApplicationApplicationResourceLifecycleConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticBeanstalkApplicationApplicationResourceLifecycleConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticBeanstalkApplicationApplicationResourceLifecycleConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticBeanstalkApplicationApplicationResourceLifecycleConfigList{item}
+		return nil
+	}
+	list := []ElasticBeanstalkApplicationApplicationResourceLifecycleConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticBeanstalkApplicationApplicationResourceLifecycleConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticBeanstalkApplicationApplicationVersionLifecycleConfig represents AWS Elastic Beanstalk Application ApplicationVersionLifecycleConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticbeanstalk-application-applicationversionlifecycleconfig.html
+type ElasticBeanstalkApplicationApplicationVersionLifecycleConfig struct {
+	// Specifies a max age rule to restrict the length of time that
+	// application versions are retained for an application.
+	MaxAgeRule *ElasticBeanstalkApplicationMaxAgeRule `json:"MaxAgeRule,omitempty"`
+
+	// Specifies a max count rule to restrict the number of application
+	// versions that are retained for an application.
+	MaxCountRule *ElasticBeanstalkApplicationMaxCountRule `json:"MaxCountRule,omitempty"`
+}
+
+// ElasticBeanstalkApplicationApplicationVersionLifecycleConfigList represents a list of ElasticBeanstalkApplicationApplicationVersionLifecycleConfig
+type ElasticBeanstalkApplicationApplicationVersionLifecycleConfigList []ElasticBeanstalkApplicationApplicationVersionLifecycleConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticBeanstalkApplicationApplicationVersionLifecycleConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticBeanstalkApplicationApplicationVersionLifecycleConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticBeanstalkApplicationApplicationVersionLifecycleConfigList{item}
+		return nil
+	}
+	list := []ElasticBeanstalkApplicationApplicationVersionLifecycleConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticBeanstalkApplicationApplicationVersionLifecycleConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticBeanstalkApplicationMaxAgeRule represents AWS Elastic Beanstalk Application MaxAgeRule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticbeanstalk-application-maxagerule.html
+type ElasticBeanstalkApplicationMaxAgeRule struct {
+	// Set to true to delete a version's source bundle from Amazon S3 when
+	// Elastic Beanstalk deletes the application version.
+	DeleteSourceFromS3 interface{} `json:"DeleteSourceFromS3,omitempty"`
+
+	// Specify true to apply the rule, or false to disable it.
+	Enabled interface{} `json:"Enabled,omitempty"`
+
+	// Specify the number of days to retain an application versions.
+	MaxAgeInDays interface{} `json:"MaxAgeInDays,omitempty"`
+}
+
+// ElasticBeanstalkApplicationMaxAgeRuleList represents a list of ElasticBeanstalkApplicationMaxAgeRule
+type ElasticBeanstalkApplicationMaxAgeRuleList []ElasticBeanstalkApplicationMaxAgeRule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticBeanstalkApplicationMaxAgeRuleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticBeanstalkApplicationMaxAgeRule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticBeanstalkApplicationMaxAgeRuleList{item}
+		return nil
+	}
+	list := []ElasticBeanstalkApplicationMaxAgeRule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticBeanstalkApplicationMaxAgeRuleList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticBeanstalkApplicationMaxCountRule represents AWS Elastic Beanstalk Application MaxCountRule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticbeanstalk-application-maxcountrule.html
+type ElasticBeanstalkApplicationMaxCountRule struct {
+	// Set to true to delete a version's source bundle from Amazon S3 when
+	// Elastic Beanstalk deletes the application version.
+	DeleteSourceFromS3 interface{} `json:"DeleteSourceFromS3,omitempty"`
+
+	// Specify true to apply the rule, or false to disable it.
+	Enabled interface{} `json:"Enabled,omitempty"`
+
+	// Specify the maximum number of application versions to retain.
+	MaxCount interface{} `json:"MaxCount,omitempty"`
+}
+
+// ElasticBeanstalkApplicationMaxCountRuleList represents a list of ElasticBeanstalkApplicationMaxCountRule
+type ElasticBeanstalkApplicationMaxCountRuleList []ElasticBeanstalkApplicationMaxCountRule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticBeanstalkApplicationMaxCountRuleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticBeanstalkApplicationMaxCountRule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticBeanstalkApplicationMaxCountRuleList{item}
+		return nil
+	}
+	list := []ElasticBeanstalkApplicationMaxCountRule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticBeanstalkApplicationMaxCountRuleList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticBeanstalkConfigurationTemplateConfigurationOptionSetting represents AWS Elastic Beanstalk ConfigurationTemplate ConfigurationOptionSetting
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticbeanstalk-configurationtemplate-configurationoptionsetting.html
+type ElasticBeanstalkConfigurationTemplateConfigurationOptionSetting struct {
+	// A unique namespace that identifies the option's associated AWS
+	// resource. For a list of namespaces that you can use, see Configuration
+	// Options in the AWS Elastic Beanstalk Developer Guide.
+	Namespace *StringExpr `json:"Namespace,omitempty"`
+
+	// The name of the configuration option. For a list of options that you
+	// can use, see Configuration Options in the AWS Elastic Beanstalk
+	// Developer Guide.
+	OptionName *StringExpr `json:"OptionName,omitempty"`
+
+	// A unique resource name for the option setting. Use this property for a
+	// time–based scaling configuration option.
+	ResourceName *StringExpr `json:"ResourceName,omitempty"`
+
+	// The current value for the configuration option.
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// ElasticBeanstalkConfigurationTemplateConfigurationOptionSettingList represents a list of ElasticBeanstalkConfigurationTemplateConfigurationOptionSetting
+type ElasticBeanstalkConfigurationTemplateConfigurationOptionSettingList []ElasticBeanstalkConfigurationTemplateConfigurationOptionSetting
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticBeanstalkConfigurationTemplateConfigurationOptionSettingList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticBeanstalkConfigurationTemplateConfigurationOptionSetting{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticBeanstalkConfigurationTemplateConfigurationOptionSettingList{item}
+		return nil
+	}
+	list := []ElasticBeanstalkConfigurationTemplateConfigurationOptionSetting{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticBeanstalkConfigurationTemplateConfigurationOptionSettingList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticBeanstalkConfigurationTemplateSourceConfiguration represents AWS Elastic Beanstalk ConfigurationTemplate SourceConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-beanstalk-configurationtemplate-sourceconfiguration.html
+type ElasticBeanstalkConfigurationTemplateSourceConfiguration struct {
+	// The name of the Elastic Beanstalk application that contains the
+	// configuration template that you want to use.
+	ApplicationName *StringExpr `json:"ApplicationName,omitempty"`
+
+	// The name of the configuration template.
+	TemplateName *StringExpr `json:"TemplateName,omitempty"`
+}
+
+// ElasticBeanstalkConfigurationTemplateSourceConfigurationList represents a list of ElasticBeanstalkConfigurationTemplateSourceConfiguration
+type ElasticBeanstalkConfigurationTemplateSourceConfigurationList []ElasticBeanstalkConfigurationTemplateSourceConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticBeanstalkConfigurationTemplateSourceConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticBeanstalkConfigurationTemplateSourceConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticBeanstalkConfigurationTemplateSourceConfigurationList{item}
+		return nil
+	}
+	list := []ElasticBeanstalkConfigurationTemplateSourceConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticBeanstalkConfigurationTemplateSourceConfigurationList(list)
 		return nil
 	}
 	return err
@@ -11495,13 +17136,13 @@ func (l *ElasticBeanstalkEnvironmentTierList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// ElasticBeanstalkOptionSettings represents Elastic Beanstalk OptionSettings Property Type
+// ElasticBeanstalkEnvironmentOptionSetting represents AWS Elastic Beanstalk Environment OptionSetting
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-beanstalk-option-settings.html
-type ElasticBeanstalkOptionSettings struct {
-	// A unique namespace identifying the option's associated AWS resource.
-	// For a list of namespaces that you can use, see Configuration Options
-	// in the AWS Elastic Beanstalk Developer Guide.
+type ElasticBeanstalkEnvironmentOptionSetting struct {
+	// A unique namespace that identifies the option's associated AWS
+	// resource. For a list of namespaces that you can use, see Configuration
+	// Options in the AWS Elastic Beanstalk Developer Guide.
 	Namespace *StringExpr `json:"Namespace,omitempty"`
 
 	// The name of the configuration option. For a list of options that you
@@ -11509,25 +17150,29 @@ type ElasticBeanstalkOptionSettings struct {
 	// Developer Guide.
 	OptionName *StringExpr `json:"OptionName,omitempty"`
 
-	// The value of the setting.
+	// A unique resource name for the option setting. Use this property for a
+	// time–based scaling configuration option.
+	ResourceName *StringExpr `json:"ResourceName,omitempty"`
+
+	// The current value for the configuration option.
 	Value *StringExpr `json:"Value,omitempty"`
 }
 
-// ElasticBeanstalkOptionSettingsList represents a list of ElasticBeanstalkOptionSettings
-type ElasticBeanstalkOptionSettingsList []ElasticBeanstalkOptionSettings
+// ElasticBeanstalkEnvironmentOptionSettingList represents a list of ElasticBeanstalkEnvironmentOptionSetting
+type ElasticBeanstalkEnvironmentOptionSettingList []ElasticBeanstalkEnvironmentOptionSetting
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *ElasticBeanstalkOptionSettingsList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticBeanstalkEnvironmentOptionSettingList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := ElasticBeanstalkOptionSettings{}
+	item := ElasticBeanstalkEnvironmentOptionSetting{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = ElasticBeanstalkOptionSettingsList{item}
+		*l = ElasticBeanstalkEnvironmentOptionSettingList{item}
 		return nil
 	}
-	list := []ElasticBeanstalkOptionSettings{}
+	list := []ElasticBeanstalkEnvironmentOptionSetting{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = ElasticBeanstalkOptionSettingsList(list)
+		*l = ElasticBeanstalkEnvironmentOptionSettingList(list)
 		return nil
 	}
 	return err
@@ -11564,38 +17209,6 @@ func (l *ElasticBeanstalkSourceBundleList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// ElasticBeanstalkSourceConfiguration represents Elastic Beanstalk SourceConfiguration Property Type
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-beanstalk-configurationtemplate-sourceconfiguration.html
-type ElasticBeanstalkSourceConfiguration struct {
-	// The name of the Elastic Beanstalk application that contains the
-	// configuration template that you want to use.
-	ApplicationName *StringExpr `json:"ApplicationName,omitempty"`
-
-	// The name of the configuration template.
-	TemplateName *StringExpr `json:"TemplateName,omitempty"`
-}
-
-// ElasticBeanstalkSourceConfigurationList represents a list of ElasticBeanstalkSourceConfiguration
-type ElasticBeanstalkSourceConfigurationList []ElasticBeanstalkSourceConfiguration
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *ElasticBeanstalkSourceConfigurationList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := ElasticBeanstalkSourceConfiguration{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = ElasticBeanstalkSourceConfigurationList{item}
-		return nil
-	}
-	list := []ElasticBeanstalkSourceConfiguration{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = ElasticBeanstalkSourceConfigurationList(list)
-		return nil
-	}
-	return err
-}
-
 // ElastiCacheReplicationGroupNodeGroupConfiguration represents Amazon ElastiCache ReplicationGroup NodeGroupConfiguration
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticache-replicationgroup-nodegroupconfiguration.html
@@ -11608,7 +17221,7 @@ type ElastiCacheReplicationGroupNodeGroupConfiguration struct {
 	// replicas. The number of Availability Zones must match the value of the
 	// ReplicaCount property or, if you don't specify the ReplicaCount
 	// property, the replication group's ReplicasPerNodeGroup property.
-	ReplicaAvailabilityZones *StringListExpr `json:"ReplicaAvailabilityZones,omitempty"`
+	ReplicaAvailabilityZones interface{} `json:"ReplicaAvailabilityZones,omitempty"`
 
 	// The number of read replica nodes in the node group.
 	ReplicaCount *IntegerExpr `json:"ReplicaCount,omitempty"`
@@ -11775,16 +17388,17 @@ func (l *ElasticLoadBalancingConnectionSettingsList) UnmarshalJSON(buf []byte) e
 	return err
 }
 
-// ElasticLoadBalancingHealthCheck represents ElasticLoadBalancing HealthCheck Type
+// ElasticLoadBalancingLoadBalancerHealthCheck represents ElasticLoadBalancing LoadBalancer HealthCheck
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-elb-health-check.html
-type ElasticLoadBalancingHealthCheck struct {
+type ElasticLoadBalancingLoadBalancerHealthCheck struct {
 	// Specifies the number of consecutive health probe successes required
 	// before moving the instance to the Healthy state.
 	HealthyThreshold *StringExpr `json:"HealthyThreshold,omitempty"`
 
 	// Specifies the approximate interval, in seconds, between health checks
-	// of an individual instance.
+	// of an individual instance. Valid values are 5 to 300. The default is
+	// 30.
 	Interval *StringExpr `json:"Interval,omitempty"`
 
 	// Specifies the instance's protocol and port to check. The protocol can
@@ -11802,21 +17416,21 @@ type ElasticLoadBalancingHealthCheck struct {
 	UnhealthyThreshold *StringExpr `json:"UnhealthyThreshold,omitempty"`
 }
 
-// ElasticLoadBalancingHealthCheckList represents a list of ElasticLoadBalancingHealthCheck
-type ElasticLoadBalancingHealthCheckList []ElasticLoadBalancingHealthCheck
+// ElasticLoadBalancingLoadBalancerHealthCheckList represents a list of ElasticLoadBalancingLoadBalancerHealthCheck
+type ElasticLoadBalancingLoadBalancerHealthCheckList []ElasticLoadBalancingLoadBalancerHealthCheck
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *ElasticLoadBalancingHealthCheckList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticLoadBalancingLoadBalancerHealthCheckList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := ElasticLoadBalancingHealthCheck{}
+	item := ElasticLoadBalancingLoadBalancerHealthCheck{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = ElasticLoadBalancingHealthCheckList{item}
+		*l = ElasticLoadBalancingLoadBalancerHealthCheckList{item}
 		return nil
 	}
-	list := []ElasticLoadBalancingHealthCheck{}
+	list := []ElasticLoadBalancingLoadBalancerHealthCheck{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = ElasticLoadBalancingHealthCheckList(list)
+		*l = ElasticLoadBalancingLoadBalancerHealthCheckList(list)
 		return nil
 	}
 	return err
@@ -11877,7 +17491,7 @@ type ElasticLoadBalancingListener struct {
 	// Listener. Specify only policies that are compatible with a Listener.
 	// For more information, see DescribeLoadBalancerPolicyTypes in the
 	// Elastic Load Balancing API Reference version 2012-06-01.
-	PolicyNames *StringListExpr `json:"PolicyNames,omitempty"`
+	PolicyNames interface{} `json:"PolicyNames,omitempty"`
 
 	// Specifies the load balancer transport protocol to use for routing:
 	// HTTP, HTTPS, TCP or SSL. You can't modify this property during the
@@ -11954,39 +17568,67 @@ func (l *ElasticLoadBalancingPolicyList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// ElasticLoadBalancingListenerCertificates represents Elastic Load Balancing Listener Certificates
+// ElasticLoadBalancingListenerCertificate represents Elastic Load Balancing Listener Certificate
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticloadbalancingv2-listener-certificates.html
-type ElasticLoadBalancingListenerCertificates struct {
+type ElasticLoadBalancingListenerCertificate struct {
 	// The Amazon Resource Name (ARN) of the certificate to associate with
 	// the listener.
 	CertificateArn *StringExpr `json:"CertificateArn,omitempty"`
 }
 
-// ElasticLoadBalancingListenerCertificatesList represents a list of ElasticLoadBalancingListenerCertificates
-type ElasticLoadBalancingListenerCertificatesList []ElasticLoadBalancingListenerCertificates
+// ElasticLoadBalancingListenerCertificateList represents a list of ElasticLoadBalancingListenerCertificate
+type ElasticLoadBalancingListenerCertificateList []ElasticLoadBalancingListenerCertificate
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *ElasticLoadBalancingListenerCertificatesList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticLoadBalancingListenerCertificateList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := ElasticLoadBalancingListenerCertificates{}
+	item := ElasticLoadBalancingListenerCertificate{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = ElasticLoadBalancingListenerCertificatesList{item}
+		*l = ElasticLoadBalancingListenerCertificateList{item}
 		return nil
 	}
-	list := []ElasticLoadBalancingListenerCertificates{}
+	list := []ElasticLoadBalancingListenerCertificate{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = ElasticLoadBalancingListenerCertificatesList(list)
+		*l = ElasticLoadBalancingListenerCertificateList(list)
 		return nil
 	}
 	return err
 }
 
-// ElasticLoadBalancingListenerDefaultActions represents Elastic Load Balancing Listener DefaultActions
+// ElasticLoadBalancingListenerCertificateCertificate represents Elastic Load Balancing ListenerCertificate Certificate
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticloadbalancingv2-listenercertificate-certificate.html
+type ElasticLoadBalancingListenerCertificateCertificate struct {
+	// The Amazon Resource Name (ARN) of the certificate.
+	CertificateArn interface{} `json:"CertificateArn,omitempty"`
+}
+
+// ElasticLoadBalancingListenerCertificateCertificateList represents a list of ElasticLoadBalancingListenerCertificateCertificate
+type ElasticLoadBalancingListenerCertificateCertificateList []ElasticLoadBalancingListenerCertificateCertificate
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticLoadBalancingListenerCertificateCertificateList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticLoadBalancingListenerCertificateCertificate{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticLoadBalancingListenerCertificateCertificateList{item}
+		return nil
+	}
+	list := []ElasticLoadBalancingListenerCertificateCertificate{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticLoadBalancingListenerCertificateCertificateList(list)
+		return nil
+	}
+	return err
+}
+
+// ElasticLoadBalancingListenerAction represents Elastic Load Balancing Listener Action
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticloadbalancingv2-listener-defaultactions.html
-type ElasticLoadBalancingListenerDefaultActions struct {
+type ElasticLoadBalancingListenerAction struct {
 	// The Amazon Resource Name (ARN) of the target group to which Elastic
 	// Load Balancing routes the traffic.
 	TargetGroupArn *StringExpr `json:"TargetGroupArn,omitempty"`
@@ -11997,21 +17639,21 @@ type ElasticLoadBalancingListenerDefaultActions struct {
 	Type *StringExpr `json:"Type,omitempty"`
 }
 
-// ElasticLoadBalancingListenerDefaultActionsList represents a list of ElasticLoadBalancingListenerDefaultActions
-type ElasticLoadBalancingListenerDefaultActionsList []ElasticLoadBalancingListenerDefaultActions
+// ElasticLoadBalancingListenerActionList represents a list of ElasticLoadBalancingListenerAction
+type ElasticLoadBalancingListenerActionList []ElasticLoadBalancingListenerAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *ElasticLoadBalancingListenerDefaultActionsList) UnmarshalJSON(buf []byte) error {
+func (l *ElasticLoadBalancingListenerActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := ElasticLoadBalancingListenerDefaultActions{}
+	item := ElasticLoadBalancingListenerAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = ElasticLoadBalancingListenerDefaultActionsList{item}
+		*l = ElasticLoadBalancingListenerActionList{item}
 		return nil
 	}
-	list := []ElasticLoadBalancingListenerDefaultActions{}
+	list := []ElasticLoadBalancingListenerAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = ElasticLoadBalancingListenerDefaultActionsList(list)
+		*l = ElasticLoadBalancingListenerActionList(list)
 		return nil
 	}
 	return err
@@ -12061,7 +17703,7 @@ type ElasticLoadBalancingListenerRuleConditions struct {
 	Field *StringExpr `json:"Field,omitempty"`
 
 	// The value for the field that you specified in the Field property.
-	Values *StringListExpr `json:"Values,omitempty"`
+	Values interface{} `json:"Values,omitempty"`
 }
 
 // ElasticLoadBalancingListenerRuleConditionsList represents a list of ElasticLoadBalancingListenerRuleConditions
@@ -12118,6 +17760,38 @@ func (l *ElasticLoadBalancingLoadBalancerLoadBalancerAttributesList) UnmarshalJS
 	return err
 }
 
+// ElasticLoadBalancingLoadBalancerSubnetMapping represents Elastic Load Balancing LoadBalancer SubnetMapping
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticloadbalancingv2-loadbalancer-subnetmapping.html
+type ElasticLoadBalancingLoadBalancerSubnetMapping struct {
+	// The ID of the subnet.
+	SubnetId *StringExpr `json:"SubnetId,omitempty"`
+
+	// [Network Load Balancer] The ID that represents the allocation of the
+	// Elastic IP address.
+	AllocationId *StringExpr `json:"AllocationId,omitempty"`
+}
+
+// ElasticLoadBalancingLoadBalancerSubnetMappingList represents a list of ElasticLoadBalancingLoadBalancerSubnetMapping
+type ElasticLoadBalancingLoadBalancerSubnetMappingList []ElasticLoadBalancingLoadBalancerSubnetMapping
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticLoadBalancingLoadBalancerSubnetMappingList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticLoadBalancingLoadBalancerSubnetMapping{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticLoadBalancingLoadBalancerSubnetMappingList{item}
+		return nil
+	}
+	list := []ElasticLoadBalancingLoadBalancerSubnetMapping{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticLoadBalancingLoadBalancerSubnetMappingList(list)
+		return nil
+	}
+	return err
+}
+
 // ElasticLoadBalancingTargetGroupMatcher represents Elastic Load Balancing TargetGroup Matcher
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticloadbalancingv2-targetgroup-matcher.html
@@ -12151,7 +17825,14 @@ func (l *ElasticLoadBalancingTargetGroupMatcherList) UnmarshalJSON(buf []byte) e
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticloadbalancingv2-targetgroup-targetdescription.html
 type ElasticLoadBalancingTargetGroupTargetDescription struct {
-	// The ID of the target, such as an EC2 instance ID.
+	// The Availability Zone where the IP address is to be registered. For
+	// more information, see TargetDescription in the Elastic Load Balancing
+	// API Reference version 2015-12-01.
+	AvailabilityZone *StringExpr `json:"AvailabilityZone,omitempty"`
+
+	// The ID of the target, such as an EC2 instance ID. If the target type
+	// of the target group is instance, specify an instance ID. If the target
+	// type is ip, specify an IP address.
 	Id *StringExpr `json:"Id,omitempty"`
 
 	// The port number on which the target is listening for traffic.
@@ -12348,6 +18029,44 @@ func (l *ElasticsearchServiceDomainSnapshotOptionsList) UnmarshalJSON(buf []byte
 	return err
 }
 
+// ElasticsearchServiceDomainVPCOptions represents Amazon Elasticsearch Service Domain VPCOptions
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticsearch-domain-vpcoptions.html
+type ElasticsearchServiceDomainVPCOptions struct {
+	// The list of security group IDs that are associated with the VPC
+	// endpoints for the domain. If you don't provide a security group ID,
+	// Amazon ES uses the default security group for the VPC. To learn more,
+	// see Security Groups for your VPC in the Amazon VPC User Guide.
+	SecurityGroupIds interface{} `json:"SecurityGroupIds,omitempty"`
+
+	// A list of subnet IDs that are associated with the VPC endpoints for
+	// the domain. If your domain has zone awareness enabled, you need to
+	// provide two subnet IDs, one per zone. Otherwise, you only need to
+	// provide one. To learn more, see VPCs and Subnets in the Amazon VPC
+	// User Guide.
+	SubnetIds interface{} `json:"SubnetIds,omitempty"`
+}
+
+// ElasticsearchServiceDomainVPCOptionsList represents a list of ElasticsearchServiceDomainVPCOptions
+type ElasticsearchServiceDomainVPCOptionsList []ElasticsearchServiceDomainVPCOptions
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *ElasticsearchServiceDomainVPCOptionsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := ElasticsearchServiceDomainVPCOptions{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = ElasticsearchServiceDomainVPCOptionsList{item}
+		return nil
+	}
+	list := []ElasticsearchServiceDomainVPCOptions{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = ElasticsearchServiceDomainVPCOptionsList(list)
+		return nil
+	}
+	return err
+}
+
 // EMRClusterApplication represents Amazon EMR Cluster Application
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-application.html
@@ -12357,7 +18076,7 @@ type EMRClusterApplication struct {
 	AdditionalInfo *StringExpr `json:"AdditionalInfo,omitempty"`
 
 	// Arguments that Amazon EMR passes to the application.
-	Args *StringListExpr `json:"Args,omitempty"`
+	Args interface{} `json:"Args,omitempty"`
 
 	// The name of the application to add to your cluster, such as Hadoop or
 	// Hive. For valid values, see the Applications parameter in the Amazon
@@ -12388,6 +18107,40 @@ func (l *EMRClusterApplicationList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// EMRClusterAutoScalingPolicy represents Amazon EMR Cluster AutoScalingPolicy
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-jobflowinstancesconfig-instancegroupconfig-autoscalingpolicy.html
+type EMRClusterAutoScalingPolicy struct {
+	// The upper and lower Amazon EC2 instance limits for an automatic
+	// scaling policy. Automatic scaling activity will not cause an instance
+	// group to grow above or below these limits.
+	Constraints *EMRClusterScalingConstraints `json:"Constraints,omitempty"`
+
+	// The scale-in and scale-out rules that comprise the automatic scaling
+	// policy.
+	Rules *EMRClusterScalingRule `json:"Rules,omitempty"`
+}
+
+// EMRClusterAutoScalingPolicyList represents a list of EMRClusterAutoScalingPolicy
+type EMRClusterAutoScalingPolicyList []EMRClusterAutoScalingPolicy
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterAutoScalingPolicyList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterAutoScalingPolicy{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterAutoScalingPolicyList{item}
+		return nil
+	}
+	list := []EMRClusterAutoScalingPolicy{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterAutoScalingPolicyList(list)
+		return nil
+	}
+	return err
+}
+
 // EMRClusterBootstrapActionConfig represents Amazon EMR Cluster BootstrapActionConfig
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-bootstrapactionconfig.html
@@ -12396,7 +18149,7 @@ type EMRClusterBootstrapActionConfig struct {
 	Name *StringExpr `json:"Name,omitempty"`
 
 	// The script that the bootstrap action runs.
-	ScriptBootstrapAction *EMRClusterBootstrapActionConfigScriptBootstrapActionConfig `json:"ScriptBootstrapAction,omitempty"`
+	ScriptBootstrapAction *EMRClusterScriptBootstrapActionConfig `json:"ScriptBootstrapAction,omitempty"`
 }
 
 // EMRClusterBootstrapActionConfigList represents a list of EMRClusterBootstrapActionConfig
@@ -12419,43 +18172,72 @@ func (l *EMRClusterBootstrapActionConfigList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// EMRClusterBootstrapActionConfigScriptBootstrapActionConfig represents Amazon EMR Cluster BootstrapActionConfig ScriptBootstrapActionConfig
+// EMRClusterCloudWatchAlarmDefinition represents Amazon EMR Cluster CloudWatchAlarmDefinition
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-bootstrapactionconfig-scriptbootstrapactionconfig.html
-type EMRClusterBootstrapActionConfigScriptBootstrapActionConfig struct {
-	// A list of command line arguments to pass to the bootstrap action
-	// script.
-	Args *StringListExpr `json:"Args,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-cluster-cloudwatchalarmdefinition.html
+type EMRClusterCloudWatchAlarmDefinition struct {
+	// Determines how the metric specified by MetricName is compared to the
+	// value specified by Threshold.
+	ComparisonOperator *StringExpr `json:"ComparisonOperator,omitempty"`
 
-	// The location of the script that Amazon EMR runs during a bootstrap
-	// action. Specify a location in an S3 bucket or your local file system.
-	Path *StringExpr `json:"Path,omitempty"`
+	// A list of CloudWatch metric dimensions.
+	Dimensions *EMRClusterMetricDimensionList `json:"Dimensions,omitempty"`
+
+	// The number of periods, expressed in seconds using Period, during which
+	// the alarm condition must exist before the alarm triggers automatic
+	// scaling activity. The default value is 1.
+	EvaluationPeriods *IntegerExpr `json:"EvaluationPeriods,omitempty"`
+
+	// The name of the CloudWatch metric that is watched to determine an
+	// alarm condition.
+	MetricName *StringExpr `json:"MetricName,omitempty"`
+
+	// The namespace for the CloudWatch metric. The default is
+	// AWS/ElasticMapReduce.
+	Namespace *StringExpr `json:"Namespace,omitempty"`
+
+	// The period, in seconds, over which the statistic is applied. EMR
+	// CloudWatch metrics are emitted every five minutes (300 seconds), so if
+	// an EMR CloudWatch metric is specified, specify 300.
+	Period *IntegerExpr `json:"Period,omitempty"`
+
+	// The statistic to apply to the metric associated with the alarm. The
+	// default is AVERAGE.
+	Statistic *StringExpr `json:"Statistic,omitempty"`
+
+	// The value against which the specified statistic is compared.
+	Threshold interface{} `json:"Threshold,omitempty"`
+
+	// The unit of measure associated with the CloudWatch metric being
+	// watched. The value specified for Unit must correspond to the units
+	// specified in the CloudWatch metric.
+	Unit *StringExpr `json:"Unit,omitempty"`
 }
 
-// EMRClusterBootstrapActionConfigScriptBootstrapActionConfigList represents a list of EMRClusterBootstrapActionConfigScriptBootstrapActionConfig
-type EMRClusterBootstrapActionConfigScriptBootstrapActionConfigList []EMRClusterBootstrapActionConfigScriptBootstrapActionConfig
+// EMRClusterCloudWatchAlarmDefinitionList represents a list of EMRClusterCloudWatchAlarmDefinition
+type EMRClusterCloudWatchAlarmDefinitionList []EMRClusterCloudWatchAlarmDefinition
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EMRClusterBootstrapActionConfigScriptBootstrapActionConfigList) UnmarshalJSON(buf []byte) error {
+func (l *EMRClusterCloudWatchAlarmDefinitionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EMRClusterBootstrapActionConfigScriptBootstrapActionConfig{}
+	item := EMRClusterCloudWatchAlarmDefinition{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EMRClusterBootstrapActionConfigScriptBootstrapActionConfigList{item}
+		*l = EMRClusterCloudWatchAlarmDefinitionList{item}
 		return nil
 	}
-	list := []EMRClusterBootstrapActionConfigScriptBootstrapActionConfig{}
+	list := []EMRClusterCloudWatchAlarmDefinition{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EMRClusterBootstrapActionConfigScriptBootstrapActionConfigList(list)
+		*l = EMRClusterCloudWatchAlarmDefinitionList(list)
 		return nil
 	}
 	return err
 }
 
-// EMRClusterConfiguration represents Amazon EMR Cluster Configuration
+// EMRClusterConfigurations represents Amazon EMR Cluster Configurations
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-configuration.html
-type EMRClusterConfiguration struct {
+type EMRClusterConfigurations struct {
 	// The name of an application-specific configuration file. For more
 	// information see, Configuring Applications in the Amazon EMR Release
 	// Guide.
@@ -12471,24 +18253,214 @@ type EMRClusterConfiguration struct {
 	// configurations. In other words, you can configure a configuration. For
 	// more information see, Configuring Applications in the Amazon EMR
 	// Release Guide.
-	Configurations *EMRClusterConfigurationList `json:"Configurations,omitempty"`
+	Configurations *EMRClusterConfigurationsList `json:"Configurations,omitempty"`
 }
 
-// EMRClusterConfigurationList represents a list of EMRClusterConfiguration
-type EMRClusterConfigurationList []EMRClusterConfiguration
+// EMRClusterConfigurationsList represents a list of EMRClusterConfigurations
+type EMRClusterConfigurationsList []EMRClusterConfigurations
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EMRClusterConfigurationList) UnmarshalJSON(buf []byte) error {
+func (l *EMRClusterConfigurationsList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EMRClusterConfiguration{}
+	item := EMRClusterConfigurations{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EMRClusterConfigurationList{item}
+		*l = EMRClusterConfigurationsList{item}
 		return nil
 	}
-	list := []EMRClusterConfiguration{}
+	list := []EMRClusterConfigurations{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EMRClusterConfigurationList(list)
+		*l = EMRClusterConfigurationsList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterInstanceFleetConfig represents Amazon EMR Cluster InstanceFleetConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-cluster-instancefleetconfig.html
+type EMRClusterInstanceFleetConfig struct {
+	// The instance type configurations that define the EC2 instances in the
+	// instance fleet. Duplicates not allowed.
+	InstanceTypeConfigs *EMRClusterInstanceTypeConfigList `json:"InstanceTypeConfigs,omitempty"`
+
+	// The launch specification for the instance fleet.
+	LaunchSpecifications *EMRClusterInstanceFleetProvisioningSpecifications `json:"LaunchSpecifications,omitempty"`
+
+	// The friendly name of the instance fleet. For constraints, see
+	// InstanceFleetConfig in the Amazon EMR API Reference.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The target capacity of On-Demand units for the instance fleet, which
+	// determines how many On-Demand instances to provision. For more
+	// information, see InstanceFleetConfig in the Amazon EMR API Reference.
+	TargetOnDemandCapacity *IntegerExpr `json:"TargetOnDemandCapacity,omitempty"`
+
+	// The target capacity of Spot units for the instance fleet, which
+	// determines how many Spot instances to provision. For more information,
+	// see InstanceFleetConfig in the Amazon EMR API Reference.
+	TargetSpotCapacity *IntegerExpr `json:"TargetSpotCapacity,omitempty"`
+}
+
+// EMRClusterInstanceFleetConfigList represents a list of EMRClusterInstanceFleetConfig
+type EMRClusterInstanceFleetConfigList []EMRClusterInstanceFleetConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterInstanceFleetConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterInstanceFleetConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterInstanceFleetConfigList{item}
+		return nil
+	}
+	list := []EMRClusterInstanceFleetConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterInstanceFleetConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterInstanceFleetProvisioningSpecifications represents Amazon EMR Cluster InstanceFleetProvisioningSpecifications
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-cluster-instancefleetprovisioningspecifications.html
+type EMRClusterInstanceFleetProvisioningSpecifications struct {
+	// The launch specification for Spot instances in the fleet, which
+	// determines the defined duration and provisioning timeout behavior.
+	SpotSpecification *EMRClusterSpotProvisioningSpecification `json:"SpotSpecification,omitempty"`
+}
+
+// EMRClusterInstanceFleetProvisioningSpecificationsList represents a list of EMRClusterInstanceFleetProvisioningSpecifications
+type EMRClusterInstanceFleetProvisioningSpecificationsList []EMRClusterInstanceFleetProvisioningSpecifications
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterInstanceFleetProvisioningSpecificationsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterInstanceFleetProvisioningSpecifications{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterInstanceFleetProvisioningSpecificationsList{item}
+		return nil
+	}
+	list := []EMRClusterInstanceFleetProvisioningSpecifications{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterInstanceFleetProvisioningSpecificationsList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterInstanceGroupConfig represents Amazon EMR Cluster InstanceGroupConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-jobflowinstancesconfig-instancegroupconfig.html
+type EMRClusterInstanceGroupConfig struct {
+	// An automatic scaling policy for a core instance group or task instance
+	// group in an Amazon EMR cluster. An automatic scaling policy defines
+	// how an instance group dynamically adds and terminates EC2 instances in
+	// response to the value of a CloudWatch metric.
+	AutoScalingPolicy *EMRClusterAutoScalingPolicy `json:"AutoScalingPolicy,omitempty"`
+
+	// When launching instances as Spot Instances, the bid price in USD for
+	// each EC2 instance in the instance group.
+	BidPrice *StringExpr `json:"BidPrice,omitempty"`
+
+	// A list of configurations to apply to this instance group. For more
+	// information see, Configuring Applications in the Amazon EMR Release
+	// Guide.
+	Configurations *EMRClusterConfigurationsList `json:"Configurations,omitempty"`
+
+	// Configures Amazon Elastic Block Store (Amazon EBS) storage volumes to
+	// attach to your instances.
+	EbsConfiguration *EMREbsConfiguration `json:"EbsConfiguration,omitempty"`
+
+	// The number of instances to launch in the instance group.
+	InstanceCount *IntegerExpr `json:"InstanceCount,omitempty"`
+
+	// The EC2 instance type for all instances in the instance group. For
+	// more information, see Instance Configurations in the Amazon EMR
+	// Management Guide.
+	InstanceType *StringExpr `json:"InstanceType,omitempty"`
+
+	// The type of marketplace from which your instances are provisioned into
+	// this group, either ON_DEMAND or SPOT. For more information, see Amazon
+	// EC2 Purchasing Options.
+	Market *StringExpr `json:"Market,omitempty"`
+
+	// A name for the instance group.
+	Name *StringExpr `json:"Name,omitempty"`
+}
+
+// EMRClusterInstanceGroupConfigList represents a list of EMRClusterInstanceGroupConfig
+type EMRClusterInstanceGroupConfigList []EMRClusterInstanceGroupConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterInstanceGroupConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterInstanceGroupConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterInstanceGroupConfigList{item}
+		return nil
+	}
+	list := []EMRClusterInstanceGroupConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterInstanceGroupConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterInstanceTypeConfig represents Amazon EMR Cluster InstanceTypeConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-cluster-instancetypeconfig.html
+type EMRClusterInstanceTypeConfig struct {
+	// The bid price for each EC2 Spot Instance type, as defined by
+	// InstanceType. BidPrice is expressed in USD. For more information, see
+	// InstanceTypeConfig in the Amazon EMR API Reference.
+	BidPrice *StringExpr `json:"BidPrice,omitempty"`
+
+	// The bid price, as a percentage of the On-Demand price, for each EC2
+	// Spot instance as defined by InstanceType.
+	// BidPriceAsPercentageOfOnDemandPriceis expressed as a number. For more
+	// information, see InstanceTypeConfig in the Amazon EMR API Reference.
+	BidPriceAsPercentageOfOnDemandPrice interface{} `json:"BidPriceAsPercentageOfOnDemandPrice,omitempty"`
+
+	// A configuration classification that applies when provisioning cluster
+	// instances. This can include configurations for applications and
+	// software that run on the cluster. Duplicates are not allowed.
+	Configurations *EMRClusterConfigurationsList `json:"Configurations,omitempty"`
+
+	// The configuration of Amazon Elastic Block Store (Amazon EBS) that is
+	// attached to each instance as defined by InstanceType.
+	EbsConfiguration *EMREbsConfiguration `json:"EbsConfiguration,omitempty"`
+
+	// An EC2 instance type, such as m3.xlarge. For constraints, see
+	// InstanceTypeConfig in the Amazon EMR API Reference.
+	InstanceType *StringExpr `json:"InstanceType,omitempty"`
+
+	// The number of units that a provisioned instance of this type provides
+	// toward fulfilling the target capacities defined in
+	// InstanceFleetConfig. For more information, see InstanceTypeConfig in
+	// the Amazon EMR API Reference.
+	WeightedCapacity *IntegerExpr `json:"WeightedCapacity,omitempty"`
+}
+
+// EMRClusterInstanceTypeConfigList represents a list of EMRClusterInstanceTypeConfig
+type EMRClusterInstanceTypeConfigList []EMRClusterInstanceTypeConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterInstanceTypeConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterInstanceTypeConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterInstanceTypeConfigList{item}
+		return nil
+	}
+	list := []EMRClusterInstanceTypeConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterInstanceTypeConfigList(list)
 		return nil
 	}
 	return err
@@ -12502,22 +18474,27 @@ type EMRClusterJobFlowInstancesConfig struct {
 	// instance (master node) in your Amazon EMR cluster. Use this property
 	// to supplement the rules specified by the Amazon EMR managed master
 	// security group.
-	AdditionalMasterSecurityGroups *StringListExpr `json:"AdditionalMasterSecurityGroups,omitempty"`
+	AdditionalMasterSecurityGroups interface{} `json:"AdditionalMasterSecurityGroups,omitempty"`
 
 	// A list of additional EC2 security group IDs to assign to the slave
 	// instances (slave nodes) in your Amazon EMR cluster. Use this property
 	// to supplement the rules specified by the Amazon EMR managed slave
 	// security group.
-	AdditionalSlaveSecurityGroups *StringListExpr `json:"AdditionalSlaveSecurityGroups,omitempty"`
+	AdditionalSlaveSecurityGroups interface{} `json:"AdditionalSlaveSecurityGroups,omitempty"`
 
-	// The settings for the core instances in your Amazon EMR cluster.
-	CoreInstanceGroup *EMRClusterJobFlowInstancesConfigInstanceGroupConfig `json:"CoreInstanceGroup,omitempty"`
+	// The instance fleet settings for the core instances in your Amazon EMR
+	// cluster. Use this property with the MasterInstanceFleet property.
+	CoreInstanceFleet *EMRClusterInstanceFleetConfig `json:"CoreInstanceFleet,omitempty"`
+
+	// The settings for the core instances in your Amazon EMR cluster. Use
+	// this property with the MasterInstanceGroup property.
+	CoreInstanceGroup *EMRClusterInstanceGroupConfig `json:"CoreInstanceGroup,omitempty"`
 
 	// The name of an Amazon Elastic Compute Cloud (Amazon EC2) key pair,
 	// which you can use to access the instances in your Amazon EMR cluster.
 	Ec2KeyName *StringExpr `json:"Ec2KeyName,omitempty"`
 
-	// The ID of a subnet where you want to launch your instances.
+	// The ID of the subnet where you want to launch your instances.
 	Ec2SubnetId *StringExpr `json:"Ec2SubnetId,omitempty"`
 
 	// The ID of an EC2 security group (managed by Amazon EMR) that is
@@ -12534,13 +18511,16 @@ type EMRClusterJobFlowInstancesConfig struct {
 	// HadoopVersion parameter in the Amazon EMR API Reference.
 	HadoopVersion *StringExpr `json:"HadoopVersion,omitempty"`
 
+	// The instance fleet settings for the master instance (master node).
+	MasterInstanceFleet *EMRClusterInstanceFleetConfig `json:"MasterInstanceFleet,omitempty"`
+
 	// The settings for the master instance (master node).
-	MasterInstanceGroup *EMRClusterJobFlowInstancesConfigInstanceGroupConfig `json:"MasterInstanceGroup,omitempty"`
+	MasterInstanceGroup *EMRClusterInstanceGroupConfig `json:"MasterInstanceGroup,omitempty"`
 
 	// The Availability Zone (AZ) in which the job flow runs.
-	Placement *EMRClusterJobFlowInstancesConfigPlacement `json:"Placement,omitempty"`
+	Placement *EMRClusterPlacement `json:"Placement,omitempty"`
 
-	// The ID of an EC2 security group (managed by Amazon EMR) that services
+	// The ID of the EC2 security group (managed by Amazon EMR) that services
 	// use to access clusters in private subnets.
 	ServiceAccessSecurityGroup *StringExpr `json:"ServiceAccessSecurityGroup,omitempty"`
 
@@ -12571,64 +18551,41 @@ func (l *EMRClusterJobFlowInstancesConfigList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// EMRClusterJobFlowInstancesConfigInstanceGroupConfig represents Amazon EMR Cluster JobFlowInstancesConfig InstanceGroupConfig
+// EMRClusterMetricDimension represents Amazon EMR Cluster MetricDimension
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-jobflowinstancesconfig-instancegroupconfig.html
-type EMRClusterJobFlowInstancesConfigInstanceGroupConfig struct {
-	// When launching instances as Spot Instances, the bid price in USD for
-	// each EC2 instance in the instance group.
-	BidPrice *StringExpr `json:"BidPrice,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-jobflowinstancesconfig-instancegroupconfig-autoscalingpolicy-constraints-scalingrule-scalingtrigger-cloudwatchalarmdefinition-metricdimension.html
+type EMRClusterMetricDimension struct {
+	// The dimension name.
+	Key *StringExpr `json:"Key,omitempty"`
 
-	// A list of configurations to apply to this instance group. For more
-	// information see, Configuring Applications in the Amazon EMR Release
-	// Guide.
-	Configurations *EMRClusterConfigurationList `json:"Configurations,omitempty"`
-
-	// Configures Amazon Elastic Block Store (Amazon EBS) storage volumes to
-	// attach to your instances.
-	EbsConfiguration *EMREbsConfiguration `json:"EbsConfiguration,omitempty"`
-
-	// The number of instances to launch in the instance group.
-	InstanceCount *IntegerExpr `json:"InstanceCount,omitempty"`
-
-	// The EC2 instance type for all instances in the instance group. For
-	// more information, see Instance Configurations in the Amazon EMR
-	// Management Guide.
-	InstanceType *StringExpr `json:"InstanceType,omitempty"`
-
-	// The type of marketplace from which your instances are provisioned into
-	// this group, either ON_DEMAND or SPOT. For more information, see Amazon
-	// EC2 Purchasing Options.
-	Market *StringExpr `json:"Market,omitempty"`
-
-	// A name for the instance group.
-	Name *StringExpr `json:"Name,omitempty"`
+	// The dimension value.
+	Value *StringExpr `json:"Value,omitempty"`
 }
 
-// EMRClusterJobFlowInstancesConfigInstanceGroupConfigList represents a list of EMRClusterJobFlowInstancesConfigInstanceGroupConfig
-type EMRClusterJobFlowInstancesConfigInstanceGroupConfigList []EMRClusterJobFlowInstancesConfigInstanceGroupConfig
+// EMRClusterMetricDimensionList represents a list of EMRClusterMetricDimension
+type EMRClusterMetricDimensionList []EMRClusterMetricDimension
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EMRClusterJobFlowInstancesConfigInstanceGroupConfigList) UnmarshalJSON(buf []byte) error {
+func (l *EMRClusterMetricDimensionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EMRClusterJobFlowInstancesConfigInstanceGroupConfig{}
+	item := EMRClusterMetricDimension{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EMRClusterJobFlowInstancesConfigInstanceGroupConfigList{item}
+		*l = EMRClusterMetricDimensionList{item}
 		return nil
 	}
-	list := []EMRClusterJobFlowInstancesConfigInstanceGroupConfig{}
+	list := []EMRClusterMetricDimension{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EMRClusterJobFlowInstancesConfigInstanceGroupConfigList(list)
+		*l = EMRClusterMetricDimensionList(list)
 		return nil
 	}
 	return err
 }
 
-// EMRClusterJobFlowInstancesConfigPlacement represents Amazon EMR Cluster JobFlowInstancesConfig PlacementType
+// EMRClusterPlacement represents Amazon EMR Cluster PlacementType
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-jobflowinstancesconfig-placementtype.html
-type EMRClusterJobFlowInstancesConfigPlacement struct {
+type EMRClusterPlacement struct {
 	// The Amazon Elastic Compute Cloud (Amazon EC2) AZ for the job flow. For
 	// more information, see
 	// http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
@@ -12636,21 +18593,275 @@ type EMRClusterJobFlowInstancesConfigPlacement struct {
 	AvailabilityZone *StringExpr `json:"AvailabilityZone,omitempty"`
 }
 
-// EMRClusterJobFlowInstancesConfigPlacementList represents a list of EMRClusterJobFlowInstancesConfigPlacement
-type EMRClusterJobFlowInstancesConfigPlacementList []EMRClusterJobFlowInstancesConfigPlacement
+// EMRClusterPlacementList represents a list of EMRClusterPlacement
+type EMRClusterPlacementList []EMRClusterPlacement
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EMRClusterJobFlowInstancesConfigPlacementList) UnmarshalJSON(buf []byte) error {
+func (l *EMRClusterPlacementList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EMRClusterJobFlowInstancesConfigPlacement{}
+	item := EMRClusterPlacement{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EMRClusterJobFlowInstancesConfigPlacementList{item}
+		*l = EMRClusterPlacementList{item}
 		return nil
 	}
-	list := []EMRClusterJobFlowInstancesConfigPlacement{}
+	list := []EMRClusterPlacement{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EMRClusterJobFlowInstancesConfigPlacementList(list)
+		*l = EMRClusterPlacementList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterScalingAction represents Amazon EMR Cluster ScalingAction
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-cluster-scalingaction.html
+type EMRClusterScalingAction struct {
+	// Not available for instance groups. Instance groups use the market type
+	// specified for the group.
+	Market *StringExpr `json:"Market,omitempty"`
+
+	// The type of adjustment the automatic scaling activity makes when
+	// triggered, and the periodicity of the adjustment.
+	SimpleScalingPolicyConfiguration *EMRClusterSimpleScalingPolicyConfiguration `json:"SimpleScalingPolicyConfiguration,omitempty"`
+}
+
+// EMRClusterScalingActionList represents a list of EMRClusterScalingAction
+type EMRClusterScalingActionList []EMRClusterScalingAction
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterScalingActionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterScalingAction{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterScalingActionList{item}
+		return nil
+	}
+	list := []EMRClusterScalingAction{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterScalingActionList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterScalingConstraints represents Amazon EMR Cluster ScalingConstraints
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-jobflowinstancesconfig-instancegroupconfig-autoscalingpolicy-constraints-scalingconstraints.html
+type EMRClusterScalingConstraints struct {
+	// The upper boundary of EC2 instances in an instance group beyond which
+	// scaling activities are not allowed to grow. Scale-out activities will
+	// not add instances beyond this boundary.
+	MaxCapacity *IntegerExpr `json:"MaxCapacity,omitempty"`
+
+	// The lower boundary of EC2 instances in an instance group below which
+	// scaling activities are not allowed to shrink. Scale-in activities will
+	// not terminate instances below this boundary.
+	MinCapacity *IntegerExpr `json:"MinCapacity,omitempty"`
+}
+
+// EMRClusterScalingConstraintsList represents a list of EMRClusterScalingConstraints
+type EMRClusterScalingConstraintsList []EMRClusterScalingConstraints
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterScalingConstraintsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterScalingConstraints{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterScalingConstraintsList{item}
+		return nil
+	}
+	list := []EMRClusterScalingConstraints{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterScalingConstraintsList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterScalingRule represents Amazon EMR Cluster ScalingRule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-jobflowinstancesconfig-instancegroupconfig-autoscalingpolicy-constraints-scalingrule.html
+type EMRClusterScalingRule struct {
+	// The conditions that trigger an automatic scaling activity.
+	Action interface{} `json:"Action,omitempty"`
+
+	// A friendly, more verbose description of the automatic scaling rule.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// The name used to identify an automatic scaling rule. Rule names must
+	// be unique within a scaling policy.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The CloudWatch alarm definition that determines when automatic scaling
+	// activity is triggered.
+	Trigger interface{} `json:"Trigger,omitempty"`
+}
+
+// EMRClusterScalingRuleList represents a list of EMRClusterScalingRule
+type EMRClusterScalingRuleList []EMRClusterScalingRule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterScalingRuleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterScalingRule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterScalingRuleList{item}
+		return nil
+	}
+	list := []EMRClusterScalingRule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterScalingRuleList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterScalingTrigger represents Amazon EMR Cluster ScalingTrigger
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-cluster-scalingtrigger.html
+type EMRClusterScalingTrigger struct {
+	// The definition of a CloudWatch metric alarm. When the defined alarm
+	// conditions are met along with other trigger parameters, scaling
+	// activity begins.
+	CloudWatchAlarmDefinition *EMRClusterCloudWatchAlarmDefinition `json:"CloudWatchAlarmDefinition,omitempty"`
+}
+
+// EMRClusterScalingTriggerList represents a list of EMRClusterScalingTrigger
+type EMRClusterScalingTriggerList []EMRClusterScalingTrigger
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterScalingTriggerList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterScalingTrigger{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterScalingTriggerList{item}
+		return nil
+	}
+	list := []EMRClusterScalingTrigger{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterScalingTriggerList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterScriptBootstrapActionConfig represents Amazon EMR Cluster ScriptBootstrapActionConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-cluster-bootstrapactionconfig-scriptbootstrapactionconfig.html
+type EMRClusterScriptBootstrapActionConfig struct {
+	// A list of command line arguments to pass to the bootstrap action
+	// script.
+	Args interface{} `json:"Args,omitempty"`
+
+	// The location of the script that Amazon EMR runs during a bootstrap
+	// action. Specify a location in an S3 bucket or your local file system.
+	Path *StringExpr `json:"Path,omitempty"`
+}
+
+// EMRClusterScriptBootstrapActionConfigList represents a list of EMRClusterScriptBootstrapActionConfig
+type EMRClusterScriptBootstrapActionConfigList []EMRClusterScriptBootstrapActionConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterScriptBootstrapActionConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterScriptBootstrapActionConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterScriptBootstrapActionConfigList{item}
+		return nil
+	}
+	list := []EMRClusterScriptBootstrapActionConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterScriptBootstrapActionConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterSimpleScalingPolicyConfiguration represents Amazon EMR Cluster SimpleScalingPolicyConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-cluster-simplescalingpolicyconfiguration.html
+type EMRClusterSimpleScalingPolicyConfiguration struct {
+	// The way in which Amazon EC2 instances are added (if ScalingAdjustment
+	// is a positive number) or terminated (if ScalingAdjustment is a
+	// negative number) each time the scaling activity is triggered.
+	// CHANGE_IN_CAPACITY is the default.
+	AdjustmentType *StringExpr `json:"AdjustmentType,omitempty"`
+
+	// The amount of time, in seconds, after a scaling activity completes
+	// before any further trigger-related scaling activities can start. The
+	// default value is 0.
+	CoolDown *IntegerExpr `json:"CoolDown,omitempty"`
+
+	// The amount by which to scale in or scale out, based on the specified
+	// AdjustmentType. A positive value adds to the instance group's Amazon
+	// EC2 instance count while a negative number removes instances. If
+	// AdjustmentType is set to EXACT_CAPACITY, the number should only be a
+	// positive integer. If AdjustmentType is set to
+	// PERCENT_CHANGE_IN_CAPACITY, the value should express the percentage as
+	// a decimal.
+	ScalingAdjustment *IntegerExpr `json:"ScalingAdjustment,omitempty"`
+}
+
+// EMRClusterSimpleScalingPolicyConfigurationList represents a list of EMRClusterSimpleScalingPolicyConfiguration
+type EMRClusterSimpleScalingPolicyConfigurationList []EMRClusterSimpleScalingPolicyConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterSimpleScalingPolicyConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterSimpleScalingPolicyConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterSimpleScalingPolicyConfigurationList{item}
+		return nil
+	}
+	list := []EMRClusterSimpleScalingPolicyConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterSimpleScalingPolicyConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRClusterSpotProvisioningSpecification represents Amazon EMR Cluster SpotProvisioningSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-cluster-spotprovisioningspecification.html
+type EMRClusterSpotProvisioningSpecification struct {
+	// The defined duration for Spot instances (also known as Spot blocks) in
+	// minutes. For more information, see SpotProvisioningSpecification in
+	// the Amazon EMR API Reference.
+	BlockDurationMinutes *IntegerExpr `json:"BlockDurationMinutes,omitempty"`
+
+	// The action to take when TargetSpotCapacity has not been fulfilled when
+	// the TimeoutDurationMinutes has expired. For more information, see
+	// SpotProvisioningSpecification in the Amazon EMR API Reference.
+	TimeoutAction *StringExpr `json:"TimeoutAction,omitempty"`
+
+	// The spot provisioning timeout period in minutes. For more information,
+	// see SpotProvisioningSpecification in the Amazon EMR API Reference.
+	TimeoutDurationMinutes *IntegerExpr `json:"TimeoutDurationMinutes,omitempty"`
+}
+
+// EMRClusterSpotProvisioningSpecificationList represents a list of EMRClusterSpotProvisioningSpecification
+type EMRClusterSpotProvisioningSpecificationList []EMRClusterSpotProvisioningSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRClusterSpotProvisioningSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRClusterSpotProvisioningSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRClusterSpotProvisioningSpecificationList{item}
+		return nil
+	}
+	list := []EMRClusterSpotProvisioningSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRClusterSpotProvisioningSpecificationList(list)
 		return nil
 	}
 	return err
@@ -12701,7 +18912,7 @@ type EMREbsConfigurationEbsBlockDeviceConfigs struct {
 	VolumeSpecification *EMREbsConfigurationEbsBlockDeviceConfigVolumeSpecification `json:"VolumeSpecification,omitempty"`
 
 	// The number of Amazon EBS volumes that you want to create for each
-	// instance in the EMR cluster or instance group.
+	// instance in the EMR cluster or instance group. The number cannot be 0.
 	VolumesPerInstance *IntegerExpr `json:"VolumesPerInstance,omitempty"`
 }
 
@@ -12765,13 +18976,587 @@ func (l *EMREbsConfigurationEbsBlockDeviceConfigVolumeSpecificationList) Unmarsh
 	return err
 }
 
+// EMRInstanceFleetConfigConfiguration represents Amazon EMR InstanceFleetConfig Configuration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancefleetconfig-configuration.html
+type EMRInstanceFleetConfigConfiguration struct {
+	// The application-specific configuration file.
+	Classification *StringExpr `json:"Classification,omitempty"`
+
+	// Within a configuration classification, a set of properties that
+	// represent the settings that you want to change in the configuration
+	// file. Duplicates not allowed.
+	ConfigurationProperties *StringExpr `json:"ConfigurationProperties,omitempty"`
+
+	// The list of additional configurations to apply within a configuration
+	// object. Duplicates not allowed.
+	Configurations *EMRInstanceFleetConfigConfigurationList `json:"Configurations,omitempty"`
+}
+
+// EMRInstanceFleetConfigConfigurationList represents a list of EMRInstanceFleetConfigConfiguration
+type EMRInstanceFleetConfigConfigurationList []EMRInstanceFleetConfigConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceFleetConfigConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceFleetConfigConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceFleetConfigConfigurationList{item}
+		return nil
+	}
+	list := []EMRInstanceFleetConfigConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceFleetConfigConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceFleetConfigEbsBlockDeviceConfig represents Amazon EMR InstanceFleetConfig EbsBlockDeviceConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancefleetconfig-ebsblockdeviceconfig.html
+type EMRInstanceFleetConfigEbsBlockDeviceConfig struct {
+	// Amazon EBS volume specifications, such as volume type, IOPS, and size
+	// (GiB), for the EBS volume attached to an EC2 instance in the fleet.
+	VolumeSpecification *EMRInstanceFleetConfigVolumeSpecification `json:"VolumeSpecification,omitempty"`
+
+	// The number of Amazon EBS volumes with a specific volume configuration
+	// that are associated with every instance in the fleet.
+	VolumesPerInstance *IntegerExpr `json:"VolumesPerInstance,omitempty"`
+}
+
+// EMRInstanceFleetConfigEbsBlockDeviceConfigList represents a list of EMRInstanceFleetConfigEbsBlockDeviceConfig
+type EMRInstanceFleetConfigEbsBlockDeviceConfigList []EMRInstanceFleetConfigEbsBlockDeviceConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceFleetConfigEbsBlockDeviceConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceFleetConfigEbsBlockDeviceConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceFleetConfigEbsBlockDeviceConfigList{item}
+		return nil
+	}
+	list := []EMRInstanceFleetConfigEbsBlockDeviceConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceFleetConfigEbsBlockDeviceConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceFleetConfigEbsConfiguration represents Amazon EMR InstanceFleetConfig EbsConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancefleetconfig-ebsconfiguration.html
+type EMRInstanceFleetConfigEbsConfiguration struct {
+	// A list of Amazon EBS volume specifications that are attached to an
+	// instance. Duplicates not allowed.
+	EbsBlockDeviceConfigs *EMRInstanceFleetConfigEbsBlockDeviceConfigList `json:"EbsBlockDeviceConfigs,omitempty"`
+
+	// Indicates whether an Amazon EBS volume is EBS-optimized.
+	EbsOptimized *BoolExpr `json:"EbsOptimized,omitempty"`
+}
+
+// EMRInstanceFleetConfigEbsConfigurationList represents a list of EMRInstanceFleetConfigEbsConfiguration
+type EMRInstanceFleetConfigEbsConfigurationList []EMRInstanceFleetConfigEbsConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceFleetConfigEbsConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceFleetConfigEbsConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceFleetConfigEbsConfigurationList{item}
+		return nil
+	}
+	list := []EMRInstanceFleetConfigEbsConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceFleetConfigEbsConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceFleetConfigInstanceFleetProvisioningSpecifications represents Amazon EMR InstanceFleetConfig InstanceFleetProvisioningSpecifications
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancefleetconfig-instancefleetprovisioningspecifications.html
+type EMRInstanceFleetConfigInstanceFleetProvisioningSpecifications struct {
+	// The launch specification for Spot Instances in the fleet. This
+	// determines the defined duration and provisioning timeout behavior.
+	SpotSpecification *EMRInstanceFleetConfigSpotProvisioningSpecification `json:"SpotSpecification,omitempty"`
+}
+
+// EMRInstanceFleetConfigInstanceFleetProvisioningSpecificationsList represents a list of EMRInstanceFleetConfigInstanceFleetProvisioningSpecifications
+type EMRInstanceFleetConfigInstanceFleetProvisioningSpecificationsList []EMRInstanceFleetConfigInstanceFleetProvisioningSpecifications
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceFleetConfigInstanceFleetProvisioningSpecificationsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceFleetConfigInstanceFleetProvisioningSpecifications{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceFleetConfigInstanceFleetProvisioningSpecificationsList{item}
+		return nil
+	}
+	list := []EMRInstanceFleetConfigInstanceFleetProvisioningSpecifications{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceFleetConfigInstanceFleetProvisioningSpecificationsList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceFleetConfigInstanceTypeConfig represents Amazon EMR InstanceFleetConfig InstanceTypeConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancefleetconfig-instancetypeconfig.html
+type EMRInstanceFleetConfigInstanceTypeConfig struct {
+	// The bid price for each EC2 Spot Instance type as defined by
+	// InstanceType. BidPrice is expressed in USD. For more information, see
+	// InstanceTypeConfig in the Amazon EMR API Reference.
+	BidPrice *StringExpr `json:"BidPrice,omitempty"`
+
+	// The bid price, as a percentage of the On-Demand price, for each EC2
+	// Spot Instance as defined by InstanceType.
+	// BidPriceAsPercentageOfOnDemandPrice is expressed as a number. For more
+	// information, see InstanceTypeConfig in the Amazon EMR API Reference.
+	BidPriceAsPercentageOfOnDemandPrice interface{} `json:"BidPriceAsPercentageOfOnDemandPrice,omitempty"`
+
+	// A configuration classification that applies when provisioning cluster
+	// instances. You can use this property to configure applications and
+	// software that run on the cluster. Duplicates are not allowed.
+	Configurations *EMRInstanceFleetConfigConfigurationList `json:"Configurations,omitempty"`
+
+	// The configuration of Amazon Elastic Block Store (Amazon EBS) that is
+	// attached to each instance as defined by InstanceType.
+	EbsConfiguration *EMRInstanceFleetConfigEbsConfiguration `json:"EbsConfiguration,omitempty"`
+
+	// An EC2 instance type, such as m3.xlarge. For constraints, see
+	// InstanceTypeConfig in the Amazon EMR API Reference.
+	InstanceType *StringExpr `json:"InstanceType,omitempty"`
+
+	// The number of units that a provisioned instance of this type provides
+	// toward fulfilling the target capacities defined in
+	// InstanceFleetConfig. For more information, see InstanceTypeConfig in
+	// the Amazon EMR API Reference.
+	WeightedCapacity *IntegerExpr `json:"WeightedCapacity,omitempty"`
+}
+
+// EMRInstanceFleetConfigInstanceTypeConfigList represents a list of EMRInstanceFleetConfigInstanceTypeConfig
+type EMRInstanceFleetConfigInstanceTypeConfigList []EMRInstanceFleetConfigInstanceTypeConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceFleetConfigInstanceTypeConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceFleetConfigInstanceTypeConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceFleetConfigInstanceTypeConfigList{item}
+		return nil
+	}
+	list := []EMRInstanceFleetConfigInstanceTypeConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceFleetConfigInstanceTypeConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceFleetConfigSpotProvisioningSpecification represents Amazon EMR InstanceFleetConfig SpotProvisioningSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancefleetconfig-spotprovisioningspecification.html
+type EMRInstanceFleetConfigSpotProvisioningSpecification struct {
+	// The defined duration for Spot Instances (also known as Spot blocks) in
+	// minutes. For more information, see SpotProvisioningSpecification in
+	// the Amazon EMR API Reference.
+	BlockDurationMinutes *IntegerExpr `json:"BlockDurationMinutes,omitempty"`
+
+	// The action to take when the capacity for the target Spot Instance, as
+	// specified in TargetSpotCapacity, has not been fulfilled before the
+	// time specified in TimeoutDurationMinutes has expired. For more
+	// information, see SpotProvisioningSpecification in the Amazon EMR API
+	// Reference.
+	TimeoutAction *StringExpr `json:"TimeoutAction,omitempty"`
+
+	// The timeout period for spot provisioning, in minutes. For more
+	// information, see SpotProvisioningSpecification in the Amazon EMR API
+	// Reference.
+	TimeoutDurationMinutes *IntegerExpr `json:"TimeoutDurationMinutes,omitempty"`
+}
+
+// EMRInstanceFleetConfigSpotProvisioningSpecificationList represents a list of EMRInstanceFleetConfigSpotProvisioningSpecification
+type EMRInstanceFleetConfigSpotProvisioningSpecificationList []EMRInstanceFleetConfigSpotProvisioningSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceFleetConfigSpotProvisioningSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceFleetConfigSpotProvisioningSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceFleetConfigSpotProvisioningSpecificationList{item}
+		return nil
+	}
+	list := []EMRInstanceFleetConfigSpotProvisioningSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceFleetConfigSpotProvisioningSpecificationList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceFleetConfigVolumeSpecification represents Amazon EMR InstanceFleetConfig VolumeSpecification
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancefleetconfig-volumespecification.html
+type EMRInstanceFleetConfigVolumeSpecification struct {
+	// The number of I/O operations per second (IOPS) that the volume
+	// supports.
+	Iops *IntegerExpr `json:"Iops,omitempty"`
+
+	// The volume size, in gibibytes (GiB). For valid values, see
+	// VolumeSpecification in the Amazon EMR API Reference.
+	SizeInGB *IntegerExpr `json:"SizeInGB,omitempty"`
+
+	// The volume type. For valid values, see VolumeSpecification in the
+	// Amazon EMR API Reference.
+	VolumeType *StringExpr `json:"VolumeType,omitempty"`
+}
+
+// EMRInstanceFleetConfigVolumeSpecificationList represents a list of EMRInstanceFleetConfigVolumeSpecification
+type EMRInstanceFleetConfigVolumeSpecificationList []EMRInstanceFleetConfigVolumeSpecification
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceFleetConfigVolumeSpecificationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceFleetConfigVolumeSpecification{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceFleetConfigVolumeSpecificationList{item}
+		return nil
+	}
+	list := []EMRInstanceFleetConfigVolumeSpecification{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceFleetConfigVolumeSpecificationList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceGroupConfigAutoScalingPolicy represents Amazon EMR InstanceGroupConfig AutoScalingPolicy
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancegroupconfig-autoscalingpolicy.html
+type EMRInstanceGroupConfigAutoScalingPolicy struct {
+	// The upper and lower Amazon EC2 instance limits for an automatic
+	// scaling policy. Automatic scaling activity doesn't cause an instance
+	// group to grow above or below these limits.
+	Constraints *EMRInstanceGroupConfigScalingConstraints `json:"Constraints,omitempty"`
+
+	// The scale-in and scale-out rules that compose the automatic scaling
+	// policy.
+	Rules *EMRInstanceGroupConfigScalingRuleList `json:"Rules,omitempty"`
+}
+
+// EMRInstanceGroupConfigAutoScalingPolicyList represents a list of EMRInstanceGroupConfigAutoScalingPolicy
+type EMRInstanceGroupConfigAutoScalingPolicyList []EMRInstanceGroupConfigAutoScalingPolicy
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceGroupConfigAutoScalingPolicyList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceGroupConfigAutoScalingPolicy{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceGroupConfigAutoScalingPolicyList{item}
+		return nil
+	}
+	list := []EMRInstanceGroupConfigAutoScalingPolicy{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceGroupConfigAutoScalingPolicyList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceGroupConfigCloudWatchAlarmDefinition represents Amazon EMR InstanceGroupConfig CloudWatchAlarmDefinition
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancegroupconfig-cloudwatchalarmdefinition.html
+type EMRInstanceGroupConfigCloudWatchAlarmDefinition struct {
+	// Determines how the metric specified by MetricName is compared to the
+	// value specified by Threshold.
+	ComparisonOperator *StringExpr `json:"ComparisonOperator,omitempty"`
+
+	// A list of CloudWatch metric dimensions.
+	Dimensions *EMRInstanceGroupConfigMetricDimensionList `json:"Dimensions,omitempty"`
+
+	// The number of periods, expressed in seconds using the Period property,
+	// during which the alarm condition must exist before the alarm triggers
+	// automatic scaling activity. The default value is 1.
+	EvaluationPeriods *IntegerExpr `json:"EvaluationPeriods,omitempty"`
+
+	// The name of the CloudWatch metric that is watched to determine an
+	// alarm condition.
+	MetricName *StringExpr `json:"MetricName,omitempty"`
+
+	// The namespace for the CloudWatch metric. The default is
+	// AWS/ElasticMapReduce.
+	Namespace *StringExpr `json:"Namespace,omitempty"`
+
+	// The period, in seconds, over which the statistic for applying the
+	// metric associated with the alarm is applied. You specify the statistic
+	// in the Statistic property. CloudWatch metrics for Amazon EMR are
+	// emitted every five minutes (300 seconds). If you specify a CloudWatch
+	// metric for Amazon EMR, specify 300.
+	Period *IntegerExpr `json:"Period,omitempty"`
+
+	// The statistic to apply to the metric associated with the alarm. The
+	// default is AVERAGE.
+	Statistic *StringExpr `json:"Statistic,omitempty"`
+
+	// The value against which the specified statistic is compared.
+	Threshold interface{} `json:"Threshold,omitempty"`
+
+	// The unit of measure associated with the CloudWatch metric being
+	// watched. Specify the unit specified in the CloudWatch metric.
+	Unit *StringExpr `json:"Unit,omitempty"`
+}
+
+// EMRInstanceGroupConfigCloudWatchAlarmDefinitionList represents a list of EMRInstanceGroupConfigCloudWatchAlarmDefinition
+type EMRInstanceGroupConfigCloudWatchAlarmDefinitionList []EMRInstanceGroupConfigCloudWatchAlarmDefinition
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceGroupConfigCloudWatchAlarmDefinitionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceGroupConfigCloudWatchAlarmDefinition{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceGroupConfigCloudWatchAlarmDefinitionList{item}
+		return nil
+	}
+	list := []EMRInstanceGroupConfigCloudWatchAlarmDefinition{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceGroupConfigCloudWatchAlarmDefinitionList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceGroupConfigMetricDimension represents Amazon EMR InstanceGroupConfig MetricDimension
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancegroupconfig-metricdimension.html
+type EMRInstanceGroupConfigMetricDimension struct {
+	// The dimension name.
+	Key *StringExpr `json:"Key,omitempty"`
+
+	// The dimension value.
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// EMRInstanceGroupConfigMetricDimensionList represents a list of EMRInstanceGroupConfigMetricDimension
+type EMRInstanceGroupConfigMetricDimensionList []EMRInstanceGroupConfigMetricDimension
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceGroupConfigMetricDimensionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceGroupConfigMetricDimension{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceGroupConfigMetricDimensionList{item}
+		return nil
+	}
+	list := []EMRInstanceGroupConfigMetricDimension{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceGroupConfigMetricDimensionList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceGroupConfigScalingAction represents Amazon EMR InstanceGroupConfig ScalingAction
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancegroupconfig-scalingaction.html
+type EMRInstanceGroupConfigScalingAction struct {
+	// Not available for instance groups. Instance groups use the market type
+	// specified for the group.
+	Market *StringExpr `json:"Market,omitempty"`
+
+	// The type of adjustment that the automatic scaling activity makes when
+	// triggered, and the periodicity of the adjustment.
+	SimpleScalingPolicyConfiguration *EMRInstanceGroupConfigSimpleScalingPolicyConfiguration `json:"SimpleScalingPolicyConfiguration,omitempty"`
+}
+
+// EMRInstanceGroupConfigScalingActionList represents a list of EMRInstanceGroupConfigScalingAction
+type EMRInstanceGroupConfigScalingActionList []EMRInstanceGroupConfigScalingAction
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceGroupConfigScalingActionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceGroupConfigScalingAction{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceGroupConfigScalingActionList{item}
+		return nil
+	}
+	list := []EMRInstanceGroupConfigScalingAction{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceGroupConfigScalingActionList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceGroupConfigScalingConstraints represents Amazon EMR InstanceGroupConfig ScalingConstraints
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancegroupconfig-scalingconstraints.html
+type EMRInstanceGroupConfigScalingConstraints struct {
+	// For autoscaling, the maximum number of EC2 instances in an instance
+	// group. Scale-out activities add instances only up to this boundary.
+	MaxCapacity *IntegerExpr `json:"MaxCapacity,omitempty"`
+
+	// For autoscaling, the minimum number of EC2 instances in an instance
+	// group. Scale-in activities do not terminate instances below this
+	// boundary.
+	MinCapacity *IntegerExpr `json:"MinCapacity,omitempty"`
+}
+
+// EMRInstanceGroupConfigScalingConstraintsList represents a list of EMRInstanceGroupConfigScalingConstraints
+type EMRInstanceGroupConfigScalingConstraintsList []EMRInstanceGroupConfigScalingConstraints
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceGroupConfigScalingConstraintsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceGroupConfigScalingConstraints{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceGroupConfigScalingConstraintsList{item}
+		return nil
+	}
+	list := []EMRInstanceGroupConfigScalingConstraints{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceGroupConfigScalingConstraintsList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceGroupConfigScalingRule represents Amazon EMR InstanceGroupConfig ScalingRule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancegroupconfig-scalingrule.html
+type EMRInstanceGroupConfigScalingRule struct {
+	// The conditions that trigger an automatic scaling activity.
+	Action *EMRInstanceGroupConfigScalingAction `json:"Action,omitempty"`
+
+	// A friendly, more verbose description of the automatic scaling rule.
+	Description *StringExpr `json:"Description,omitempty"`
+
+	// The identifier of the automatic scaling rule. Rule names must be
+	// unique within a scaling policy.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The CloudWatch alarm definition that determines when automatic scaling
+	// activity is triggered.
+	Trigger *EMRInstanceGroupConfigScalingTrigger `json:"Trigger,omitempty"`
+}
+
+// EMRInstanceGroupConfigScalingRuleList represents a list of EMRInstanceGroupConfigScalingRule
+type EMRInstanceGroupConfigScalingRuleList []EMRInstanceGroupConfigScalingRule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceGroupConfigScalingRuleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceGroupConfigScalingRule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceGroupConfigScalingRuleList{item}
+		return nil
+	}
+	list := []EMRInstanceGroupConfigScalingRule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceGroupConfigScalingRuleList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceGroupConfigScalingTrigger represents Amazon EMR InstanceGroupConfig ScalingTrigger
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancegroupconfig-scalingtrigger.html
+type EMRInstanceGroupConfigScalingTrigger struct {
+	// The definition of a CloudWatch metric alarm. When the defined alarm
+	// conditions are met along with other trigger parameters, scaling
+	// activity begins.
+	CloudWatchAlarmDefinition *EMRInstanceGroupConfigCloudWatchAlarmDefinition `json:"CloudWatchAlarmDefinition,omitempty"`
+}
+
+// EMRInstanceGroupConfigScalingTriggerList represents a list of EMRInstanceGroupConfigScalingTrigger
+type EMRInstanceGroupConfigScalingTriggerList []EMRInstanceGroupConfigScalingTrigger
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceGroupConfigScalingTriggerList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceGroupConfigScalingTrigger{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceGroupConfigScalingTriggerList{item}
+		return nil
+	}
+	list := []EMRInstanceGroupConfigScalingTrigger{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceGroupConfigScalingTriggerList(list)
+		return nil
+	}
+	return err
+}
+
+// EMRInstanceGroupConfigSimpleScalingPolicyConfiguration represents Amazon EMR InstanceGroupConfig SimpleScalingPolicyConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-elasticmapreduce-instancegroupconfig-simplescalingpolicyconfiguration.html
+type EMRInstanceGroupConfigSimpleScalingPolicyConfiguration struct {
+	// The way in which EC2 instances are added (if ScalingAdjustment is a
+	// positive number) or terminated (if ScalingAdjustment is a negative
+	// number) when the scaling activity is triggered. CHANGE_IN_CAPACITY is
+	// the default value.
+	AdjustmentType *StringExpr `json:"AdjustmentType,omitempty"`
+
+	// The amount of time, in seconds, after a scaling activity completes
+	// before any further trigger-related scaling activities can start. The
+	// default value is 0.
+	CoolDown *IntegerExpr `json:"CoolDown,omitempty"`
+
+	// The amount by which to scale the instance group, based on the
+	// specified AdjustmentType. A positive value adds to the instance
+	// group's EC2 instance count. A negative number removes instances. If
+	// AdjustmentType is set to EXACT_CAPACITY, specify only a positive
+	// integer. If AdjustmentType is set to PERCENT_CHANGE_IN_CAPACITY,
+	// express the value of the percentage as a decimal. For example, -0.20
+	// indicates a decrease in 20% increments of cluster capacity.
+	ScalingAdjustment *IntegerExpr `json:"ScalingAdjustment,omitempty"`
+}
+
+// EMRInstanceGroupConfigSimpleScalingPolicyConfigurationList represents a list of EMRInstanceGroupConfigSimpleScalingPolicyConfiguration
+type EMRInstanceGroupConfigSimpleScalingPolicyConfigurationList []EMRInstanceGroupConfigSimpleScalingPolicyConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EMRInstanceGroupConfigSimpleScalingPolicyConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EMRInstanceGroupConfigSimpleScalingPolicyConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EMRInstanceGroupConfigSimpleScalingPolicyConfigurationList{item}
+		return nil
+	}
+	list := []EMRInstanceGroupConfigSimpleScalingPolicyConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EMRInstanceGroupConfigSimpleScalingPolicyConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
 // EMRStepHadoopJarStepConfig represents Amazon EMR Step HadoopJarStepConfig
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-step-hadoopjarstepconfig.html
 type EMRStepHadoopJarStepConfig struct {
 	// A list of command line arguments passed to the JAR file's main
 	// function when the function is executed.
-	Args *StringListExpr `json:"Args,omitempty"`
+	Args interface{} `json:"Args,omitempty"`
 
 	// A path to the JAR file that Amazon EMR runs for the job flow step.
 	Jar *StringExpr `json:"Jar,omitempty"`
@@ -12784,7 +19569,7 @@ type EMRStepHadoopJarStepConfig struct {
 	// A list of Java properties that are set when the job flow step runs.
 	// You can use these properties to pass key-value pairs to your main
 	// function in the JAR file.
-	StepProperties *EMRStepHadoopJarStepConfigKeyValueList `json:"StepProperties,omitempty"`
+	StepProperties *EMRStepKeyValueList `json:"StepProperties,omitempty"`
 }
 
 // EMRStepHadoopJarStepConfigList represents a list of EMRStepHadoopJarStepConfig
@@ -12807,10 +19592,10 @@ func (l *EMRStepHadoopJarStepConfigList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// EMRStepHadoopJarStepConfigKeyValue represents Amazon EMR Step HadoopJarStepConfig KeyValue
+// EMRStepKeyValue represents Amazon EMR Step KeyValue
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-emr-step-hadoopjarstepconfig-keyvalue.html
-type EMRStepHadoopJarStepConfigKeyValue struct {
+type EMRStepKeyValue struct {
 	// The unique identifier of a key-value pair.
 	Key *StringExpr `json:"Key,omitempty"`
 
@@ -12818,21 +19603,21 @@ type EMRStepHadoopJarStepConfigKeyValue struct {
 	Value *StringExpr `json:"Value,omitempty"`
 }
 
-// EMRStepHadoopJarStepConfigKeyValueList represents a list of EMRStepHadoopJarStepConfigKeyValue
-type EMRStepHadoopJarStepConfigKeyValueList []EMRStepHadoopJarStepConfigKeyValue
+// EMRStepKeyValueList represents a list of EMRStepKeyValue
+type EMRStepKeyValueList []EMRStepKeyValue
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *EMRStepHadoopJarStepConfigKeyValueList) UnmarshalJSON(buf []byte) error {
+func (l *EMRStepKeyValueList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := EMRStepHadoopJarStepConfigKeyValue{}
+	item := EMRStepKeyValue{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = EMRStepHadoopJarStepConfigKeyValueList{item}
+		*l = EMRStepKeyValueList{item}
 		return nil
 	}
-	list := []EMRStepHadoopJarStepConfigKeyValue{}
+	list := []EMRStepKeyValue{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = EMRStepHadoopJarStepConfigKeyValueList(list)
+		*l = EMRStepKeyValueList(list)
 		return nil
 	}
 	return err
@@ -12953,6 +19738,1063 @@ func (l *GameLiftFleetEC2InboundPermissionList) UnmarshalJSON(buf []byte) error 
 	return err
 }
 
+// GlueClassifierGrokClassifier represents AWS Glue Classifier GrokClassifier
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-classifier-grokclassifier.html
+type GlueClassifierGrokClassifier struct {
+	// Custom grok patterns that are used by this classifier. It must match
+	// the URI address multi-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*
+	CustomPatterns interface{} `json:"CustomPatterns,omitempty"`
+
+	// The grok pattern that's used by this classifier. It must match the
+	// Logstash grok string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\t]*
+	GrokPattern interface{} `json:"GrokPattern,omitempty"`
+
+	// The data form that the classifier matches—such as Twitter, JSON, or
+	// Omniture logs.
+	Classification interface{} `json:"Classification,omitempty"`
+
+	// The name of the classifier. It must match the single-line string
+	// pattern: [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GlueClassifierGrokClassifierList represents a list of GlueClassifierGrokClassifier
+type GlueClassifierGrokClassifierList []GlueClassifierGrokClassifier
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueClassifierGrokClassifierList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueClassifierGrokClassifier{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueClassifierGrokClassifierList{item}
+		return nil
+	}
+	list := []GlueClassifierGrokClassifier{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueClassifierGrokClassifierList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueConnectionConnectionInput represents AWS Glue Connection ConnectionInput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-connection-connectioninput.html
+type GlueConnectionConnectionInput struct {
+	// The description of the connection.
+	Description interface{} `json:"Description,omitempty"`
+
+	// The type of the connection. Valid values are JDBC or SFTP.
+	ConnectionType interface{} `json:"ConnectionType,omitempty"`
+
+	// A list of UTF-8 strings that specify the criteria that you can use in
+	// selecting this connection.
+	MatchCriteria interface{} `json:"MatchCriteria,omitempty"`
+
+	// A map of physical connection requirements that are needed to make the
+	// connection, such as VPC and SecurityGroup.
+	PhysicalConnectionRequirements *GlueConnectionPhysicalConnectionRequirements `json:"PhysicalConnectionRequirements,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify the
+	// parameters for this connection.
+	ConnectionProperties interface{} `json:"ConnectionProperties,omitempty"`
+
+	// The name of the connection.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GlueConnectionConnectionInputList represents a list of GlueConnectionConnectionInput
+type GlueConnectionConnectionInputList []GlueConnectionConnectionInput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueConnectionConnectionInputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueConnectionConnectionInput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueConnectionConnectionInputList{item}
+		return nil
+	}
+	list := []GlueConnectionConnectionInput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueConnectionConnectionInputList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueConnectionPhysicalConnectionRequirements represents AWS Glue Connection PhysicalConnectionRequirements
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-connection-physicalconnectionrequirements.html
+type GlueConnectionPhysicalConnectionRequirements struct {
+	// The connection's Availability Zone. It must match the single-line
+	// string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	AvailabilityZone interface{} `json:"AvailabilityZone,omitempty"`
+
+	// A list of UTF-8 strings that specify the security group IDs that are
+	// used by the connection.
+	SecurityGroupIdList interface{} `json:"SecurityGroupIdList,omitempty"`
+
+	// The subnet ID that's used by the connection. It must match the
+	// single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	SubnetId interface{} `json:"SubnetId,omitempty"`
+}
+
+// GlueConnectionPhysicalConnectionRequirementsList represents a list of GlueConnectionPhysicalConnectionRequirements
+type GlueConnectionPhysicalConnectionRequirementsList []GlueConnectionPhysicalConnectionRequirements
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueConnectionPhysicalConnectionRequirementsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueConnectionPhysicalConnectionRequirements{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueConnectionPhysicalConnectionRequirementsList{item}
+		return nil
+	}
+	list := []GlueConnectionPhysicalConnectionRequirements{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueConnectionPhysicalConnectionRequirementsList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueCrawlerJdbcTarget represents AWS Glue Crawler JdbcTarget
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-crawler-jdbctarget.html
+type GlueCrawlerJdbcTarget struct {
+	// The name of the connection to use for the JDBC target.
+	ConnectionName interface{} `json:"ConnectionName,omitempty"`
+
+	// The path of the JDBC target.
+	Path interface{} `json:"Path,omitempty"`
+
+	// A list of UTF-8 strings that specify the items to exclude from the
+	// crawl.
+	Exclusions interface{} `json:"Exclusions,omitempty"`
+}
+
+// GlueCrawlerJdbcTargetList represents a list of GlueCrawlerJdbcTarget
+type GlueCrawlerJdbcTargetList []GlueCrawlerJdbcTarget
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueCrawlerJdbcTargetList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueCrawlerJdbcTarget{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueCrawlerJdbcTargetList{item}
+		return nil
+	}
+	list := []GlueCrawlerJdbcTarget{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueCrawlerJdbcTargetList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueCrawlerS3Target represents AWS Glue Crawler S3Target
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-crawler-s3target.html
+type GlueCrawlerS3Target struct {
+	// The path to the Amazon S3 target.
+	Path interface{} `json:"Path,omitempty"`
+
+	// A list of UTF-8 strings that specify the Amazon S3 objects to exclude
+	// from the crawl.
+	Exclusions interface{} `json:"Exclusions,omitempty"`
+}
+
+// GlueCrawlerS3TargetList represents a list of GlueCrawlerS3Target
+type GlueCrawlerS3TargetList []GlueCrawlerS3Target
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueCrawlerS3TargetList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueCrawlerS3Target{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueCrawlerS3TargetList{item}
+		return nil
+	}
+	list := []GlueCrawlerS3Target{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueCrawlerS3TargetList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueCrawlerSchedule represents AWS Glue Crawler Schedule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-crawler-schedule.html
+type GlueCrawlerSchedule struct {
+	// A cron expression that you can use as an Amazon CloudWatch Events
+	// event to schedule something. For example, to run something every day
+	// at 12:15 UTC, you would specify: cron(15 12 * * ? *).
+	ScheduleExpression interface{} `json:"ScheduleExpression,omitempty"`
+}
+
+// GlueCrawlerScheduleList represents a list of GlueCrawlerSchedule
+type GlueCrawlerScheduleList []GlueCrawlerSchedule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueCrawlerScheduleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueCrawlerSchedule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueCrawlerScheduleList{item}
+		return nil
+	}
+	list := []GlueCrawlerSchedule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueCrawlerScheduleList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueCrawlerSchemaChangePolicy represents AWS Glue Crawler SchemaChangePolicy
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-crawler-schemachangepolicy.html
+type GlueCrawlerSchemaChangePolicy struct {
+	// The update behavior. Valid values are LOG or UPDATE_IN_DATABASE.
+	UpdateBehavior interface{} `json:"UpdateBehavior,omitempty"`
+
+	// The deletion behavior. Valid values are LOG, DELETE_FROM_DATABASE, or
+	// DEPRECATE_IN_DATABASE.
+	DeleteBehavior interface{} `json:"DeleteBehavior,omitempty"`
+}
+
+// GlueCrawlerSchemaChangePolicyList represents a list of GlueCrawlerSchemaChangePolicy
+type GlueCrawlerSchemaChangePolicyList []GlueCrawlerSchemaChangePolicy
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueCrawlerSchemaChangePolicyList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueCrawlerSchemaChangePolicy{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueCrawlerSchemaChangePolicyList{item}
+		return nil
+	}
+	list := []GlueCrawlerSchemaChangePolicy{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueCrawlerSchemaChangePolicyList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueCrawlerTargets represents AWS Glue Crawler Targets
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-crawler-targets.html
+type GlueCrawlerTargets struct {
+	// The Amazon S3 crawler targets.
+	S3Targets *GlueCrawlerS3TargetList `json:"S3Targets,omitempty"`
+
+	// The JDBC crawler targets.
+	JdbcTargets *GlueCrawlerJdbcTargetList `json:"JdbcTargets,omitempty"`
+}
+
+// GlueCrawlerTargetsList represents a list of GlueCrawlerTargets
+type GlueCrawlerTargetsList []GlueCrawlerTargets
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueCrawlerTargetsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueCrawlerTargets{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueCrawlerTargetsList{item}
+		return nil
+	}
+	list := []GlueCrawlerTargets{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueCrawlerTargetsList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueDatabaseDatabaseInput represents AWS Glue Database DatabaseInput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-database-databaseinput.html
+type GlueDatabaseDatabaseInput struct {
+	// The location of the database (for example, an HDFS path). It must
+	// match the URI address multi-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*
+	LocationUri interface{} `json:"LocationUri,omitempty"`
+
+	// The description of the database. It must match the URI address
+	// multi-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*
+	Description interface{} `json:"Description,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify the
+	// properties that are associated with the database.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// The name of the database. It must match the single-line string
+	// pattern: [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GlueDatabaseDatabaseInputList represents a list of GlueDatabaseDatabaseInput
+type GlueDatabaseDatabaseInputList []GlueDatabaseDatabaseInput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueDatabaseDatabaseInputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueDatabaseDatabaseInput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueDatabaseDatabaseInputList{item}
+		return nil
+	}
+	list := []GlueDatabaseDatabaseInput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueDatabaseDatabaseInputList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueJobConnectionsList represents AWS Glue Job ConnectionsList
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-job-connectionslist.html
+type GlueJobConnectionsList struct {
+	// A list of UTF-8 strings that specifies the connections that are used
+	// by the job.
+	Connections interface{} `json:"Connections,omitempty"`
+}
+
+// GlueJobConnectionsListList represents a list of GlueJobConnectionsList
+type GlueJobConnectionsListList []GlueJobConnectionsList
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueJobConnectionsListList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueJobConnectionsList{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueJobConnectionsListList{item}
+		return nil
+	}
+	list := []GlueJobConnectionsList{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueJobConnectionsListList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueJobExecutionProperty represents AWS Glue Job ExecutionProperty
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-job-executionproperty.html
+type GlueJobExecutionProperty struct {
+	// The maximum number of concurrent runs that are allowed for the job.
+	MaxConcurrentRuns interface{} `json:"MaxConcurrentRuns,omitempty"`
+}
+
+// GlueJobExecutionPropertyList represents a list of GlueJobExecutionProperty
+type GlueJobExecutionPropertyList []GlueJobExecutionProperty
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueJobExecutionPropertyList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueJobExecutionProperty{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueJobExecutionPropertyList{item}
+		return nil
+	}
+	list := []GlueJobExecutionProperty{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueJobExecutionPropertyList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueJobJobCommand represents AWS Glue Job JobCommand
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-job-jobcommand.html
+type GlueJobJobCommand struct {
+	// The location of a script that executes a job.
+	ScriptLocation interface{} `json:"ScriptLocation,omitempty"`
+
+	// The name of the job command.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GlueJobJobCommandList represents a list of GlueJobJobCommand
+type GlueJobJobCommandList []GlueJobJobCommand
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueJobJobCommandList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueJobJobCommand{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueJobJobCommandList{item}
+		return nil
+	}
+	list := []GlueJobJobCommand{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueJobJobCommandList(list)
+		return nil
+	}
+	return err
+}
+
+// GluePartitionColumn represents AWS Glue Partition Column
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-partition-column.html
+type GluePartitionColumn struct {
+	// A free-form text comment. It must match the single-line string
+	// pattern: [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Comment interface{} `json:"Comment,omitempty"`
+
+	// The data type of the column data. It must match the single-line string
+	// pattern: [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Type interface{} `json:"Type,omitempty"`
+
+	// The name of the column. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GluePartitionColumnList represents a list of GluePartitionColumn
+type GluePartitionColumnList []GluePartitionColumn
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GluePartitionColumnList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GluePartitionColumn{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GluePartitionColumnList{item}
+		return nil
+	}
+	list := []GluePartitionColumn{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GluePartitionColumnList(list)
+		return nil
+	}
+	return err
+}
+
+// GluePartitionOrder represents AWS Glue Partition Order
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-partition-order.html
+type GluePartitionOrder struct {
+	// The name of the column. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Column interface{} `json:"Column,omitempty"`
+
+	// Indicates whether the column is sorted in ascending order (1) or
+	// descending order (0).
+	SortOrder interface{} `json:"SortOrder,omitempty"`
+}
+
+// GluePartitionOrderList represents a list of GluePartitionOrder
+type GluePartitionOrderList []GluePartitionOrder
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GluePartitionOrderList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GluePartitionOrder{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GluePartitionOrderList{item}
+		return nil
+	}
+	list := []GluePartitionOrder{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GluePartitionOrderList(list)
+		return nil
+	}
+	return err
+}
+
+// GluePartitionPartitionInput represents AWS Glue Partition PartitionInput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-partition-partitioninput.html
+type GluePartitionPartitionInput struct {
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify the
+	// parameters for the partition.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// Information about the physical storage of the partition.
+	StorageDescriptor *GluePartitionStorageDescriptor `json:"StorageDescriptor,omitempty"`
+
+	// A list of UTF-8 strings that specify the values of the partition.
+	Values interface{} `json:"Values,omitempty"`
+}
+
+// GluePartitionPartitionInputList represents a list of GluePartitionPartitionInput
+type GluePartitionPartitionInputList []GluePartitionPartitionInput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GluePartitionPartitionInputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GluePartitionPartitionInput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GluePartitionPartitionInputList{item}
+		return nil
+	}
+	list := []GluePartitionPartitionInput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GluePartitionPartitionInputList(list)
+		return nil
+	}
+	return err
+}
+
+// GluePartitionSerdeInfo represents AWS Glue Partition SerdeInfo
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-partition-serdeinfo.html
+type GluePartitionSerdeInfo struct {
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify the
+	// initialization parameters for the SerDe.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// The serialization library. This is usually the class that implements
+	// the SerDe, such as
+	// org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe. It must match
+	// the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	SerializationLibrary interface{} `json:"SerializationLibrary,omitempty"`
+
+	// The name of the SerDe. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GluePartitionSerdeInfoList represents a list of GluePartitionSerdeInfo
+type GluePartitionSerdeInfoList []GluePartitionSerdeInfo
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GluePartitionSerdeInfoList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GluePartitionSerdeInfo{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GluePartitionSerdeInfoList{item}
+		return nil
+	}
+	list := []GluePartitionSerdeInfo{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GluePartitionSerdeInfoList(list)
+		return nil
+	}
+	return err
+}
+
+// GluePartitionSkewedInfo represents AWS Glue Partition SkewedInfo
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-partition-skewedinfo.html
+type GluePartitionSkewedInfo struct {
+	// A list of UTF-8 strings that specify the names of columns that contain
+	// skewed values.
+	SkewedColumnNames interface{} `json:"SkewedColumnNames,omitempty"`
+
+	// A list of UTF-8 strings that specify values that appear so frequently
+	// that they're considered to be skewed.
+	SkewedColumnValues interface{} `json:"SkewedColumnValues,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that map skewed
+	// values to the columns that contain them.
+	SkewedColumnValueLocationMaps interface{} `json:"SkewedColumnValueLocationMaps,omitempty"`
+}
+
+// GluePartitionSkewedInfoList represents a list of GluePartitionSkewedInfo
+type GluePartitionSkewedInfoList []GluePartitionSkewedInfo
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GluePartitionSkewedInfoList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GluePartitionSkewedInfo{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GluePartitionSkewedInfoList{item}
+		return nil
+	}
+	list := []GluePartitionSkewedInfo{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GluePartitionSkewedInfoList(list)
+		return nil
+	}
+	return err
+}
+
+// GluePartitionStorageDescriptor represents AWS Glue Partition StorageDescriptor
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-partition-storagedescriptor.html
+type GluePartitionStorageDescriptor struct {
+	// Indicates whether the partition data is stored in subdirectories.
+	StoredAsSubDirectories interface{} `json:"StoredAsSubDirectories,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify
+	// user-supplied properties.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// A list of UTF-8 strings that specify reducer grouping columns,
+	// clustering columns, and bucketing columns in the partition.
+	BucketColumns interface{} `json:"BucketColumns,omitempty"`
+
+	// Information about values that appear very frequently in a column
+	// (skewed values).
+	SkewedInfo *GluePartitionSkewedInfo `json:"SkewedInfo,omitempty"`
+
+	// The input format: SequenceFileInputFormat (binary), TextInputFormat,
+	// or a custom format. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	InputFormat interface{} `json:"InputFormat,omitempty"`
+
+	// The number of buckets.
+	NumberOfBuckets interface{} `json:"NumberOfBuckets,omitempty"`
+
+	// The output format: SequenceFileOutputFormat (binary),
+	// IgnoreKeyTextOutputFormat, or a custom format. It must match the
+	// single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	OutputFormat interface{} `json:"OutputFormat,omitempty"`
+
+	// The columns in the partition.
+	Columns *GluePartitionColumnList `json:"Columns,omitempty"`
+
+	// Information about a serialization/deserialization program (SerDe),
+	// which serves as an extractor and loader.
+	SerdeInfo *GluePartitionSerdeInfo `json:"SerdeInfo,omitempty"`
+
+	// The sort order of each bucket in the partition.
+	SortColumns *GluePartitionOrderList `json:"SortColumns,omitempty"`
+
+	// Indicates whether the data in the partition is compressed.
+	Compressed interface{} `json:"Compressed,omitempty"`
+
+	// The physical location of the partition. By default, this takes the
+	// form of the warehouse location, followed by the database location in
+	// the warehouse, followed by the partition name. It must match the URI
+	// address multi-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*
+	Location interface{} `json:"Location,omitempty"`
+}
+
+// GluePartitionStorageDescriptorList represents a list of GluePartitionStorageDescriptor
+type GluePartitionStorageDescriptorList []GluePartitionStorageDescriptor
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GluePartitionStorageDescriptorList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GluePartitionStorageDescriptor{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GluePartitionStorageDescriptorList{item}
+		return nil
+	}
+	list := []GluePartitionStorageDescriptor{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GluePartitionStorageDescriptorList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTableColumn represents AWS Glue Table Column
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-table-column.html
+type GlueTableColumn struct {
+	// A free-form text comment. It must match the single-line string
+	// pattern: [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Comment interface{} `json:"Comment,omitempty"`
+
+	// The data type of the column data. It must match the single-line string
+	// pattern: [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Type interface{} `json:"Type,omitempty"`
+
+	// The name of the column. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GlueTableColumnList represents a list of GlueTableColumn
+type GlueTableColumnList []GlueTableColumn
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTableColumnList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTableColumn{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTableColumnList{item}
+		return nil
+	}
+	list := []GlueTableColumn{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTableColumnList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTableOrder represents AWS Glue Table Order
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-table-order.html
+type GlueTableOrder struct {
+	// The name of the column. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Column interface{} `json:"Column,omitempty"`
+
+	// Indicates whether the column is sorted in ascending order (1) or
+	// descending order (0).
+	SortOrder interface{} `json:"SortOrder,omitempty"`
+}
+
+// GlueTableOrderList represents a list of GlueTableOrder
+type GlueTableOrderList []GlueTableOrder
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTableOrderList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTableOrder{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTableOrderList{item}
+		return nil
+	}
+	list := []GlueTableOrder{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTableOrderList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTableSerdeInfo represents AWS Glue Table SerdeInfo
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-table-serdeinfo.html
+type GlueTableSerdeInfo struct {
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify the
+	// initialization parameters for the SerDe.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// The serialization library. This is usually the class that implements
+	// the SerDe, such as
+	// org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe. It must match
+	// the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	SerializationLibrary interface{} `json:"SerializationLibrary,omitempty"`
+
+	// The name of the SerDe. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GlueTableSerdeInfoList represents a list of GlueTableSerdeInfo
+type GlueTableSerdeInfoList []GlueTableSerdeInfo
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTableSerdeInfoList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTableSerdeInfo{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTableSerdeInfoList{item}
+		return nil
+	}
+	list := []GlueTableSerdeInfo{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTableSerdeInfoList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTableSkewedInfo represents AWS Glue Table SkewedInfo
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-table-skewedinfo.html
+type GlueTableSkewedInfo struct {
+	// A list of UTF-8 strings that specify the names of columns that contain
+	// skewed values.
+	SkewedColumnNames interface{} `json:"SkewedColumnNames,omitempty"`
+
+	// A list of UTF-8 strings that specify values that appear so frequently
+	// that they're considered to be skewed.
+	SkewedColumnValues interface{} `json:"SkewedColumnValues,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that map skewed
+	// values to the columns that contain them.
+	SkewedColumnValueLocationMaps interface{} `json:"SkewedColumnValueLocationMaps,omitempty"`
+}
+
+// GlueTableSkewedInfoList represents a list of GlueTableSkewedInfo
+type GlueTableSkewedInfoList []GlueTableSkewedInfo
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTableSkewedInfoList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTableSkewedInfo{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTableSkewedInfoList{item}
+		return nil
+	}
+	list := []GlueTableSkewedInfo{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTableSkewedInfoList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTableStorageDescriptor represents AWS Glue Table StorageDescriptor
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-table-storagedescriptor.html
+type GlueTableStorageDescriptor struct {
+	// Indicates whether the table data is stored in subdirectories.
+	StoredAsSubDirectories interface{} `json:"StoredAsSubDirectories,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify
+	// user-supplied properties.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// A list of UTF-8 strings that specify reducer grouping columns,
+	// clustering columns, and bucketing columns in the table.
+	BucketColumns interface{} `json:"BucketColumns,omitempty"`
+
+	// Information about values that appear very frequently in a column
+	// (skewed values).
+	SkewedInfo *GlueTableSkewedInfo `json:"SkewedInfo,omitempty"`
+
+	// The input format: SequenceFileInputFormat (binary), TextInputFormat,
+	// or a custom format. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	InputFormat interface{} `json:"InputFormat,omitempty"`
+
+	// The number of buckets.
+	NumberOfBuckets interface{} `json:"NumberOfBuckets,omitempty"`
+
+	// The output format: SequenceFileOutputFormat (binary),
+	// IgnoreKeyTextOutputFormat, or a custom format. It must match the
+	// single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	OutputFormat interface{} `json:"OutputFormat,omitempty"`
+
+	// The columns in the table.
+	Columns *GlueTableColumnList `json:"Columns,omitempty"`
+
+	// Information about a serialization/deserialization program (SerDe),
+	// which serves as an extractor and loader.
+	SerdeInfo *GlueTableSerdeInfo `json:"SerdeInfo,omitempty"`
+
+	// The sort order of each bucket in the table.
+	SortColumns *GlueTableOrderList `json:"SortColumns,omitempty"`
+
+	// Indicates whether the data in the table is compressed.
+	Compressed interface{} `json:"Compressed,omitempty"`
+
+	// The physical location of the table. By default, this takes the form of
+	// the warehouse location, followed by the database location in the
+	// warehouse, followed by the table name. It must match the URI address
+	// multi-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*
+	Location interface{} `json:"Location,omitempty"`
+}
+
+// GlueTableStorageDescriptorList represents a list of GlueTableStorageDescriptor
+type GlueTableStorageDescriptorList []GlueTableStorageDescriptor
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTableStorageDescriptorList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTableStorageDescriptor{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTableStorageDescriptorList{item}
+		return nil
+	}
+	list := []GlueTableStorageDescriptor{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTableStorageDescriptorList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTableTableInput represents AWS Glue Table TableInput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-table-tableinput.html
+type GlueTableTableInput struct {
+	// The owner of the table. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Owner interface{} `json:"Owner,omitempty"`
+
+	// The original text of the view, if the table is a view. Otherwise, it's
+	// null.
+	ViewOriginalText interface{} `json:"ViewOriginalText,omitempty"`
+
+	// The description of the table. It must match the URI address multi-line
+	// string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*
+	Description interface{} `json:"Description,omitempty"`
+
+	// The type of the table, such as EXTERNAL_TABLE or VIRTUAL_VIEW.
+	TableType interface{} `json:"TableType,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify the
+	// properties that are associated with the table.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// The expanded text of the view, if the table is a view. Otherwise it's
+	// null.
+	ViewExpandedText interface{} `json:"ViewExpandedText,omitempty"`
+
+	// Information about the physical storage of the table.
+	StorageDescriptor *GlueTableStorageDescriptor `json:"StorageDescriptor,omitempty"`
+
+	// The columns in the table.
+	PartitionKeys *GlueTableColumnList `json:"PartitionKeys,omitempty"`
+
+	// The retention time for the table.
+	Retention interface{} `json:"Retention,omitempty"`
+
+	// The name of the table. It must match the single-line string pattern:
+	// [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// GlueTableTableInputList represents a list of GlueTableTableInput
+type GlueTableTableInputList []GlueTableTableInput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTableTableInputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTableTableInput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTableTableInputList{item}
+		return nil
+	}
+	list := []GlueTableTableInput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTableTableInputList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTriggerAction represents AWS Glue Trigger Action
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-trigger-action.html
+type GlueTriggerAction struct {
+	// The name of the associated job. It must match the single-line string
+	// pattern: [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	JobName interface{} `json:"JobName,omitempty"`
+
+	// UTF-8 string–to–UTF-8 string key-value pairs that specify the
+	// arguments for the action.
+	Arguments interface{} `json:"Arguments,omitempty"`
+}
+
+// GlueTriggerActionList represents a list of GlueTriggerAction
+type GlueTriggerActionList []GlueTriggerAction
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTriggerActionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTriggerAction{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTriggerActionList{item}
+		return nil
+	}
+	list := []GlueTriggerAction{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTriggerActionList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTriggerCondition represents AWS Glue Trigger Condition
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-trigger-condition.html
+type GlueTriggerCondition struct {
+	// The logical operator for the condition.
+	LogicalOperator interface{} `json:"LogicalOperator,omitempty"`
+
+	// The name of the associated job. It must match the single-line string
+	// pattern: [\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\t]*
+	JobName interface{} `json:"JobName,omitempty"`
+
+	// The state of the condition.
+	State interface{} `json:"State,omitempty"`
+}
+
+// GlueTriggerConditionList represents a list of GlueTriggerCondition
+type GlueTriggerConditionList []GlueTriggerCondition
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTriggerConditionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTriggerCondition{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTriggerConditionList{item}
+		return nil
+	}
+	list := []GlueTriggerCondition{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTriggerConditionList(list)
+		return nil
+	}
+	return err
+}
+
+// GlueTriggerPredicate represents AWS Glue Trigger Predicate
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-glue-trigger-predicate.html
+type GlueTriggerPredicate struct {
+	// The logical operator for the predicate.
+	Logical interface{} `json:"Logical,omitempty"`
+
+	// The conditions that determine when the trigger fires.
+	Conditions *GlueTriggerConditionList `json:"Conditions,omitempty"`
+}
+
+// GlueTriggerPredicateList represents a list of GlueTriggerPredicate
+type GlueTriggerPredicateList []GlueTriggerPredicate
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *GlueTriggerPredicateList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := GlueTriggerPredicate{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = GlueTriggerPredicateList{item}
+		return nil
+	}
+	list := []GlueTriggerPredicate{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = GlueTriggerPredicateList(list)
+		return nil
+	}
+	return err
+}
+
 // IAMPolicies represents IAM Policies
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iam-policy.html
@@ -13017,69 +20859,72 @@ func (l *IAMUserLoginProfileList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// IoTActions represents AWS IoT Actions
+// IoTTopicRuleAction represents AWS IoT TopicRule Action
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-actions.html
-type IoTActions struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-action.html
+type IoTTopicRuleAction struct {
 	// Changes the state of a CloudWatch alarm.
-	CloudwatchAlarm *IoTCloudwatchAlarmAction `json:"CloudwatchAlarm,omitempty"`
+	CloudwatchAlarm *IoTTopicRuleCloudwatchAlarmAction `json:"CloudwatchAlarm,omitempty"`
 
 	// Captures a CloudWatch metric.
-	CloudwatchMetric *IoTCloudwatchMetricAction `json:"CloudwatchMetric,omitempty"`
+	CloudwatchMetric *IoTTopicRuleCloudwatchMetricAction `json:"CloudwatchMetric,omitempty"`
 
 	// Writes data to a DynamoDB table.
-	DynamoDB *IoTDynamoDBAction `json:"DynamoDB,omitempty"`
+	DynamoDB *IoTTopicRuleDynamoDBAction `json:"DynamoDB,omitempty"`
+
+	// Writes data to a DynamoDB table.
+	DynamoDBv2 *IoTTopicRuleDynamoDBv2Action `json:"DynamoDBv2,omitempty"`
 
 	// Writes data to an Elasticsearch domain.
-	Elasticsearch *IoTElasticsearchAction `json:"Elasticsearch,omitempty"`
+	Elasticsearch *IoTTopicRuleElasticsearchAction `json:"Elasticsearch,omitempty"`
 
-	// Writes data to a Firehose stream.
-	Firehose *IoTFirehoseAction `json:"Firehose,omitempty"`
+	// Writes data to a Kinesis Firehose stream.
+	Firehose *IoTTopicRuleFirehoseAction `json:"Firehose,omitempty"`
 
-	// Writes data to an Amazon Kinesis stream.
-	Kinesis *IoTKinesisAction `json:"Kinesis,omitempty"`
+	// Writes data to an Kinesis stream.
+	Kinesis *IoTTopicRuleKinesisAction `json:"Kinesis,omitempty"`
 
 	// Invokes a Lambda function.
-	Lambda *IoTLambdaAction `json:"Lambda,omitempty"`
+	Lambda *IoTTopicRuleLambdaAction `json:"Lambda,omitempty"`
 
 	// Publishes data to an MQ Telemetry Transport (MQTT) topic different
 	// from the one currently specified.
-	Republish *IoTRepublishAction `json:"Republish,omitempty"`
+	Republish *IoTTopicRuleRepublishAction `json:"Republish,omitempty"`
 
 	// Writes data to an S3 bucket.
-	S3 *IoTS3Action `json:"S3,omitempty"`
+	S3 *IoTTopicRuleS3Action `json:"S3,omitempty"`
 
 	// Publishes data to an SNS topic.
-	Sns *IoTSnsAction `json:"Sns,omitempty"`
+	Sns *IoTTopicRuleSnsAction `json:"Sns,omitempty"`
 
 	// Publishes data to an SQS queue.
-	Sqs *IoTSqsAction `json:"Sqs,omitempty"`
+	Sqs *IoTTopicRuleSqsAction `json:"Sqs,omitempty"`
 }
 
-// IoTActionsList represents a list of IoTActions
-type IoTActionsList []IoTActions
+// IoTTopicRuleActionList represents a list of IoTTopicRuleAction
+type IoTTopicRuleActionList []IoTTopicRuleAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTActionsList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTActions{}
+	item := IoTTopicRuleAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTActionsList{item}
+		*l = IoTTopicRuleActionList{item}
 		return nil
 	}
-	list := []IoTActions{}
+	list := []IoTTopicRuleAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTActionsList(list)
+		*l = IoTTopicRuleActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTCloudwatchAlarmAction represents AWS IoT CloudwatchAlarm Action
+// IoTTopicRuleCloudwatchAlarmAction represents AWS IoT TopicRule CloudwatchAlarmAction
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-cloudwatchalarm.html
-type IoTCloudwatchAlarmAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-cloudwatchalarmaction.html
+type IoTTopicRuleCloudwatchAlarmAction struct {
 	// The CloudWatch alarm name.
 	AlarmName *StringExpr `json:"AlarmName,omitempty"`
 
@@ -13093,30 +20938,30 @@ type IoTCloudwatchAlarmAction struct {
 	StateValue *StringExpr `json:"StateValue,omitempty"`
 }
 
-// IoTCloudwatchAlarmActionList represents a list of IoTCloudwatchAlarmAction
-type IoTCloudwatchAlarmActionList []IoTCloudwatchAlarmAction
+// IoTTopicRuleCloudwatchAlarmActionList represents a list of IoTTopicRuleCloudwatchAlarmAction
+type IoTTopicRuleCloudwatchAlarmActionList []IoTTopicRuleCloudwatchAlarmAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTCloudwatchAlarmActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleCloudwatchAlarmActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTCloudwatchAlarmAction{}
+	item := IoTTopicRuleCloudwatchAlarmAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTCloudwatchAlarmActionList{item}
+		*l = IoTTopicRuleCloudwatchAlarmActionList{item}
 		return nil
 	}
-	list := []IoTCloudwatchAlarmAction{}
+	list := []IoTTopicRuleCloudwatchAlarmAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTCloudwatchAlarmActionList(list)
+		*l = IoTTopicRuleCloudwatchAlarmActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTCloudwatchMetricAction represents AWS IoT CloudwatchMetric Action
+// IoTTopicRuleCloudwatchMetricAction represents AWS IoT TopicRule CloudwatchMetricAction
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-cloudwatchmetric.html
-type IoTCloudwatchMetricAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-cloudwatchmetricaction.html
+type IoTTopicRuleCloudwatchMetricAction struct {
 	// The name of the CloudWatch metric.
 	MetricName *StringExpr `json:"MetricName,omitempty"`
 
@@ -13138,32 +20983,36 @@ type IoTCloudwatchMetricAction struct {
 	RoleArn *StringExpr `json:"RoleArn,omitempty"`
 }
 
-// IoTCloudwatchMetricActionList represents a list of IoTCloudwatchMetricAction
-type IoTCloudwatchMetricActionList []IoTCloudwatchMetricAction
+// IoTTopicRuleCloudwatchMetricActionList represents a list of IoTTopicRuleCloudwatchMetricAction
+type IoTTopicRuleCloudwatchMetricActionList []IoTTopicRuleCloudwatchMetricAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTCloudwatchMetricActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleCloudwatchMetricActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTCloudwatchMetricAction{}
+	item := IoTTopicRuleCloudwatchMetricAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTCloudwatchMetricActionList{item}
+		*l = IoTTopicRuleCloudwatchMetricActionList{item}
 		return nil
 	}
-	list := []IoTCloudwatchMetricAction{}
+	list := []IoTTopicRuleCloudwatchMetricAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTCloudwatchMetricActionList(list)
+		*l = IoTTopicRuleCloudwatchMetricActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTDynamoDBAction represents AWS IoT DynamoDB Action
+// IoTTopicRuleDynamoDBAction represents AWS IoT TopicRule DynamoDBAction
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-dynamodb.html
-type IoTDynamoDBAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-dynamodbaction.html
+type IoTTopicRuleDynamoDBAction struct {
 	// The name of the hash key.
 	HashKeyField *StringExpr `json:"HashKeyField,omitempty"`
+
+	// The data type of the hash key (also called the partition key). Valid
+	// values are: "STRING" or "NUMBER".
+	HashKeyType *StringExpr `json:"HashKeyType,omitempty"`
 
 	// The value of the hash key.
 	HashKeyValue *StringExpr `json:"HashKeyValue,omitempty"`
@@ -13175,6 +21024,10 @@ type IoTDynamoDBAction struct {
 	// The name of the range key.
 	RangeKeyField *StringExpr `json:"RangeKeyField,omitempty"`
 
+	// The data type of the range key (also called the sort key). Valid
+	// values are: "STRING" or "NUMBER".
+	RangeKeyType *StringExpr `json:"RangeKeyType,omitempty"`
+
 	// The value of the range key.
 	RangeKeyValue *StringExpr `json:"RangeKeyValue,omitempty"`
 
@@ -13185,30 +21038,63 @@ type IoTDynamoDBAction struct {
 	TableName *StringExpr `json:"TableName,omitempty"`
 }
 
-// IoTDynamoDBActionList represents a list of IoTDynamoDBAction
-type IoTDynamoDBActionList []IoTDynamoDBAction
+// IoTTopicRuleDynamoDBActionList represents a list of IoTTopicRuleDynamoDBAction
+type IoTTopicRuleDynamoDBActionList []IoTTopicRuleDynamoDBAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTDynamoDBActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleDynamoDBActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTDynamoDBAction{}
+	item := IoTTopicRuleDynamoDBAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTDynamoDBActionList{item}
+		*l = IoTTopicRuleDynamoDBActionList{item}
 		return nil
 	}
-	list := []IoTDynamoDBAction{}
+	list := []IoTTopicRuleDynamoDBAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTDynamoDBActionList(list)
+		*l = IoTTopicRuleDynamoDBActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTElasticsearchAction represents AWS IoT Elasticsearch Action
+// IoTTopicRuleDynamoDBv2Action represents AWS IoT TopicRule DynamoDBv2Action
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-elasticsearch.html
-type IoTElasticsearchAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-dynamodbv2action.html
+type IoTTopicRuleDynamoDBv2Action struct {
+	// Specifies the database table to which to write the item for an AWS IoT
+	// topic rule.
+	PutItem *IoTTopicRulePutItemInput `json:"PutItem,omitempty"`
+
+	// The IAM role that allows access to the DynamoDB table. At a minimum,
+	// the role must allow the dynamoDB:PutItem IAM action.
+	RoleArn interface{} `json:"RoleArn,omitempty"`
+}
+
+// IoTTopicRuleDynamoDBv2ActionList represents a list of IoTTopicRuleDynamoDBv2Action
+type IoTTopicRuleDynamoDBv2ActionList []IoTTopicRuleDynamoDBv2Action
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *IoTTopicRuleDynamoDBv2ActionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := IoTTopicRuleDynamoDBv2Action{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = IoTTopicRuleDynamoDBv2ActionList{item}
+		return nil
+	}
+	list := []IoTTopicRuleDynamoDBv2Action{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = IoTTopicRuleDynamoDBv2ActionList(list)
+		return nil
+	}
+	return err
+}
+
+// IoTTopicRuleElasticsearchAction represents AWS IoT TopicRule ElasticsearchAction
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-elasticsearchaction.html
+type IoTTopicRuleElasticsearchAction struct {
 	// The endpoint of your Elasticsearch domain.
 	Endpoint *StringExpr `json:"Endpoint,omitempty"`
 
@@ -13225,131 +21111,158 @@ type IoTElasticsearchAction struct {
 	Type *StringExpr `json:"Type,omitempty"`
 }
 
-// IoTElasticsearchActionList represents a list of IoTElasticsearchAction
-type IoTElasticsearchActionList []IoTElasticsearchAction
+// IoTTopicRuleElasticsearchActionList represents a list of IoTTopicRuleElasticsearchAction
+type IoTTopicRuleElasticsearchActionList []IoTTopicRuleElasticsearchAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTElasticsearchActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleElasticsearchActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTElasticsearchAction{}
+	item := IoTTopicRuleElasticsearchAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTElasticsearchActionList{item}
+		*l = IoTTopicRuleElasticsearchActionList{item}
 		return nil
 	}
-	list := []IoTElasticsearchAction{}
+	list := []IoTTopicRuleElasticsearchAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTElasticsearchActionList(list)
+		*l = IoTTopicRuleElasticsearchActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTFirehoseAction represents AWS IoT Firehose Action
+// IoTTopicRuleFirehoseAction represents AWS IoT TopicRule FirehoseAction
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-firehose.html
-type IoTFirehoseAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-firehoseaction.html
+type IoTTopicRuleFirehoseAction struct {
 	// The delivery stream name.
 	DeliveryStreamName *StringExpr `json:"DeliveryStreamName,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the IAM role that grants access to
-	// the Firehose stream.
+	// the Kinesis Firehose stream.
 	RoleArn *StringExpr `json:"RoleArn,omitempty"`
 
 	// A character separator that's used to separate records written to the
-	// Firehose stream. For valid values, see Firehose Action in the AWS IoT
-	// Developer Guide.
+	// Kinesis Firehose stream. For valid values, see Firehose Action in the
+	// AWS IoT Developer Guide.
 	Separator *StringExpr `json:"Separator,omitempty"`
 }
 
-// IoTFirehoseActionList represents a list of IoTFirehoseAction
-type IoTFirehoseActionList []IoTFirehoseAction
+// IoTTopicRuleFirehoseActionList represents a list of IoTTopicRuleFirehoseAction
+type IoTTopicRuleFirehoseActionList []IoTTopicRuleFirehoseAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTFirehoseActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleFirehoseActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTFirehoseAction{}
+	item := IoTTopicRuleFirehoseAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTFirehoseActionList{item}
+		*l = IoTTopicRuleFirehoseActionList{item}
 		return nil
 	}
-	list := []IoTFirehoseAction{}
+	list := []IoTTopicRuleFirehoseAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTFirehoseActionList(list)
+		*l = IoTTopicRuleFirehoseActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTKinesisAction represents AWS IoT Kinesis Action
+// IoTTopicRuleKinesisAction represents AWS IoT TopicRule KinesisAction
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-kinesis.html
-type IoTKinesisAction struct {
-	// The partition key (the grouping of data by shard within an an Amazon
-	// Kinesis stream).
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-kinesisaction.html
+type IoTTopicRuleKinesisAction struct {
+	// The partition key (the grouping of data by shard within an Kinesis
+	// stream).
 	PartitionKey *StringExpr `json:"PartitionKey,omitempty"`
 
-	// The ARN of the IAM role that grants access to an Amazon Kinesis
-	// stream.
+	// The ARN of the IAM role that grants access to an Kinesis stream.
 	RoleArn *StringExpr `json:"RoleArn,omitempty"`
 
-	// The name of the Amazon Kinesis stream.
+	// The name of the Kinesis stream.
 	StreamName *StringExpr `json:"StreamName,omitempty"`
 }
 
-// IoTKinesisActionList represents a list of IoTKinesisAction
-type IoTKinesisActionList []IoTKinesisAction
+// IoTTopicRuleKinesisActionList represents a list of IoTTopicRuleKinesisAction
+type IoTTopicRuleKinesisActionList []IoTTopicRuleKinesisAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTKinesisActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleKinesisActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTKinesisAction{}
+	item := IoTTopicRuleKinesisAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTKinesisActionList{item}
+		*l = IoTTopicRuleKinesisActionList{item}
 		return nil
 	}
-	list := []IoTKinesisAction{}
+	list := []IoTTopicRuleKinesisAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTKinesisActionList(list)
+		*l = IoTTopicRuleKinesisActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTLambdaAction represents AWS IoT Lambda Action
+// IoTTopicRuleLambdaAction represents AWS IoT TopicRule LambdaAction
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-lambda.html
-type IoTLambdaAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-lambdaaction.html
+type IoTTopicRuleLambdaAction struct {
 	// The ARN of the Lambda function.
 	FunctionArn *StringExpr `json:"FunctionArn,omitempty"`
 }
 
-// IoTLambdaActionList represents a list of IoTLambdaAction
-type IoTLambdaActionList []IoTLambdaAction
+// IoTTopicRuleLambdaActionList represents a list of IoTTopicRuleLambdaAction
+type IoTTopicRuleLambdaActionList []IoTTopicRuleLambdaAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTLambdaActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleLambdaActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTLambdaAction{}
+	item := IoTTopicRuleLambdaAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTLambdaActionList{item}
+		*l = IoTTopicRuleLambdaActionList{item}
 		return nil
 	}
-	list := []IoTLambdaAction{}
+	list := []IoTTopicRuleLambdaAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTLambdaActionList(list)
+		*l = IoTTopicRuleLambdaActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTRepublishAction represents AWS IoT Republish Action
+// IoTTopicRulePutItemInput represents AWS IoT TopicRule PutItemInput
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-republish.html
-type IoTRepublishAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-putiteminput.html
+type IoTTopicRulePutItemInput struct {
+	// The name of the DynamoDB table.
+	TableName interface{} `json:"TableName,omitempty"`
+}
+
+// IoTTopicRulePutItemInputList represents a list of IoTTopicRulePutItemInput
+type IoTTopicRulePutItemInputList []IoTTopicRulePutItemInput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *IoTTopicRulePutItemInputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := IoTTopicRulePutItemInput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = IoTTopicRulePutItemInputList{item}
+		return nil
+	}
+	list := []IoTTopicRulePutItemInput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = IoTTopicRulePutItemInputList(list)
+		return nil
+	}
+	return err
+}
+
+// IoTTopicRuleRepublishAction represents AWS IoT TopicRule RepublishAction
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-republishaction.html
+type IoTTopicRuleRepublishAction struct {
 	// The ARN of the IAM role that grants publishing access.
 	RoleArn *StringExpr `json:"RoleArn,omitempty"`
 
@@ -13358,30 +21271,30 @@ type IoTRepublishAction struct {
 	Topic *StringExpr `json:"Topic,omitempty"`
 }
 
-// IoTRepublishActionList represents a list of IoTRepublishAction
-type IoTRepublishActionList []IoTRepublishAction
+// IoTTopicRuleRepublishActionList represents a list of IoTTopicRuleRepublishAction
+type IoTTopicRuleRepublishActionList []IoTTopicRuleRepublishAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTRepublishActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleRepublishActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTRepublishAction{}
+	item := IoTTopicRuleRepublishAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTRepublishActionList{item}
+		*l = IoTTopicRuleRepublishActionList{item}
 		return nil
 	}
-	list := []IoTRepublishAction{}
+	list := []IoTTopicRuleRepublishAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTRepublishActionList(list)
+		*l = IoTTopicRuleRepublishActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTS3Action represents AWS IoT S3 Action
+// IoTTopicRuleS3Action represents AWS IoT TopicRule S3Action
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-s3.html
-type IoTS3Action struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-s3action.html
+type IoTTopicRuleS3Action struct {
 	// The name of the S3 bucket.
 	BucketName *StringExpr `json:"BucketName,omitempty"`
 
@@ -13392,30 +21305,30 @@ type IoTS3Action struct {
 	RoleArn *StringExpr `json:"RoleArn,omitempty"`
 }
 
-// IoTS3ActionList represents a list of IoTS3Action
-type IoTS3ActionList []IoTS3Action
+// IoTTopicRuleS3ActionList represents a list of IoTTopicRuleS3Action
+type IoTTopicRuleS3ActionList []IoTTopicRuleS3Action
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTS3ActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleS3ActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTS3Action{}
+	item := IoTTopicRuleS3Action{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTS3ActionList{item}
+		*l = IoTTopicRuleS3ActionList{item}
 		return nil
 	}
-	list := []IoTS3Action{}
+	list := []IoTTopicRuleS3Action{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTS3ActionList(list)
+		*l = IoTTopicRuleS3ActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTSnsAction represents AWS IoT Sns Action
+// IoTTopicRuleSnsAction represents AWS IoT TopicRule SnsAction
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-sns.html
-type IoTSnsAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-snsaction.html
+type IoTTopicRuleSnsAction struct {
 	// The format of the published message. Amazon SNS uses this setting to
 	// determine whether it should parse the payload and extract the
 	// platform-specific bits from the payload.
@@ -13428,30 +21341,30 @@ type IoTSnsAction struct {
 	TargetArn *StringExpr `json:"TargetArn,omitempty"`
 }
 
-// IoTSnsActionList represents a list of IoTSnsAction
-type IoTSnsActionList []IoTSnsAction
+// IoTTopicRuleSnsActionList represents a list of IoTTopicRuleSnsAction
+type IoTTopicRuleSnsActionList []IoTTopicRuleSnsAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTSnsActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleSnsActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTSnsAction{}
+	item := IoTTopicRuleSnsAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTSnsActionList{item}
+		*l = IoTTopicRuleSnsActionList{item}
 		return nil
 	}
-	list := []IoTSnsAction{}
+	list := []IoTTopicRuleSnsAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTSnsActionList(list)
+		*l = IoTTopicRuleSnsActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTSqsAction represents AWS IoT Sqs Action
+// IoTTopicRuleSqsAction represents AWS IoT TopicRule SqsAction
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-sqs.html
-type IoTSqsAction struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-sqsaction.html
+type IoTTopicRuleSqsAction struct {
 	// The URL of the Amazon Simple Queue Service (Amazon SQS) queue.
 	QueueUrl *StringExpr `json:"QueueUrl,omitempty"`
 
@@ -13462,32 +21375,61 @@ type IoTSqsAction struct {
 	UseBase64 *BoolExpr `json:"UseBase64,omitempty"`
 }
 
-// IoTSqsActionList represents a list of IoTSqsAction
-type IoTSqsActionList []IoTSqsAction
+// IoTTopicRuleSqsActionList represents a list of IoTTopicRuleSqsAction
+type IoTTopicRuleSqsActionList []IoTTopicRuleSqsAction
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTSqsActionList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleSqsActionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTSqsAction{}
+	item := IoTTopicRuleSqsAction{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTSqsActionList{item}
+		*l = IoTTopicRuleSqsActionList{item}
 		return nil
 	}
-	list := []IoTSqsAction{}
+	list := []IoTTopicRuleSqsAction{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTSqsActionList(list)
+		*l = IoTTopicRuleSqsActionList(list)
 		return nil
 	}
 	return err
 }
 
-// IoTTopicRulePayload represents AWS IoT TopicRulePayload
+// IoTThingAttributePayload represents AWS IoT Thing AttributePayload
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrulepayload.html
-type IoTTopicRulePayload struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-thing-attributepayload.html
+type IoTThingAttributePayload struct {
+	// A string that contains up to three key–value pairs. Maximum length
+	// of 800. Duplicates not allowed.
+	Attributes *StringExpr `json:"Attributes,omitempty"`
+}
+
+// IoTThingAttributePayloadList represents a list of IoTThingAttributePayload
+type IoTThingAttributePayloadList []IoTThingAttributePayload
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *IoTThingAttributePayloadList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := IoTThingAttributePayload{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = IoTThingAttributePayloadList{item}
+		return nil
+	}
+	list := []IoTThingAttributePayload{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = IoTThingAttributePayloadList(list)
+		return nil
+	}
+	return err
+}
+
+// IoTTopicRuleTopicRulePayload represents AWS IoT TopicRule TopicRulePayload
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-iot-topicrule-topicrulepayload.html
+type IoTTopicRuleTopicRulePayload struct {
 	// The actions associated with the rule.
-	Actions *IoTActionsList `json:"Actions,omitempty"`
+	Actions *IoTTopicRuleActionList `json:"Actions,omitempty"`
 
 	// The version of the SQL rules engine to use when evaluating the rule.
 	AwsIotSqlVersion *StringExpr `json:"AwsIotSqlVersion,omitempty"`
@@ -13503,57 +21445,984 @@ type IoTTopicRulePayload struct {
 	Sql *StringExpr `json:"Sql,omitempty"`
 }
 
-// IoTTopicRulePayloadList represents a list of IoTTopicRulePayload
-type IoTTopicRulePayloadList []IoTTopicRulePayload
+// IoTTopicRuleTopicRulePayloadList represents a list of IoTTopicRuleTopicRulePayload
+type IoTTopicRuleTopicRulePayloadList []IoTTopicRuleTopicRulePayload
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *IoTTopicRulePayloadList) UnmarshalJSON(buf []byte) error {
+func (l *IoTTopicRuleTopicRulePayloadList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := IoTTopicRulePayload{}
+	item := IoTTopicRuleTopicRulePayload{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = IoTTopicRulePayloadList{item}
+		*l = IoTTopicRuleTopicRulePayloadList{item}
 		return nil
 	}
-	list := []IoTTopicRulePayload{}
+	list := []IoTTopicRuleTopicRulePayload{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = IoTTopicRulePayloadList(list)
+		*l = IoTTopicRuleTopicRulePayloadList(list)
 		return nil
 	}
 	return err
 }
 
-// KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions represents Amazon Kinesis Firehose DeliveryStream Destination CloudWatchLoggingOptions
+// KinesisAnalyticsApplicationCSVMappingParameters represents Amazon Kinesis Analytics Application CSVMappingParameters
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-destination-cloudwatchloggingoptions.html
-type KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions struct {
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-csvmappingparameters.html
+type KinesisAnalyticsApplicationCSVMappingParameters struct {
+	// The column delimiter. For example, in a CSV format, a comma (",") is
+	// the typical column delimiter.
+	RecordColumnDelimiter interface{} `json:"RecordColumnDelimiter,omitempty"`
+
+	// The row delimiter. For example, in a CSV format, "\n" is the typical
+	// row delimiter.
+	RecordRowDelimiter interface{} `json:"RecordRowDelimiter,omitempty"`
+}
+
+// KinesisAnalyticsApplicationCSVMappingParametersList represents a list of KinesisAnalyticsApplicationCSVMappingParameters
+type KinesisAnalyticsApplicationCSVMappingParametersList []KinesisAnalyticsApplicationCSVMappingParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationCSVMappingParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationCSVMappingParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationCSVMappingParametersList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationCSVMappingParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationCSVMappingParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationInput represents Amazon Kinesis Analytics Application Input
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-input.html
+type KinesisAnalyticsApplicationInput struct {
+	// The name prefix to use when creating the in-application streams.
+	NamePrefix interface{} `json:"NamePrefix,omitempty"`
+
+	// Describes the number of in-application streams to create.
+	InputParallelism *KinesisAnalyticsApplicationInputParallelism `json:"InputParallelism,omitempty"`
+
+	// Describes the format of the data in the streaming source, and how each
+	// data element maps to corresponding columns in the in-application
+	// stream that is being created.
+	InputSchema *KinesisAnalyticsApplicationInputSchema `json:"InputSchema,omitempty"`
+
+	// If the streaming source is an Amazon Kinesis Firehose delivery stream,
+	// identifies the delivery stream's Amazon Resource Name (ARN) and an IAM
+	// role that enables Kinesis Analytics to access the stream on your
+	// behalf.
+	KinesisFirehoseInput *KinesisAnalyticsApplicationKinesisFirehoseInput `json:"KinesisFirehoseInput,omitempty"`
+
+	// If the streaming source is an Amazon Kinesis stream, identifies the
+	// stream's ARN and an IAM role that enables Kinesis Analytics to access
+	// the stream on your behalf.
+	KinesisStreamsInput *KinesisAnalyticsApplicationKinesisStreamsInput `json:"KinesisStreamsInput,omitempty"`
+
+	// The input processing configuration for the input. An input processor
+	// transforms records as they are received from the stream, before the
+	// application's SQL code executes. Currently, the only input processing
+	// configuration available is InputLambdaProcessor.
+	InputProcessingConfiguration *KinesisAnalyticsApplicationInputProcessingConfiguration `json:"InputProcessingConfiguration,omitempty"`
+}
+
+// KinesisAnalyticsApplicationInputList represents a list of KinesisAnalyticsApplicationInput
+type KinesisAnalyticsApplicationInputList []KinesisAnalyticsApplicationInput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationInputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationInput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationInputList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationInput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationInputList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationInputLambdaProcessor represents Amazon Kinesis Analytics Application InputLambdaProcessor
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-inputlambdaprocessor.html
+type KinesisAnalyticsApplicationInputLambdaProcessor struct {
+	// The ARN of the AWS Lambda function that operates on records in the
+	// stream.
+	ResourceARN interface{} `json:"ResourceARN,omitempty"`
+
+	// The ARN of the IAM role that is used to access the AWS Lambda
+	// function.
+	RoleARN interface{} `json:"RoleARN,omitempty"`
+}
+
+// KinesisAnalyticsApplicationInputLambdaProcessorList represents a list of KinesisAnalyticsApplicationInputLambdaProcessor
+type KinesisAnalyticsApplicationInputLambdaProcessorList []KinesisAnalyticsApplicationInputLambdaProcessor
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationInputLambdaProcessorList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationInputLambdaProcessor{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationInputLambdaProcessorList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationInputLambdaProcessor{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationInputLambdaProcessorList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationInputParallelism represents Amazon Kinesis Analytics Application InputParallelism
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-inputparallelism.html
+type KinesisAnalyticsApplicationInputParallelism struct {
+	// The number of in-application streams to create.
+	Count interface{} `json:"Count,omitempty"`
+}
+
+// KinesisAnalyticsApplicationInputParallelismList represents a list of KinesisAnalyticsApplicationInputParallelism
+type KinesisAnalyticsApplicationInputParallelismList []KinesisAnalyticsApplicationInputParallelism
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationInputParallelismList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationInputParallelism{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationInputParallelismList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationInputParallelism{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationInputParallelismList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationInputProcessingConfiguration represents Amazon Kinesis Analytics Application InputProcessingConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-inputprocessingconfiguration.html
+type KinesisAnalyticsApplicationInputProcessingConfiguration struct {
+	// The InputLambdaProcessor that is used to preprocess the records in the
+	// stream before they are processed by your application code.
+	InputLambdaProcessor *KinesisAnalyticsApplicationInputLambdaProcessor `json:"InputLambdaProcessor,omitempty"`
+}
+
+// KinesisAnalyticsApplicationInputProcessingConfigurationList represents a list of KinesisAnalyticsApplicationInputProcessingConfiguration
+type KinesisAnalyticsApplicationInputProcessingConfigurationList []KinesisAnalyticsApplicationInputProcessingConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationInputProcessingConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationInputProcessingConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationInputProcessingConfigurationList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationInputProcessingConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationInputProcessingConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationInputSchema represents Amazon Kinesis Analytics Application InputSchema
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-inputschema.html
+type KinesisAnalyticsApplicationInputSchema struct {
+	// A list of RecordColumn objects.
+	RecordColumns *KinesisAnalyticsApplicationRecordColumnList `json:"RecordColumns,omitempty"`
+
+	// Specifies the encoding of the records in the streaming source; for
+	// example, UTF-8.
+	RecordEncoding interface{} `json:"RecordEncoding,omitempty"`
+
+	// Specifies the format of the records on the streaming source.
+	RecordFormat *KinesisAnalyticsApplicationRecordFormat `json:"RecordFormat,omitempty"`
+}
+
+// KinesisAnalyticsApplicationInputSchemaList represents a list of KinesisAnalyticsApplicationInputSchema
+type KinesisAnalyticsApplicationInputSchemaList []KinesisAnalyticsApplicationInputSchema
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationInputSchemaList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationInputSchema{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationInputSchemaList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationInputSchema{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationInputSchemaList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationJSONMappingParameters represents Amazon Kinesis Analytics Application JSONMappingParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-jsonmappingparameters.html
+type KinesisAnalyticsApplicationJSONMappingParameters struct {
+	// The path to the top-level parent that contains the records (e.g.,
+	// "$".)
+	RecordRowPath interface{} `json:"RecordRowPath,omitempty"`
+}
+
+// KinesisAnalyticsApplicationJSONMappingParametersList represents a list of KinesisAnalyticsApplicationJSONMappingParameters
+type KinesisAnalyticsApplicationJSONMappingParametersList []KinesisAnalyticsApplicationJSONMappingParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationJSONMappingParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationJSONMappingParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationJSONMappingParametersList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationJSONMappingParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationJSONMappingParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationKinesisFirehoseInput represents Amazon Kinesis Analytics Application KinesisFirehoseInput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-kinesisfirehoseinput.html
+type KinesisAnalyticsApplicationKinesisFirehoseInput struct {
+	// The Amazon Resource Name (ARN) of the input Kinesis Firehose delivery
+	// stream.
+	ResourceARN interface{} `json:"ResourceARN,omitempty"`
+
+	// The ARN of the IAM role that Kinesis Analytics can assume to access
+	// the stream on your behalf.
+	RoleARN interface{} `json:"RoleARN,omitempty"`
+}
+
+// KinesisAnalyticsApplicationKinesisFirehoseInputList represents a list of KinesisAnalyticsApplicationKinesisFirehoseInput
+type KinesisAnalyticsApplicationKinesisFirehoseInputList []KinesisAnalyticsApplicationKinesisFirehoseInput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationKinesisFirehoseInputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationKinesisFirehoseInput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationKinesisFirehoseInputList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationKinesisFirehoseInput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationKinesisFirehoseInputList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationKinesisStreamsInput represents Amazon Kinesis Analytics Application KinesisStreamsInput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-kinesisstreamsinput.html
+type KinesisAnalyticsApplicationKinesisStreamsInput struct {
+	// The Amazon Resource Name (ARN) of the input Amazon Kinesis stream to
+	// read.
+	ResourceARN interface{} `json:"ResourceARN,omitempty"`
+
+	// The ARN of the IAM role that Kinesis Analytics can assume to access
+	// the stream on your behalf.
+	RoleARN interface{} `json:"RoleARN,omitempty"`
+}
+
+// KinesisAnalyticsApplicationKinesisStreamsInputList represents a list of KinesisAnalyticsApplicationKinesisStreamsInput
+type KinesisAnalyticsApplicationKinesisStreamsInputList []KinesisAnalyticsApplicationKinesisStreamsInput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationKinesisStreamsInputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationKinesisStreamsInput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationKinesisStreamsInputList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationKinesisStreamsInput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationKinesisStreamsInputList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationMappingParameters represents Amazon Kinesis Analytics Application MappingParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-mappingparameters.html
+type KinesisAnalyticsApplicationMappingParameters struct {
+	// Provides additional mapping information when the record format uses
+	// delimiters (for example, CSV).
+	CSVMappingParameters *KinesisAnalyticsApplicationCSVMappingParameters `json:"CSVMappingParameters,omitempty"`
+
+	// Provides additional mapping information when JSON is the record format
+	// on the streaming source.
+	JSONMappingParameters *KinesisAnalyticsApplicationJSONMappingParameters `json:"JSONMappingParameters,omitempty"`
+}
+
+// KinesisAnalyticsApplicationMappingParametersList represents a list of KinesisAnalyticsApplicationMappingParameters
+type KinesisAnalyticsApplicationMappingParametersList []KinesisAnalyticsApplicationMappingParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationMappingParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationMappingParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationMappingParametersList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationMappingParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationMappingParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationRecordColumn represents Amazon Kinesis Analytics Application RecordColumn
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-recordcolumn.html
+type KinesisAnalyticsApplicationRecordColumn struct {
+	// Reference to the data element in the streaming input of the reference
+	// data source.
+	Mapping interface{} `json:"Mapping,omitempty"`
+
+	// The name of the column created in the in-application input stream or
+	// reference table.
+	Name interface{} `json:"Name,omitempty"`
+
+	// The type of column created in the in-application input stream or
+	// reference table.
+	SqlType interface{} `json:"SqlType,omitempty"`
+}
+
+// KinesisAnalyticsApplicationRecordColumnList represents a list of KinesisAnalyticsApplicationRecordColumn
+type KinesisAnalyticsApplicationRecordColumnList []KinesisAnalyticsApplicationRecordColumn
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationRecordColumnList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationRecordColumn{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationRecordColumnList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationRecordColumn{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationRecordColumnList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationRecordFormat represents Amazon Kinesis Analytics Application RecordFormat
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-application-recordformat.html
+type KinesisAnalyticsApplicationRecordFormat struct {
+	// When configuring application input at the time of creating or updating
+	// an application, provides additional mapping information specific to
+	// the record format (such as JSON, CSV, or record fields delimited by
+	// some delimiter) on the streaming source.
+	MappingParameters *KinesisAnalyticsApplicationMappingParameters `json:"MappingParameters,omitempty"`
+
+	// The type of record format (e.g CSV or JSON.)
+	RecordFormatType interface{} `json:"RecordFormatType,omitempty"`
+}
+
+// KinesisAnalyticsApplicationRecordFormatList represents a list of KinesisAnalyticsApplicationRecordFormat
+type KinesisAnalyticsApplicationRecordFormatList []KinesisAnalyticsApplicationRecordFormat
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationRecordFormatList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationRecordFormat{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationRecordFormatList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationRecordFormat{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationRecordFormatList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationOutputDestinationSchema represents Amazon Kinesis Analytics ApplicationOutput DestinationSchema
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationoutput-destinationschema.html
+type KinesisAnalyticsApplicationOutputDestinationSchema struct {
+	// Specifies the format of the records on the output stream.
+	RecordFormatType interface{} `json:"RecordFormatType,omitempty"`
+}
+
+// KinesisAnalyticsApplicationOutputDestinationSchemaList represents a list of KinesisAnalyticsApplicationOutputDestinationSchema
+type KinesisAnalyticsApplicationOutputDestinationSchemaList []KinesisAnalyticsApplicationOutputDestinationSchema
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationOutputDestinationSchemaList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationOutputDestinationSchema{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationOutputDestinationSchemaList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationOutputDestinationSchema{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationOutputDestinationSchemaList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationOutputKinesisFirehoseOutput represents Amazon Kinesis Analytics ApplicationOutput KinesisFirehoseOutput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationoutput-kinesisfirehoseoutput.html
+type KinesisAnalyticsApplicationOutputKinesisFirehoseOutput struct {
+	// The Amazon Resource Name (ARN) of the destination Amazon Kinesis
+	// Firehose delivery stream to write to.
+	ResourceARN interface{} `json:"ResourceARN,omitempty"`
+
+	// The ARN of the IAM role that Amazon Kinesis Analytics can assume to
+	// write to the destination stream on your behalf.
+	RoleARN interface{} `json:"RoleARN,omitempty"`
+}
+
+// KinesisAnalyticsApplicationOutputKinesisFirehoseOutputList represents a list of KinesisAnalyticsApplicationOutputKinesisFirehoseOutput
+type KinesisAnalyticsApplicationOutputKinesisFirehoseOutputList []KinesisAnalyticsApplicationOutputKinesisFirehoseOutput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationOutputKinesisFirehoseOutputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationOutputKinesisFirehoseOutput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationOutputKinesisFirehoseOutputList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationOutputKinesisFirehoseOutput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationOutputKinesisFirehoseOutputList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationOutputKinesisStreamsOutput represents Amazon Kinesis Analytics ApplicationOutput KinesisStreamsOutput
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationoutput-kinesisstreamsoutput.html
+type KinesisAnalyticsApplicationOutputKinesisStreamsOutput struct {
+	// The Amazon Resource Name (ARN) of the destination Amazon Kinesis
+	// stream to write to.
+	ResourceARN interface{} `json:"ResourceARN,omitempty"`
+
+	// The ARN of the IAM role that Amazon Kinesis Analytics can assume to
+	// write to the destination stream on your behalf.
+	RoleARN interface{} `json:"RoleARN,omitempty"`
+}
+
+// KinesisAnalyticsApplicationOutputKinesisStreamsOutputList represents a list of KinesisAnalyticsApplicationOutputKinesisStreamsOutput
+type KinesisAnalyticsApplicationOutputKinesisStreamsOutputList []KinesisAnalyticsApplicationOutputKinesisStreamsOutput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationOutputKinesisStreamsOutputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationOutputKinesisStreamsOutput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationOutputKinesisStreamsOutputList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationOutputKinesisStreamsOutput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationOutputKinesisStreamsOutputList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationOutputOutput represents Amazon Kinesis Analytics ApplicationOutput Output
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationoutput-output.html
+type KinesisAnalyticsApplicationOutputOutput struct {
+	// The data format when records are written to the destination.
+	DestinationSchema *KinesisAnalyticsApplicationOutputDestinationSchema `json:"DestinationSchema,omitempty"`
+
+	// Identifies an Amazon Kinesis Firehose delivery stream as the
+	// destination.
+	KinesisFirehoseOutput *KinesisAnalyticsApplicationOutputKinesisFirehoseOutput `json:"KinesisFirehoseOutput,omitempty"`
+
+	// Identifies an Amazon Kinesis stream as the destination.
+	KinesisStreamsOutput *KinesisAnalyticsApplicationOutputKinesisStreamsOutput `json:"KinesisStreamsOutput,omitempty"`
+
+	// The name of the in-application stream.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// KinesisAnalyticsApplicationOutputOutputList represents a list of KinesisAnalyticsApplicationOutputOutput
+type KinesisAnalyticsApplicationOutputOutputList []KinesisAnalyticsApplicationOutputOutput
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationOutputOutputList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationOutputOutput{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationOutputOutputList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationOutputOutput{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationOutputOutputList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParameters represents Amazon Kinesis Analytics ApplicationReferenceDataSource CSVMappingParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationreferencedatasource-csvmappingparameters.html
+type KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParameters struct {
+	// The column delimiter. For example, in a CSV format, a comma (",") is
+	// the typical column delimiter.
+	RecordColumnDelimiter interface{} `json:"RecordColumnDelimiter,omitempty"`
+
+	// The row delimiter. For example, in a CSV format, "\n" is the typical
+	// row delimiter.
+	RecordRowDelimiter interface{} `json:"RecordRowDelimiter,omitempty"`
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParametersList represents a list of KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParameters
+type KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParametersList []KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParametersList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParameters represents Amazon Kinesis Analytics ApplicationReferenceDataSource JSONMappingParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationreferencedatasource-jsonmappingparameters.html
+type KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParameters struct {
+	// Path to the top-level parent that contains the records (e.g., "$".)
+	RecordRowPath interface{} `json:"RecordRowPath,omitempty"`
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParametersList represents a list of KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParameters
+type KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParametersList []KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParametersList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceMappingParameters represents Amazon Kinesis Analytics ApplicationReferenceDataSource MappingParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationreferencedatasource-mappingparameters.html
+type KinesisAnalyticsApplicationReferenceDataSourceMappingParameters struct {
+	// Provides additional mapping information when the record format uses
+	// delimiters (for example, CSV).
+	CSVMappingParameters *KinesisAnalyticsApplicationReferenceDataSourceCSVMappingParameters `json:"CSVMappingParameters,omitempty"`
+
+	// Provides additional mapping information when JSON is the record format
+	// on the streaming source.
+	JSONMappingParameters *KinesisAnalyticsApplicationReferenceDataSourceJSONMappingParameters `json:"JSONMappingParameters,omitempty"`
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceMappingParametersList represents a list of KinesisAnalyticsApplicationReferenceDataSourceMappingParameters
+type KinesisAnalyticsApplicationReferenceDataSourceMappingParametersList []KinesisAnalyticsApplicationReferenceDataSourceMappingParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationReferenceDataSourceMappingParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationReferenceDataSourceMappingParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceMappingParametersList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationReferenceDataSourceMappingParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceMappingParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceRecordColumn represents Amazon Kinesis Analytics ApplicationReferenceDataSource RecordColumn
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationreferencedatasource-recordcolumn.html
+type KinesisAnalyticsApplicationReferenceDataSourceRecordColumn struct {
+	// The reference to the data element in the streaming input of the
+	// reference data source.
+	Mapping interface{} `json:"Mapping,omitempty"`
+
+	// The name of the column created in the in-application input stream or
+	// reference table.
+	Name interface{} `json:"Name,omitempty"`
+
+	// The SQL data type of the column created in the in-application input
+	// stream or reference table.
+	SqlType interface{} `json:"SqlType,omitempty"`
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceRecordColumnList represents a list of KinesisAnalyticsApplicationReferenceDataSourceRecordColumn
+type KinesisAnalyticsApplicationReferenceDataSourceRecordColumnList []KinesisAnalyticsApplicationReferenceDataSourceRecordColumn
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationReferenceDataSourceRecordColumnList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationReferenceDataSourceRecordColumn{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceRecordColumnList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationReferenceDataSourceRecordColumn{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceRecordColumnList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceRecordFormat represents Amazon Kinesis Analytics ApplicationReferenceDataSource RecordFormat
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationreferencedatasource-recordformat.html
+type KinesisAnalyticsApplicationReferenceDataSourceRecordFormat struct {
+	// When configuring application input at the time of creating or updating
+	// an application, provides additional mapping information specific to
+	// the record format (such as JSON, CSV, or record fields delimited by
+	// some delimiter) on the streaming source.
+	MappingParameters *KinesisAnalyticsApplicationReferenceDataSourceMappingParameters `json:"MappingParameters,omitempty"`
+
+	// The type of record format (CSV or JSON).
+	RecordFormatType interface{} `json:"RecordFormatType,omitempty"`
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceRecordFormatList represents a list of KinesisAnalyticsApplicationReferenceDataSourceRecordFormat
+type KinesisAnalyticsApplicationReferenceDataSourceRecordFormatList []KinesisAnalyticsApplicationReferenceDataSourceRecordFormat
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationReferenceDataSourceRecordFormatList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationReferenceDataSourceRecordFormat{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceRecordFormatList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationReferenceDataSourceRecordFormat{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceRecordFormatList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSource represents Amazon Kinesis Analytics ApplicationReferenceDataSource ReferenceDataSource
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationreferencedatasource-referencedatasource.html
+type KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSource struct {
+	// The name of the in-application table to create.
+	TableName interface{} `json:"TableName,omitempty"`
+
+	// Identifies the Amazon S3 bucket and object that contains the reference
+	// data. Also identifies the IAM role that Amazon Kinesis Analytics can
+	// assume to read this object on your behalf.
+	S3ReferenceDataSource *KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSource `json:"S3ReferenceDataSource,omitempty"`
+
+	// Describes the format of the data in the streaming source, and how each
+	// data element maps to corresponding columns that are created in the
+	// in-application stream.
+	ReferenceSchema *KinesisAnalyticsApplicationReferenceDataSourceReferenceSchema `json:"ReferenceSchema,omitempty"`
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSourceList represents a list of KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSource
+type KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSourceList []KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSource
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSourceList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSource{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSourceList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSource{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceReferenceDataSourceList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceReferenceSchema represents Amazon Kinesis Analytics ApplicationReferenceDataSource ReferenceSchema
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationreferencedatasource-referenceschema.html
+type KinesisAnalyticsApplicationReferenceDataSourceReferenceSchema struct {
+	// A list of Amazon Kinesis Analytics ApplicationReferenceDataSource
+	// RecordColumn objects.
+	RecordColumns *KinesisAnalyticsApplicationReferenceDataSourceRecordColumnList `json:"RecordColumns,omitempty"`
+
+	// Specifies the encoding of the records in the streaming source; For
+	// example, UTF-8.
+	RecordEncoding interface{} `json:"RecordEncoding,omitempty"`
+
+	// Specifies the format of the records on the streaming source.
+	RecordFormat *KinesisAnalyticsApplicationReferenceDataSourceRecordFormat `json:"RecordFormat,omitempty"`
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceReferenceSchemaList represents a list of KinesisAnalyticsApplicationReferenceDataSourceReferenceSchema
+type KinesisAnalyticsApplicationReferenceDataSourceReferenceSchemaList []KinesisAnalyticsApplicationReferenceDataSourceReferenceSchema
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationReferenceDataSourceReferenceSchemaList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationReferenceDataSourceReferenceSchema{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceReferenceSchemaList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationReferenceDataSourceReferenceSchema{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceReferenceSchemaList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSource represents Amazon Kinesis Analytics ApplicationReferenceDataSource S3ReferenceDataSource
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisanalytics-applicationreferencedatasource-s3referencedatasource.html
+type KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSource struct {
+	// The Amazon Resource Name (ARN) of the Amazon S3 bucket.
+	BucketARN interface{} `json:"BucketARN,omitempty"`
+
+	// The object key name containing reference data.
+	FileKey interface{} `json:"FileKey,omitempty"`
+
+	// The ARN of the IAM role that the service can assume to read data on
+	// your behalf.
+	ReferenceRoleARN interface{} `json:"ReferenceRoleARN,omitempty"`
+}
+
+// KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSourceList represents a list of KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSource
+type KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSourceList []KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSource
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSourceList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSource{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSourceList{item}
+		return nil
+	}
+	list := []KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSource{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisAnalyticsApplicationReferenceDataSourceS3ReferenceDataSourceList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamBufferingHints represents Amazon Kinesis Firehose DeliveryStream BufferingHints
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-bufferinghints.html
+type KinesisFirehoseDeliveryStreamBufferingHints struct {
+	// The length of time, in seconds, that Kinesis Firehose buffers incoming
+	// data before delivering it to the destination. For valid values, see
+	// the IntervalInSeconds content for the BufferingHints data type in the
+	// Amazon Kinesis Firehose API Reference.
+	IntervalInSeconds *IntegerExpr `json:"IntervalInSeconds,omitempty"`
+
+	// The size of the buffer, in MBs, that Kinesis Firehose uses for
+	// incoming data before delivering it to the destination. For valid
+	// values, see the SizeInMBs content for the BufferingHints data type in
+	// the Amazon Kinesis Firehose API Reference.
+	SizeInMBs *IntegerExpr `json:"SizeInMBs,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamBufferingHintsList represents a list of KinesisFirehoseDeliveryStreamBufferingHints
+type KinesisFirehoseDeliveryStreamBufferingHintsList []KinesisFirehoseDeliveryStreamBufferingHints
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamBufferingHintsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamBufferingHints{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamBufferingHintsList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamBufferingHints{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamBufferingHintsList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions represents Amazon Kinesis Firehose DeliveryStream CloudWatchLoggingOptions
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-cloudwatchloggingoptions.html
+type KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions struct {
 	// Indicates whether CloudWatch Logs logging is enabled.
 	Enabled *BoolExpr `json:"Enabled,omitempty"`
 
 	// The name of the CloudWatch Logs log group that contains the log stream
-	// that Firehose will use.
+	// that Kinesis Firehose will use.
 	LogGroupName *StringExpr `json:"LogGroupName,omitempty"`
 
-	// The name of the CloudWatch Logs log stream that Firehose uses to send
-	// logs about data delivery.
+	// The name of the CloudWatch Logs log stream that Kinesis Firehose uses
+	// to send logs about data delivery.
 	LogStreamName *StringExpr `json:"LogStreamName,omitempty"`
 }
 
-// KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptionsList represents a list of KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions
-type KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptionsList []KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions
+// KinesisFirehoseDeliveryStreamCloudWatchLoggingOptionsList represents a list of KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions
+type KinesisFirehoseDeliveryStreamCloudWatchLoggingOptionsList []KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptionsList) UnmarshalJSON(buf []byte) error {
+func (l *KinesisFirehoseDeliveryStreamCloudWatchLoggingOptionsList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions{}
+	item := KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptionsList{item}
+		*l = KinesisFirehoseDeliveryStreamCloudWatchLoggingOptionsList{item}
 		return nil
 	}
-	list := []KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions{}
+	list := []KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptionsList(list)
+		*l = KinesisFirehoseDeliveryStreamCloudWatchLoggingOptionsList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamCopyCommand represents Amazon Kinesis Firehose DeliveryStream CopyCommand
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-copycommand.html
+type KinesisFirehoseDeliveryStreamCopyCommand struct {
+	// Parameters to use with the Amazon Redshift COPY command. For examples,
+	// see the CopyOptions content for the CopyCommand data type in the
+	// Amazon Kinesis Firehose API Reference.
+	CopyOptions *StringExpr `json:"CopyOptions,omitempty"`
+
+	// A comma-separated list of the column names in the table that Kinesis
+	// Firehose copies data to.
+	DataTableColumns *StringExpr `json:"DataTableColumns,omitempty"`
+
+	// The name of the table where Kinesis Firehose adds the copied data.
+	DataTableName *StringExpr `json:"DataTableName,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamCopyCommandList represents a list of KinesisFirehoseDeliveryStreamCopyCommand
+type KinesisFirehoseDeliveryStreamCopyCommandList []KinesisFirehoseDeliveryStreamCopyCommand
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamCopyCommandList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamCopyCommand{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamCopyCommandList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamCopyCommand{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamCopyCommandList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamElasticsearchBufferingHints represents Amazon Kinesis Firehose DeliveryStream ElasticsearchBufferingHints
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-elasticsearchbufferinghints.html
+type KinesisFirehoseDeliveryStreamElasticsearchBufferingHints struct {
+	// The length of time, in seconds, that Kinesis Firehose buffers incoming
+	// data before delivering it to the destination. For valid values, see
+	// the IntervalInSeconds content for the BufferingHints data type in the
+	// Amazon Kinesis Firehose API Reference.
+	IntervalInSeconds *IntegerExpr `json:"IntervalInSeconds,omitempty"`
+
+	// The size of the buffer, in MBs, that Kinesis Firehose uses for
+	// incoming data before delivering it to the destination. For valid
+	// values, see the SizeInMBs content for the BufferingHints data type in
+	// the Amazon Kinesis Firehose API Reference.
+	SizeInMBs *IntegerExpr `json:"SizeInMBs,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamElasticsearchBufferingHintsList represents a list of KinesisFirehoseDeliveryStreamElasticsearchBufferingHints
+type KinesisFirehoseDeliveryStreamElasticsearchBufferingHintsList []KinesisFirehoseDeliveryStreamElasticsearchBufferingHints
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamElasticsearchBufferingHintsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamElasticsearchBufferingHints{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamElasticsearchBufferingHintsList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamElasticsearchBufferingHints{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamElasticsearchBufferingHintsList(list)
 		return nil
 	}
 	return err
@@ -13561,48 +22430,55 @@ func (l *KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptionsList) U
 
 // KinesisFirehoseDeliveryStreamElasticsearchDestinationConfiguration represents Amazon Kinesis Firehose DeliveryStream ElasticsearchDestinationConfiguration
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-elasticsearchdestinationconfiguration.html
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-elasticsearchdestinationconfiguration.html
 type KinesisFirehoseDeliveryStreamElasticsearchDestinationConfiguration struct {
-	// Configures how Firehose buffers incoming data while delivering it to
-	// the Amazon ES domain.
-	BufferingHints *KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHints `json:"BufferingHints,omitempty"`
+	// Configures how Kinesis Firehose buffers incoming data while delivering
+	// it to the Amazon ES domain.
+	BufferingHints *KinesisFirehoseDeliveryStreamElasticsearchBufferingHints `json:"BufferingHints,omitempty"`
 
 	// The Amazon CloudWatch Logs logging options for the delivery stream.
-	CloudWatchLoggingOptions *KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions `json:"CloudWatchLoggingOptions,omitempty"`
+	CloudWatchLoggingOptions *KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions `json:"CloudWatchLoggingOptions,omitempty"`
 
-	// The Amazon Resource Name (ARN) of the Amazon ES domain that Firehose
-	// delivers data to.
+	// The Amazon Resource Name (ARN) of the Amazon ES domain that Kinesis
+	// Firehose delivers data to.
 	DomainARN *StringExpr `json:"DomainARN,omitempty"`
 
-	// The name of the Elasticsearch index to which Firehose adds data for
-	// indexing.
+	// The name of the Elasticsearch index to which Kinesis Firehose adds
+	// data for indexing.
 	IndexName *StringExpr `json:"IndexName,omitempty"`
 
 	// The frequency of Elasticsearch index rotation. If you enable index
-	// rotation, Firehose appends a portion of the UTC arrival timestamp to
-	// the specified index name, and rotates the appended timestamp
-	// accordingly. For more information, see Index Rotation for the Amazon
-	// ES Destination in the Amazon Kinesis Firehose Developer Guide.
+	// rotation, Kinesis Firehose appends a portion of the UTC arrival
+	// timestamp to the specified index name, and rotates the appended
+	// timestamp accordingly. For more information, see Index Rotation for
+	// the Amazon ES Destination in the Amazon Kinesis Firehose Developer
+	// Guide.
 	IndexRotationPeriod *StringExpr `json:"IndexRotationPeriod,omitempty"`
 
-	// The retry behavior when Firehose is unable to deliver data to Amazon
-	// ES.
-	RetryOptions *KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptions `json:"RetryOptions,omitempty"`
+	// The data processing configuration for the Kinesis Firehose delivery
+	// stream.
+	ProcessingConfiguration *KinesisFirehoseDeliveryStreamProcessingConfiguration `json:"ProcessingConfiguration,omitempty"`
+
+	// The retry behavior when Kinesis Firehose is unable to deliver data to
+	// Amazon ES.
+	RetryOptions *KinesisFirehoseDeliveryStreamElasticsearchRetryOptions `json:"RetryOptions,omitempty"`
 
 	// The ARN of the AWS Identity and Access Management (IAM) role that
-	// grants Firehose access to your S3 bucket, AWS KMS (if you enable data
-	// encryption), and Amazon CloudWatch Logs (if you enable logging).
+	// grants Kinesis Firehose access to your Amazon S3 bucket, AWS KMS (if
+	// you enable data encryption), and Amazon CloudWatch Logs (if you enable
+	// logging).
 	RoleARN *StringExpr `json:"RoleARN,omitempty"`
 
-	// The condition under which Firehose delivers data to Amazon Simple
-	// Storage Service (Amazon S3). You can send Amazon S3 all documents (all
-	// data) or only the documents that Firehose could not deliver to the
-	// Amazon ES destination. For more information and valid values, see the
-	// S3BackupMode content for the ElasticsearchDestinationConfiguration
-	// data type in the Amazon Kinesis Firehose API Reference.
+	// The condition under which Kinesis Firehose delivers data to Amazon
+	// Simple Storage Service (Amazon S3). You can send Amazon S3 all
+	// documents (all data) or only the documents that Kinesis Firehose could
+	// not deliver to the Amazon ES destination. For more information and
+	// valid values, see the S3BackupMode content for the
+	// ElasticsearchDestinationConfiguration data type in the Amazon Kinesis
+	// Firehose API Reference.
 	S3BackupMode *StringExpr `json:"S3BackupMode,omitempty"`
 
-	// The S3 bucket where Firehose backs up incoming data.
+	// The S3 bucket where Kinesis Firehose backs up incoming data.
 	S3Configuration *KinesisFirehoseDeliveryStreamS3DestinationConfiguration `json:"S3Configuration,omitempty"`
 
 	// The Elasticsearch type name that Amazon ES adds to documents when
@@ -13630,71 +22506,296 @@ func (l *KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationList)
 	return err
 }
 
-// KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHints represents Amazon Kinesis Firehose DeliveryStream ElasticsearchDestinationConfiguration BufferingHints
+// KinesisFirehoseDeliveryStreamElasticsearchRetryOptions represents Amazon Kinesis Firehose DeliveryStream ElasticsearchRetryOptions
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-elasticsearchdestinationconfiguration-bufferinghints.html
-type KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHints struct {
-	// The length of time, in seconds, that Firehose buffers incoming data
-	// before delivering it to the destination. For valid values, see the
-	// IntervalInSeconds content for the BufferingHints data type in the
-	// Amazon Kinesis Firehose API Reference.
-	IntervalInSeconds *IntegerExpr `json:"IntervalInSeconds,omitempty"`
-
-	// The size of the buffer, in MBs, that Firehose uses for incoming data
-	// before delivering it to the destination. For valid values, see the
-	// SizeInMBs content for the BufferingHints data type in the Amazon
-	// Kinesis Firehose API Reference.
-	SizeInMBs *IntegerExpr `json:"SizeInMBs,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-elasticsearchretryoptions.html
+type KinesisFirehoseDeliveryStreamElasticsearchRetryOptions struct {
+	// After an initial failure to deliver to Amazon ES, the total amount of
+	// time during which Kinesis Firehose re-attempts delivery (including the
+	// first attempt). If Kinesis Firehose can't deliver the data within the
+	// specified time, it writes the data to the backup S3 bucket. For valid
+	// values, see the DurationInSeconds content for the
+	// ElasticsearchRetryOptions data type in the Amazon Kinesis Firehose API
+	// Reference.
+	DurationInSeconds *IntegerExpr `json:"DurationInSeconds,omitempty"`
 }
 
-// KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHintsList represents a list of KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHints
-type KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHintsList []KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHints
+// KinesisFirehoseDeliveryStreamElasticsearchRetryOptionsList represents a list of KinesisFirehoseDeliveryStreamElasticsearchRetryOptions
+type KinesisFirehoseDeliveryStreamElasticsearchRetryOptionsList []KinesisFirehoseDeliveryStreamElasticsearchRetryOptions
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHintsList) UnmarshalJSON(buf []byte) error {
+func (l *KinesisFirehoseDeliveryStreamElasticsearchRetryOptionsList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHints{}
+	item := KinesisFirehoseDeliveryStreamElasticsearchRetryOptions{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHintsList{item}
+		*l = KinesisFirehoseDeliveryStreamElasticsearchRetryOptionsList{item}
 		return nil
 	}
-	list := []KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHints{}
+	list := []KinesisFirehoseDeliveryStreamElasticsearchRetryOptions{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationBufferingHintsList(list)
+		*l = KinesisFirehoseDeliveryStreamElasticsearchRetryOptionsList(list)
 		return nil
 	}
 	return err
 }
 
-// KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptions represents Amazon Kinesis Firehose DeliveryStream ElasticsearchDestinationConfiguration RetryOptions
+// KinesisFirehoseDeliveryStreamEncryptionConfiguration represents Amazon Kinesis Firehose DeliveryStream EncryptionConfiguration
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-elasticsearchdestinationconfiguration-retryoptions.html
-type KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptions struct {
-	// After an initial failure to deliver to Amazon ES, the total amount of
-	// time during which Firehose re-attempts delivery (including the first
-	// attempt). If Firehose can't deliver the data within the specified
-	// time, it writes the data to the backup S3 bucket. For valid values,
-	// see the DurationInSeconds content for the ElasticsearchRetryOptions
-	// data type in the Amazon Kinesis Firehose API Reference.
-	DurationInSeconds *IntegerExpr `json:"DurationInSeconds,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-encryptionconfiguration.html
+type KinesisFirehoseDeliveryStreamEncryptionConfiguration struct {
+	// The AWS Key Management Service (AWS KMS) encryption key that Amazon S3
+	// uses to encrypt your data.
+	KMSEncryptionConfig *KinesisFirehoseDeliveryStreamKMSEncryptionConfig `json:"KMSEncryptionConfig,omitempty"`
+
+	// Disables encryption. For valid values, see the NoEncryptionConfig
+	// content for the EncryptionConfiguration data type in the Amazon
+	// Kinesis Firehose API Reference.
+	NoEncryptionConfig *StringExpr `json:"NoEncryptionConfig,omitempty"`
 }
 
-// KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptionsList represents a list of KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptions
-type KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptionsList []KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptions
+// KinesisFirehoseDeliveryStreamEncryptionConfigurationList represents a list of KinesisFirehoseDeliveryStreamEncryptionConfiguration
+type KinesisFirehoseDeliveryStreamEncryptionConfigurationList []KinesisFirehoseDeliveryStreamEncryptionConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptionsList) UnmarshalJSON(buf []byte) error {
+func (l *KinesisFirehoseDeliveryStreamEncryptionConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptions{}
+	item := KinesisFirehoseDeliveryStreamEncryptionConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptionsList{item}
+		*l = KinesisFirehoseDeliveryStreamEncryptionConfigurationList{item}
 		return nil
 	}
-	list := []KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptions{}
+	list := []KinesisFirehoseDeliveryStreamEncryptionConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetryOptionsList(list)
+		*l = KinesisFirehoseDeliveryStreamEncryptionConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamExtendedS3DestinationConfiguration represents Amazon Kinesis Firehose DeliveryStream ExtendedS3DestinationConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-extendeds3destinationconfiguration.html
+type KinesisFirehoseDeliveryStreamExtendedS3DestinationConfiguration struct {
+	// The Amazon Resource Name (ARN) of the Amazon S3 bucket. For
+	// constraints, see ExtendedS3DestinationConfiguration in the Amazon
+	// Kinesis Firehose API Reference.
+	BucketARN *StringExpr `json:"BucketARN,omitempty"`
+
+	// The buffering option.
+	BufferingHints *KinesisFirehoseDeliveryStreamBufferingHints `json:"BufferingHints,omitempty"`
+
+	// The CloudWatch logging options for the Kinesis Firehose delivery
+	// stream.
+	CloudWatchLoggingOptions *KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions `json:"CloudWatchLoggingOptions,omitempty"`
+
+	// The compression format for the Kinesis Firehose delivery stream. The
+	// default value is UNCOMPRESSED. For valid values, see
+	// ExtendedS3DestinationConfiguration in the Amazon Kinesis Firehose API
+	// Reference.
+	CompressionFormat *StringExpr `json:"CompressionFormat,omitempty"`
+
+	// The encryption configuration for the Kinesis Firehose delivery stream.
+	// The default value is NoEncryption.
+	EncryptionConfiguration *KinesisFirehoseDeliveryStreamEncryptionConfiguration `json:"EncryptionConfiguration,omitempty"`
+
+	// The YYYY/MM/DD/HH time format prefix is automatically used for
+	// delivered Amazon S3 files. For more information, see
+	// ExtendedS3DestinationConfiguration in the Amazon Kinesis Firehose API
+	// Reference.
+	Prefix *StringExpr `json:"Prefix,omitempty"`
+
+	// The data processing configuration for the Kinesis Firehose delivery
+	// stream.
+	ProcessingConfiguration *KinesisFirehoseDeliveryStreamProcessingConfiguration `json:"ProcessingConfiguration,omitempty"`
+
+	// The ARN of the AWS credentials. For constraints, see
+	// ExtendedS3DestinationConfiguration in the Amazon Kinesis Firehose API
+	// Reference.
+	RoleARN *StringExpr `json:"RoleARN,omitempty"`
+
+	// The configuration for backup in Amazon S3.
+	S3BackupConfiguration *KinesisFirehoseDeliveryStreamS3DestinationConfiguration `json:"S3BackupConfiguration,omitempty"`
+
+	// The Amazon S3 backup mode. For valid values, see
+	// ExtendedS3DestinationConfiguration in the Amazon Kinesis Firehose API
+	// Reference.
+	S3BackupMode *StringExpr `json:"S3BackupMode,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamExtendedS3DestinationConfigurationList represents a list of KinesisFirehoseDeliveryStreamExtendedS3DestinationConfiguration
+type KinesisFirehoseDeliveryStreamExtendedS3DestinationConfigurationList []KinesisFirehoseDeliveryStreamExtendedS3DestinationConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamExtendedS3DestinationConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamExtendedS3DestinationConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamExtendedS3DestinationConfigurationList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamExtendedS3DestinationConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamExtendedS3DestinationConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamKinesisStreamSourceConfiguration represents Amazon Kinesis Firehose DeliveryStream KinesisStreamSourceConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-kinesisstreamsourceconfiguration.html
+type KinesisFirehoseDeliveryStreamKinesisStreamSourceConfiguration struct {
+	// The Amazon Resource Name (ARN) of the source Kinesis stream.
+	KinesisStreamARN interface{} `json:"KinesisStreamARN,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the role that provides access to the
+	// source Kinesis stream.
+	RoleARN interface{} `json:"RoleARN,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamKinesisStreamSourceConfigurationList represents a list of KinesisFirehoseDeliveryStreamKinesisStreamSourceConfiguration
+type KinesisFirehoseDeliveryStreamKinesisStreamSourceConfigurationList []KinesisFirehoseDeliveryStreamKinesisStreamSourceConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamKinesisStreamSourceConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamKinesisStreamSourceConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamKinesisStreamSourceConfigurationList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamKinesisStreamSourceConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamKinesisStreamSourceConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamKMSEncryptionConfig represents Amazon Kinesis Firehose DeliveryStream KMSEncryptionConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-kmsencryptionconfig.html
+type KinesisFirehoseDeliveryStreamKMSEncryptionConfig struct {
+	// The Amazon Resource Name (ARN) of the AWS KMS encryption key that
+	// Amazon S3 uses to encrypt data delivered by the Kinesis Firehose
+	// stream. The key must belong to the same region as the destination S3
+	// bucket.
+	AWSKMSKeyARN *StringExpr `json:"AWSKMSKeyARN,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamKMSEncryptionConfigList represents a list of KinesisFirehoseDeliveryStreamKMSEncryptionConfig
+type KinesisFirehoseDeliveryStreamKMSEncryptionConfigList []KinesisFirehoseDeliveryStreamKMSEncryptionConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamKMSEncryptionConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamKMSEncryptionConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamKMSEncryptionConfigList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamKMSEncryptionConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamKMSEncryptionConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamProcessingConfiguration represents Amazon Kinesis Firehose DeliveryStream ProcessingConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-processingconfiguration.html
+type KinesisFirehoseDeliveryStreamProcessingConfiguration struct {
+	// Indicates whether data processing is enabled (true) or disabled
+	// (false).
+	Enabled *BoolExpr `json:"Enabled,omitempty"`
+
+	// The data processors.
+	Processors *KinesisFirehoseDeliveryStreamProcessorList `json:"Processors,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamProcessingConfigurationList represents a list of KinesisFirehoseDeliveryStreamProcessingConfiguration
+type KinesisFirehoseDeliveryStreamProcessingConfigurationList []KinesisFirehoseDeliveryStreamProcessingConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamProcessingConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamProcessingConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamProcessingConfigurationList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamProcessingConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamProcessingConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamProcessor represents Amazon Kinesis Firehose DeliveryStream Processor
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-processor.html
+type KinesisFirehoseDeliveryStreamProcessor struct {
+	// The processor parameters.
+	Parameters *KinesisFirehoseDeliveryStreamProcessorParameterList `json:"Parameters,omitempty"`
+
+	// The type of processor. Valid values: Lambda.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamProcessorList represents a list of KinesisFirehoseDeliveryStreamProcessor
+type KinesisFirehoseDeliveryStreamProcessorList []KinesisFirehoseDeliveryStreamProcessor
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamProcessorList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamProcessor{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamProcessorList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamProcessor{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamProcessorList(list)
+		return nil
+	}
+	return err
+}
+
+// KinesisFirehoseDeliveryStreamProcessorParameter represents Amazon Kinesis Firehose DeliveryStream ProcessorParameter
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-processorparameter.html
+type KinesisFirehoseDeliveryStreamProcessorParameter struct {
+	// The name of the parameter.
+	ParameterName *StringExpr `json:"ParameterName,omitempty"`
+
+	// The parameter value.
+	ParameterValue *StringExpr `json:"ParameterValue,omitempty"`
+}
+
+// KinesisFirehoseDeliveryStreamProcessorParameterList represents a list of KinesisFirehoseDeliveryStreamProcessorParameter
+type KinesisFirehoseDeliveryStreamProcessorParameterList []KinesisFirehoseDeliveryStreamProcessorParameter
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *KinesisFirehoseDeliveryStreamProcessorParameterList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := KinesisFirehoseDeliveryStreamProcessorParameter{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = KinesisFirehoseDeliveryStreamProcessorParameterList{item}
+		return nil
+	}
+	list := []KinesisFirehoseDeliveryStreamProcessorParameter{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = KinesisFirehoseDeliveryStreamProcessorParameterList(list)
 		return nil
 	}
 	return err
@@ -13702,38 +22803,42 @@ func (l *KinesisFirehoseDeliveryStreamElasticsearchDestinationConfigurationRetry
 
 // KinesisFirehoseDeliveryStreamRedshiftDestinationConfiguration represents Amazon Kinesis Firehose DeliveryStream RedshiftDestinationConfiguration
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-redshiftdestinationconfiguration.html
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-redshiftdestinationconfiguration.html
 type KinesisFirehoseDeliveryStreamRedshiftDestinationConfiguration struct {
 	// The Amazon CloudWatch Logs logging options for the delivery stream.
-	CloudWatchLoggingOptions *KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions `json:"CloudWatchLoggingOptions,omitempty"`
+	CloudWatchLoggingOptions *KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions `json:"CloudWatchLoggingOptions,omitempty"`
 
-	// The connection string that Firehose uses to connect to the Amazon
-	// Redshift cluster.
+	// The connection string that Kinesis Firehose uses to connect to the
+	// Amazon Redshift cluster.
 	ClusterJDBCURL *StringExpr `json:"ClusterJDBCURL,omitempty"`
 
-	// Configures the Amazon Redshift COPY command that Firehose uses to load
-	// data into the cluster from the S3 bucket.
-	CopyCommand *KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommand `json:"CopyCommand,omitempty"`
+	// Configures the Amazon Redshift COPY command that Kinesis Firehose uses
+	// to load data into the cluster from the Amazon S3 bucket.
+	CopyCommand *KinesisFirehoseDeliveryStreamCopyCommand `json:"CopyCommand,omitempty"`
 
 	// The password for the Amazon Redshift user that you specified in the
 	// Username property.
 	Password *StringExpr `json:"Password,omitempty"`
 
+	// The data processing configuration for the Kinesis Firehose delivery
+	// stream.
+	ProcessingConfiguration *KinesisFirehoseDeliveryStreamProcessingConfiguration `json:"ProcessingConfiguration,omitempty"`
+
 	// The ARN of the AWS Identity and Access Management (IAM) role that
-	// grants Firehose access to your S3 bucket and AWS KMS (if you enable
-	// data encryption).
+	// grants Kinesis Firehose access to your Amazon S3 bucket and AWS KMS
+	// (if you enable data encryption).
 	RoleARN *StringExpr `json:"RoleARN,omitempty"`
 
-	// The S3 bucket where Firehose first delivers data. After the data is in
-	// the bucket, Firehose uses the COPY command to load the data into the
-	// Amazon Redshift cluster. For the S3 bucket's compression format, don't
-	// specify SNAPPY or ZIP because the Amazon Redshift COPY command doesn't
-	// support them.
+	// The S3 bucket where Kinesis Firehose first delivers data. After the
+	// data is in the bucket, Kinesis Firehose uses the COPY command to load
+	// the data into the Amazon Redshift cluster. For the Amazon S3 bucket's
+	// compression format, don't specify SNAPPY or ZIP because the Amazon
+	// Redshift COPY command doesn't support them.
 	S3Configuration *KinesisFirehoseDeliveryStreamS3DestinationConfiguration `json:"S3Configuration,omitempty"`
 
 	// The Amazon Redshift user that has permission to access the Amazon
 	// Redshift cluster. This user must have INSERT privileges for copying
-	// data from the S3 bucket to the cluster.
+	// data from the Amazon S3 bucket to the cluster.
 	Username *StringExpr `json:"Username,omitempty"`
 }
 
@@ -13757,76 +22862,40 @@ func (l *KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationList) Unma
 	return err
 }
 
-// KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommand represents Amazon Kinesis Firehose DeliveryStream RedshiftDestinationConfiguration CopyCommand
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-redshiftdestinationconfiguration-copycommand.html
-type KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommand struct {
-	// Parameters to use with the Amazon Redshift COPY command. For examples,
-	// see the CopyOptions content for the CopyCommand data type in the
-	// Amazon Kinesis Firehose API Reference.
-	CopyOptions *StringExpr `json:"CopyOptions,omitempty"`
-
-	// A comma-separated list of the column names in the table that Firehose
-	// copies data to.
-	DataTableColumns *StringExpr `json:"DataTableColumns,omitempty"`
-
-	// The name of the table where Firehose adds the copied data.
-	DataTableName *StringExpr `json:"DataTableName,omitempty"`
-}
-
-// KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommandList represents a list of KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommand
-type KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommandList []KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommand
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommandList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommand{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommandList{item}
-		return nil
-	}
-	list := []KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommand{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = KinesisFirehoseDeliveryStreamRedshiftDestinationConfigurationCopyCommandList(list)
-		return nil
-	}
-	return err
-}
-
 // KinesisFirehoseDeliveryStreamS3DestinationConfiguration represents Amazon Kinesis Firehose DeliveryStream S3DestinationConfiguration
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-s3destinationconfiguration.html
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-deliverystream-s3destinationconfiguration.html
 type KinesisFirehoseDeliveryStreamS3DestinationConfiguration struct {
-	// The Amazon Resource Name (ARN) of the S3 bucket to send data to.
+	// The Amazon Resource Name (ARN) of the Amazon S3 bucket to send data
+	// to.
 	BucketARN *StringExpr `json:"BucketARN,omitempty"`
 
-	// Configures how Firehose buffers incoming data while delivering it to
-	// the S3 bucket.
-	BufferingHints *KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHints `json:"BufferingHints,omitempty"`
+	// Configures how Kinesis Firehose buffers incoming data while delivering
+	// it to the Amazon S3 bucket.
+	BufferingHints *KinesisFirehoseDeliveryStreamBufferingHints `json:"BufferingHints,omitempty"`
 
 	// The Amazon CloudWatch Logs logging options for the delivery stream.
-	CloudWatchLoggingOptions *KinesisFirehoseDeliveryStreamDestinationCloudWatchLoggingOptions `json:"CloudWatchLoggingOptions,omitempty"`
+	CloudWatchLoggingOptions *KinesisFirehoseDeliveryStreamCloudWatchLoggingOptions `json:"CloudWatchLoggingOptions,omitempty"`
 
-	// The type of compression that Firehose uses to compress the data that
-	// it delivers to the S3 bucket. For valid values, see the
-	// CompressionFormat content for the S3DestinationConfiguration data type
-	// in the Amazon Kinesis Firehose API Reference.
+	// The type of compression that Kinesis Firehose uses to compress the
+	// data that it delivers to the Amazon S3 bucket. For valid values, see
+	// the CompressionFormat content for the S3DestinationConfiguration data
+	// type in the Amazon Kinesis Firehose API Reference.
 	CompressionFormat *StringExpr `json:"CompressionFormat,omitempty"`
 
 	// Configures Amazon Simple Storage Service (Amazon S3) server-side
-	// encryption. Firehose uses AWS Key Management Service (AWS KMS) to
-	// encrypt the data that it delivers to your S3 bucket.
-	EncryptionConfiguration *KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfiguration `json:"EncryptionConfiguration,omitempty"`
+	// encryption. Kinesis Firehose uses AWS Key Management Service (AWS KMS)
+	// to encrypt the data that it delivers to your Amazon S3 bucket.
+	EncryptionConfiguration *KinesisFirehoseDeliveryStreamEncryptionConfiguration `json:"EncryptionConfiguration,omitempty"`
 
-	// A prefix that Firehose adds to the files that it delivers to the S3
-	// bucket. The prefix helps you identify the files that Firehose
-	// delivered.
+	// A prefix that Kinesis Firehose adds to the files that it delivers to
+	// the Amazon S3 bucket. The prefix helps you identify the files that
+	// Kinesis Firehose delivered.
 	Prefix *StringExpr `json:"Prefix,omitempty"`
 
 	// The ARN of an AWS Identity and Access Management (IAM) role that
-	// grants Firehose access to your S3 bucket and AWS KMS (if you enable
-	// data encryption).
+	// grants Kinesis Firehose access to your Amazon S3 bucket and AWS KMS
+	// (if you enable data encryption).
 	RoleARN *StringExpr `json:"RoleARN,omitempty"`
 }
 
@@ -13850,102 +22919,61 @@ func (l *KinesisFirehoseDeliveryStreamS3DestinationConfigurationList) UnmarshalJ
 	return err
 }
 
-// KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHints represents Amazon Kinesis Firehose DeliveryStream S3DestinationConfiguration BufferingHints
+// LambdaAliasAliasRoutingConfiguration represents AWS Lambda Alias AliasRoutingConfiguration
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-s3destinationconfiguration-bufferinghints.html
-type KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHints struct {
-	// The length of time, in seconds, that Firehose buffers incoming data
-	// before delivering it to the destination. For valid values, see the
-	// IntervalInSeconds content for the BufferingHints data type in the
-	// Amazon Kinesis Firehose API Reference.
-	IntervalInSeconds *IntegerExpr `json:"IntervalInSeconds,omitempty"`
-
-	// The size of the buffer, in MBs, that Firehose uses for incoming data
-	// before delivering it to the destination. For valid values, see the
-	// SizeInMBs content for the BufferingHints data type in the Amazon
-	// Kinesis Firehose API Reference.
-	SizeInMBs *IntegerExpr `json:"SizeInMBs,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-lambda-alias-aliasroutingconfiguration.html
+type LambdaAliasAliasRoutingConfiguration struct {
+	// The percentage of traffic that will invoke the updated function
+	// version.
+	AdditionalVersionWeights *LambdaAliasVersionWeightList `json:"AdditionalVersionWeights,omitempty"`
 }
 
-// KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHintsList represents a list of KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHints
-type KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHintsList []KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHints
+// LambdaAliasAliasRoutingConfigurationList represents a list of LambdaAliasAliasRoutingConfiguration
+type LambdaAliasAliasRoutingConfigurationList []LambdaAliasAliasRoutingConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHintsList) UnmarshalJSON(buf []byte) error {
+func (l *LambdaAliasAliasRoutingConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHints{}
+	item := LambdaAliasAliasRoutingConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHintsList{item}
+		*l = LambdaAliasAliasRoutingConfigurationList{item}
 		return nil
 	}
-	list := []KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHints{}
+	list := []LambdaAliasAliasRoutingConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = KinesisFirehoseDeliveryStreamS3DestinationConfigurationBufferingHintsList(list)
+		*l = LambdaAliasAliasRoutingConfigurationList(list)
 		return nil
 	}
 	return err
 }
 
-// KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfig represents Amazon Kinesis Firehose DeliveryStream S3DestinationConfiguration EncryptionConfiguration KMSEncryptionConfig
+// LambdaAliasVersionWeight represents AWS Lambda Alias VersionWeight
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-s3destinationconfiguration-encryptionconfiguration-kmsencryptionconfig.html
-type KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfig struct {
-	// The Amazon Resource Name (ARN) of the AWS KMS encryption key that
-	// Amazon S3 uses to encrypt data delivered by the Firehose stream. The
-	// key must belong to the same region as the destination S3 bucket.
-	AWSKMSKeyARN *StringExpr `json:"AWSKMSKeyARN,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-lambda-alias-versionweight.html
+type LambdaAliasVersionWeight struct {
+	// Function version to which the alias points.
+	FunctionVersion interface{} `json:"FunctionVersion,omitempty"`
+
+	// The percentage of traffic that will invoke the function version.
+	FunctionWeight interface{} `json:"FunctionWeight,omitempty"`
 }
 
-// KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfigList represents a list of KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfig
-type KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfigList []KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfig
+// LambdaAliasVersionWeightList represents a list of LambdaAliasVersionWeight
+type LambdaAliasVersionWeightList []LambdaAliasVersionWeight
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfigList) UnmarshalJSON(buf []byte) error {
+func (l *LambdaAliasVersionWeightList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfig{}
+	item := LambdaAliasVersionWeight{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfigList{item}
+		*l = LambdaAliasVersionWeightList{item}
 		return nil
 	}
-	list := []KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfig{}
+	list := []LambdaAliasVersionWeight{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfigList(list)
-		return nil
-	}
-	return err
-}
-
-// KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfiguration represents Amazon Kinesis Firehose DeliveryStream S3DestinationConfiguration EncryptionConfiguration
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-kinesisfirehose-kinesisdeliverystream-s3destinationconfiguration-encryptionconfiguration.html
-type KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfiguration struct {
-	// The AWS Key Management Service (AWS KMS) encryption key that Amazon S3
-	// uses to encrypt your data.
-	KMSEncryptionConfig *KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationKMSEncryptionConfig `json:"KMSEncryptionConfig,omitempty"`
-
-	// Disables encryption. For valid values, see the NoEncryptionConfig
-	// content for the EncryptionConfiguration data type in the Amazon
-	// Kinesis Firehose API Reference.
-	NoEncryptionConfig *StringExpr `json:"NoEncryptionConfig,omitempty"`
-}
-
-// KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationList represents a list of KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfiguration
-type KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationList []KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfiguration
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfiguration{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationList{item}
-		return nil
-	}
-	list := []KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfiguration{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = KinesisFirehoseDeliveryStreamS3DestinationConfigurationEncryptionConfigurationList(list)
+		*l = LambdaAliasVersionWeightList(list)
 		return nil
 	}
 	return err
@@ -14016,8 +23044,11 @@ func (l *LambdaFunctionEnvironmentList) UnmarshalJSON(buf []byte) error {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-lambda-function-code.html
 type LambdaFunctionCode struct {
-	// The name of the S3 bucket that contains the source code of your Lambda
-	// function. The S3 bucket must be in the same region as the stack.
+	// The name of the Amazon S3 bucket where the .zip file that contains
+	// your deployment package is stored. This bucket must reside in the same
+	// AWS Region that you're creating the Lambda function in. You can
+	// specify a bucket from another AWS account as long as the Lambda
+	// function and the bucket are in the same region.
 	S3Bucket *StringExpr `json:"S3Bucket,omitempty"`
 
 	// The location and name of the .zip file that contains your source code.
@@ -14030,9 +23061,9 @@ type LambdaFunctionCode struct {
 	// specify the S3Bucket and S3Key properties.
 	S3ObjectVersion *StringExpr `json:"S3ObjectVersion,omitempty"`
 
-	// For nodejs4.3 and python2.7 runtime environments, the source code of
-	// your Lambda function. You can't use this property with other runtime
-	// environments.
+	// For nodejs4.3, nodejs6.10, python2.7, and python3.6 runtime
+	// environments, the source code of your Lambda function. You can't use
+	// this property with other runtime environments.
 	ZipFile *StringExpr `json:"ZipFile,omitempty"`
 }
 
@@ -14056,34 +23087,64 @@ func (l *LambdaFunctionCodeList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// LambdaFunctionVPCConfig represents AWS Lambda Function VPCConfig
+// LambdaFunctionTracingConfig represents AWS Lambda Function TracingConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-lambda-function-tracingconfig.html
+type LambdaFunctionTracingConfig struct {
+	// Specifies how Lambda traces a request. The default mode is
+	// PassThrough. For more information, see TracingConfig in the AWS Lambda
+	// Developer Guide.
+	Mode *StringExpr `json:"Mode,omitempty"`
+}
+
+// LambdaFunctionTracingConfigList represents a list of LambdaFunctionTracingConfig
+type LambdaFunctionTracingConfigList []LambdaFunctionTracingConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *LambdaFunctionTracingConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := LambdaFunctionTracingConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = LambdaFunctionTracingConfigList{item}
+		return nil
+	}
+	list := []LambdaFunctionTracingConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = LambdaFunctionTracingConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// LambdaFunctionVpcConfig represents AWS Lambda Function VpcConfig
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-lambda-function-vpcconfig.html
-type LambdaFunctionVPCConfig struct {
+type LambdaFunctionVpcConfig struct {
 	// A list of one or more security groups IDs in the VPC that includes the
 	// resources to which your Lambda function requires access.
-	SecurityGroupIds *StringListExpr `json:"SecurityGroupIds,omitempty"`
+	SecurityGroupIds interface{} `json:"SecurityGroupIds,omitempty"`
 
 	// A list of one or more subnet IDs in the VPC that includes the
 	// resources to which your Lambda function requires access.
-	SubnetIds *StringListExpr `json:"SubnetIds,omitempty"`
+	SubnetIds interface{} `json:"SubnetIds,omitempty"`
 }
 
-// LambdaFunctionVPCConfigList represents a list of LambdaFunctionVPCConfig
-type LambdaFunctionVPCConfigList []LambdaFunctionVPCConfig
+// LambdaFunctionVpcConfigList represents a list of LambdaFunctionVpcConfig
+type LambdaFunctionVpcConfigList []LambdaFunctionVpcConfig
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *LambdaFunctionVPCConfigList) UnmarshalJSON(buf []byte) error {
+func (l *LambdaFunctionVpcConfigList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := LambdaFunctionVPCConfig{}
+	item := LambdaFunctionVpcConfig{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = LambdaFunctionVPCConfigList{item}
+		*l = LambdaFunctionVpcConfigList{item}
 		return nil
 	}
-	list := []LambdaFunctionVPCConfig{}
+	list := []LambdaFunctionVpcConfig{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = LambdaFunctionVPCConfigList(list)
+		*l = LambdaFunctionVpcConfigList(list)
 		return nil
 	}
 	return err
@@ -14115,10 +23176,10 @@ func (l *NameList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// DataSource represents DataSource
+// OpsWorksAppDataSource represents AWS OpsWorks App DataSource
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-opsworks-app-datasource.html
-type DataSource struct {
+type OpsWorksAppDataSource struct {
 	// The ARN of the data source.
 	Arn *StringExpr `json:"Arn,omitempty"`
 
@@ -14131,21 +23192,21 @@ type DataSource struct {
 	Type *StringExpr `json:"Type,omitempty"`
 }
 
-// DataSourceList represents a list of DataSource
-type DataSourceList []DataSource
+// OpsWorksAppDataSourceList represents a list of OpsWorksAppDataSource
+type OpsWorksAppDataSourceList []OpsWorksAppDataSource
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *DataSourceList) UnmarshalJSON(buf []byte) error {
+func (l *OpsWorksAppDataSourceList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := DataSource{}
+	item := OpsWorksAppDataSource{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = DataSourceList{item}
+		*l = OpsWorksAppDataSourceList{item}
 		return nil
 	}
-	list := []DataSource{}
+	list := []OpsWorksAppDataSource{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = DataSourceList(list)
+		*l = OpsWorksAppDataSourceList(list)
 		return nil
 	}
 	return err
@@ -14474,26 +23535,26 @@ type OpsWorksRecipes struct {
 	// Custom recipe names to be run following a Configure event. The event
 	// occurs on all of the stack's instances when an instance enters or
 	// leaves the online state.
-	Configure *StringListExpr `json:"Configure,omitempty"`
+	Configure interface{} `json:"Configure,omitempty"`
 
 	// Custom recipe names to be run following a Deploy event. The event
 	// occurs when you run a deploy command, typically to deploy an
 	// application to a set of application server instances.
-	Deploy *StringListExpr `json:"Deploy,omitempty"`
+	Deploy interface{} `json:"Deploy,omitempty"`
 
 	// Custom recipe names to be run following a Setup event. This event
 	// occurs on a new instance after it successfully boots.
-	Setup *StringListExpr `json:"Setup,omitempty"`
+	Setup interface{} `json:"Setup,omitempty"`
 
 	// Custom recipe names to be run following a Shutdown event. This event
 	// occurs after you direct AWS OpsWorks to shut an instance down before
 	// the associated Amazon EC2 instance is actually terminated.
-	Shutdown *StringListExpr `json:"Shutdown,omitempty"`
+	Shutdown interface{} `json:"Shutdown,omitempty"`
 
 	// Custom recipe names to be run following a Undeploy event. This event
 	// occurs when you delete an app or run an undeploy command to remove an
 	// app from a set of application server instances.
-	Undeploy *StringListExpr `json:"Undeploy,omitempty"`
+	Undeploy interface{} `json:"Undeploy,omitempty"`
 }
 
 // OpsWorksRecipesList represents a list of OpsWorksRecipes
@@ -14822,6 +23883,38 @@ func (l *RedshiftParameterList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// RedshiftLoggingProperties represents Amazon Redshift LoggingProperties
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-redshift-cluster-loggingproperties.html
+type RedshiftLoggingProperties struct {
+	// The name of an existing S3 bucket where the log files are to be
+	// stored.
+	BucketName *StringExpr `json:"BucketName,omitempty"`
+
+	// The prefix applied to the log file names.
+	S3KeyPrefix *StringExpr `json:"S3KeyPrefix,omitempty"`
+}
+
+// RedshiftLoggingPropertiesList represents a list of RedshiftLoggingProperties
+type RedshiftLoggingPropertiesList []RedshiftLoggingProperties
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *RedshiftLoggingPropertiesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := RedshiftLoggingProperties{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = RedshiftLoggingPropertiesList{item}
+		return nil
+	}
+	list := []RedshiftLoggingProperties{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = RedshiftLoggingPropertiesList(list)
+		return nil
+	}
+	return err
+}
+
 // ResourceTag represents AWS CloudFormation Resource Tags Type
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html
@@ -14859,15 +23952,15 @@ func (l *ResourceTagList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// RDSOptionGroupOptionConfigurations represents Amazon RDS OptionGroup OptionConfigurations
+// RelationalDatabaseServiceOptionGroupOptionConfiguration represents Amazon Relational Database Service OptionGroup OptionConfiguration
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-optiongroup-optionconfigurations.html
-type RDSOptionGroupOptionConfigurations struct {
+type RelationalDatabaseServiceOptionGroupOptionConfiguration struct {
 	// A list of database security group names for this option. If the option
 	// requires access to a port, the security groups must allow access to
 	// that port. If you specify this property, don't specify the
 	// VPCSecurityGroupMemberships property.
-	DBSecurityGroupMemberships *StringListExpr `json:"DBSecurityGroupMemberships,omitempty"`
+	DBSecurityGroupMemberships interface{} `json:"DBSecurityGroupMemberships,omitempty"`
 
 	// The name of the option. For more information about options, see
 	// Working with Option Groups in the Amazon Relational Database Service
@@ -14875,7 +23968,10 @@ type RDSOptionGroupOptionConfigurations struct {
 	OptionName *StringExpr `json:"OptionName,omitempty"`
 
 	// The settings for this option.
-	OptionSettings *RDSOptionGroupOptionConfigurationsOptionSettingsList `json:"OptionSettings,omitempty"`
+	OptionSettings *RelationalDatabaseServiceOptionGroupOptionSettingList `json:"OptionSettings,omitempty"`
+
+	// The version for the option.
+	OptionVersion *StringExpr `json:"OptionVersion,omitempty"`
 
 	// The port number that this option uses.
 	Port *IntegerExpr `json:"Port,omitempty"`
@@ -14884,33 +23980,33 @@ type RDSOptionGroupOptionConfigurations struct {
 	// requires access to a port, the security groups must allow access to
 	// that port. If you specify this property, don't specify the
 	// DBSecurityGroupMemberships property.
-	VpcSecurityGroupMemberships *StringListExpr `json:"VpcSecurityGroupMemberships,omitempty"`
+	VpcSecurityGroupMemberships interface{} `json:"VpcSecurityGroupMemberships,omitempty"`
 }
 
-// RDSOptionGroupOptionConfigurationsList represents a list of RDSOptionGroupOptionConfigurations
-type RDSOptionGroupOptionConfigurationsList []RDSOptionGroupOptionConfigurations
+// RelationalDatabaseServiceOptionGroupOptionConfigurationList represents a list of RelationalDatabaseServiceOptionGroupOptionConfiguration
+type RelationalDatabaseServiceOptionGroupOptionConfigurationList []RelationalDatabaseServiceOptionGroupOptionConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *RDSOptionGroupOptionConfigurationsList) UnmarshalJSON(buf []byte) error {
+func (l *RelationalDatabaseServiceOptionGroupOptionConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := RDSOptionGroupOptionConfigurations{}
+	item := RelationalDatabaseServiceOptionGroupOptionConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = RDSOptionGroupOptionConfigurationsList{item}
+		*l = RelationalDatabaseServiceOptionGroupOptionConfigurationList{item}
 		return nil
 	}
-	list := []RDSOptionGroupOptionConfigurations{}
+	list := []RelationalDatabaseServiceOptionGroupOptionConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = RDSOptionGroupOptionConfigurationsList(list)
+		*l = RelationalDatabaseServiceOptionGroupOptionConfigurationList(list)
 		return nil
 	}
 	return err
 }
 
-// RDSOptionGroupOptionConfigurationsOptionSettings represents Amazon RDS OptionGroup OptionConfigurations OptionSettings
+// RelationalDatabaseServiceOptionGroupOptionSetting represents Amazon Relational Database Service OptionGroup OptionSetting
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-optiongroup-optionconfigurations-optionsettings.html
-type RDSOptionGroupOptionConfigurationsOptionSettings struct {
+type RelationalDatabaseServiceOptionGroupOptionSetting struct {
 	// The name of the option setting that you want to specify.
 	Name *StringExpr `json:"Name,omitempty"`
 
@@ -14918,21 +24014,21 @@ type RDSOptionGroupOptionConfigurationsOptionSettings struct {
 	Value *StringExpr `json:"Value,omitempty"`
 }
 
-// RDSOptionGroupOptionConfigurationsOptionSettingsList represents a list of RDSOptionGroupOptionConfigurationsOptionSettings
-type RDSOptionGroupOptionConfigurationsOptionSettingsList []RDSOptionGroupOptionConfigurationsOptionSettings
+// RelationalDatabaseServiceOptionGroupOptionSettingList represents a list of RelationalDatabaseServiceOptionGroupOptionSetting
+type RelationalDatabaseServiceOptionGroupOptionSettingList []RelationalDatabaseServiceOptionGroupOptionSetting
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *RDSOptionGroupOptionConfigurationsOptionSettingsList) UnmarshalJSON(buf []byte) error {
+func (l *RelationalDatabaseServiceOptionGroupOptionSettingList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := RDSOptionGroupOptionConfigurationsOptionSettings{}
+	item := RelationalDatabaseServiceOptionGroupOptionSetting{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = RDSOptionGroupOptionConfigurationsOptionSettingsList{item}
+		*l = RelationalDatabaseServiceOptionGroupOptionSettingList{item}
 		return nil
 	}
-	list := []RDSOptionGroupOptionConfigurationsOptionSettings{}
+	list := []RelationalDatabaseServiceOptionGroupOptionSetting{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = RDSOptionGroupOptionConfigurationsOptionSettingsList(list)
+		*l = RelationalDatabaseServiceOptionGroupOptionSettingList(list)
 		return nil
 	}
 	return err
@@ -15073,7 +24169,7 @@ type Route53HealthCheckConfig struct {
 	// (CALCULATED Health Checks Only) A complex type that contains one
 	// ChildHealthCheck element for each health check that you want to
 	// associate with a CALCULATED health check.
-	ChildHealthChecks *StringListExpr `json:"ChildHealthChecks,omitempty"`
+	ChildHealthChecks interface{} `json:"ChildHealthChecks,omitempty"`
 
 	// Specifies whether you want Amazon Route 53 to send the value of
 	// FullyQualifiedDomainName to the endpoint in the client_hello message
@@ -15303,6 +24399,35 @@ func (l *Route53HostedZoneTagsList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// Route53QueryLoggingConfig represents Amazon Route 53 QueryLoggingConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-hostedzone-queryloggingconfig.html
+type Route53QueryLoggingConfig struct {
+	// The Amazon Resource Name (ARN) for the log group that you want Amazon
+	// Route 53 to send query logs to. This is the format of the ARN:
+	CloudWatchLogsLogGroupArn *StringExpr `json:"CloudWatchLogsLogGroupArn,omitempty"`
+}
+
+// Route53QueryLoggingConfigList represents a list of Route53QueryLoggingConfig
+type Route53QueryLoggingConfigList []Route53QueryLoggingConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *Route53QueryLoggingConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := Route53QueryLoggingConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = Route53QueryLoggingConfigList{item}
+		return nil
+	}
+	list := []Route53QueryLoggingConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = Route53QueryLoggingConfigList(list)
+		return nil
+	}
+	return err
+}
+
 // Route53HostedZoneVPCs represents Amazon Route 53 HostedZoneVPCs
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-route53-hostedzone-hostedzonevpcs.html
@@ -15336,54 +24461,150 @@ func (l *Route53HostedZoneVPCsList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
-// S3CorsConfiguration represents Amazon S3 Cors Configuration
+// S3BucketAbortIncompleteMultipartUpload represents Amazon S3 Bucket AbortIncompleteMultipartUpload
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-cors.html
-type S3CorsConfiguration struct {
-	// A set of origins and methods that you allow.
-	CorsRules *S3CorsConfigurationRuleList `json:"CorsRules,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-abortincompletemultipartupload.html
+type S3BucketAbortIncompleteMultipartUpload struct {
+	// The number of days after the upload is initiated before aborting the
+	// upload.
+	DaysAfterInitiation interface{} `json:"DaysAfterInitiation,omitempty"`
 }
 
-// S3CorsConfigurationList represents a list of S3CorsConfiguration
-type S3CorsConfigurationList []S3CorsConfiguration
+// S3BucketAbortIncompleteMultipartUploadList represents a list of S3BucketAbortIncompleteMultipartUpload
+type S3BucketAbortIncompleteMultipartUploadList []S3BucketAbortIncompleteMultipartUpload
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3CorsConfigurationList) UnmarshalJSON(buf []byte) error {
+func (l *S3BucketAbortIncompleteMultipartUploadList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := S3CorsConfiguration{}
+	item := S3BucketAbortIncompleteMultipartUpload{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3CorsConfigurationList{item}
+		*l = S3BucketAbortIncompleteMultipartUploadList{item}
 		return nil
 	}
-	list := []S3CorsConfiguration{}
+	list := []S3BucketAbortIncompleteMultipartUpload{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = S3CorsConfigurationList(list)
+		*l = S3BucketAbortIncompleteMultipartUploadList(list)
 		return nil
 	}
 	return err
 }
 
-// S3CorsConfigurationRule represents Amazon S3 Cors Configuration Rule
+// S3BucketAccelerateConfiguration represents Amazon S3 Bucket AccelerateConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-accelerateconfiguration.html
+type S3BucketAccelerateConfiguration struct {
+	// Sets the transfer acceleration state of the bucket.
+	AccelerationStatus interface{} `json:"AccelerationStatus,omitempty"`
+}
+
+// S3BucketAccelerateConfigurationList represents a list of S3BucketAccelerateConfiguration
+type S3BucketAccelerateConfigurationList []S3BucketAccelerateConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketAccelerateConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketAccelerateConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketAccelerateConfigurationList{item}
+		return nil
+	}
+	list := []S3BucketAccelerateConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketAccelerateConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketAnalyticsConfiguration represents Amazon S3 Bucket AnalyticsConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-analyticsconfiguration.html
+type S3BucketAnalyticsConfiguration struct {
+	// The ID that identifies the analytics configuration.
+	Id interface{} `json:"Id,omitempty"`
+
+	// The prefix that an object must have to be included in the analytics
+	// results.
+	Prefix interface{} `json:"Prefix,omitempty"`
+
+	// Contains data related to access patterns to be collected and made
+	// available to analyze the tradeoffs between different storage classes.
+	StorageClassAnalysis *S3BucketStorageClassAnalysis `json:"StorageClassAnalysis,omitempty"`
+
+	// The tags to use when evaluating an analytics filter.
+	TagFilters *S3BucketTagFilterList `json:"TagFilters,omitempty"`
+}
+
+// S3BucketAnalyticsConfigurationList represents a list of S3BucketAnalyticsConfiguration
+type S3BucketAnalyticsConfigurationList []S3BucketAnalyticsConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketAnalyticsConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketAnalyticsConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketAnalyticsConfigurationList{item}
+		return nil
+	}
+	list := []S3BucketAnalyticsConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketAnalyticsConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketCorsConfiguration represents Amazon S3 Bucket CorsConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-cors.html
+type S3BucketCorsConfiguration struct {
+	// A set of origins and methods that you allow.
+	CorsRules *S3BucketCorsRuleList `json:"CorsRules,omitempty"`
+}
+
+// S3BucketCorsConfigurationList represents a list of S3BucketCorsConfiguration
+type S3BucketCorsConfigurationList []S3BucketCorsConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketCorsConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketCorsConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketCorsConfigurationList{item}
+		return nil
+	}
+	list := []S3BucketCorsConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketCorsConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketCorsRule represents Amazon S3 Bucket CorsRule
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-cors-corsrule.html
-type S3CorsConfigurationRule struct {
+type S3BucketCorsRule struct {
 	// Headers that are specified in the Access-Control-Request-Headers
 	// header. These headers are allowed in a preflight OPTIONS request. In
 	// response to any preflight OPTIONS request, Amazon S3 returns any
 	// requested headers that are allowed.
-	AllowedHeaders *StringListExpr `json:"AllowedHeaders,omitempty"`
+	AllowedHeaders interface{} `json:"AllowedHeaders,omitempty"`
 
 	// An HTTP method that you allow the origin to execute. The valid values
 	// are GET, PUT, HEAD, POST, and DELETE.
-	AllowedMethods *StringListExpr `json:"AllowedMethods,omitempty"`
+	AllowedMethods interface{} `json:"AllowedMethods,omitempty"`
 
 	// An origin that you allow to send cross-domain requests.
-	AllowedOrigins *StringListExpr `json:"AllowedOrigins,omitempty"`
+	AllowedOrigins interface{} `json:"AllowedOrigins,omitempty"`
 
 	// One or more headers in the response that are accessible to client
 	// applications (for example, from a JavaScript XMLHttpRequest object).
-	ExposedHeaders *StringListExpr `json:"ExposedHeaders,omitempty"`
+	ExposedHeaders interface{} `json:"ExposedHeaders,omitempty"`
 
 	// A unique identifier for this rule. The value cannot be more than 255
 	// characters.
@@ -15394,58 +24615,590 @@ type S3CorsConfigurationRule struct {
 	MaxAge *IntegerExpr `json:"MaxAge,omitempty"`
 }
 
-// S3CorsConfigurationRuleList represents a list of S3CorsConfigurationRule
-type S3CorsConfigurationRuleList []S3CorsConfigurationRule
+// S3BucketCorsRuleList represents a list of S3BucketCorsRule
+type S3BucketCorsRuleList []S3BucketCorsRule
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3CorsConfigurationRuleList) UnmarshalJSON(buf []byte) error {
+func (l *S3BucketCorsRuleList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := S3CorsConfigurationRule{}
+	item := S3BucketCorsRule{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3CorsConfigurationRuleList{item}
+		*l = S3BucketCorsRuleList{item}
 		return nil
 	}
-	list := []S3CorsConfigurationRule{}
+	list := []S3BucketCorsRule{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = S3CorsConfigurationRuleList(list)
+		*l = S3BucketCorsRuleList(list)
 		return nil
 	}
 	return err
 }
 
-// S3LifecycleConfiguration represents Amazon S3 Lifecycle Configuration
+// S3BucketDataExport represents Amazon S3 Bucket DataExport
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-dataexport.html
+type S3BucketDataExport struct {
+	// Information about where to publish the analytics results.
+	Destination *S3BucketDestination `json:"Destination,omitempty"`
+
+	// The version of the output schema to use when exporting data. Must be
+	// V_1.
+	OutputSchemaVersion interface{} `json:"OutputSchemaVersion,omitempty"`
+}
+
+// S3BucketDataExportList represents a list of S3BucketDataExport
+type S3BucketDataExportList []S3BucketDataExport
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketDataExportList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketDataExport{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketDataExportList{item}
+		return nil
+	}
+	list := []S3BucketDataExport{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketDataExportList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketDestination represents Amazon S3 Bucket Destination
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-destination.html
+type S3BucketDestination struct {
+	// The ID of the account that owns the destination bucket where the
+	// analytics is published.
+	BucketAccountId interface{} `json:"BucketAccountId,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the bucket where analytics results
+	// are published. This destination bucket must be in the same region as
+	// the bucket used for the analytics or inventory configuration.
+	BucketArn interface{} `json:"BucketArn,omitempty"`
+
+	// Specifies the output format of the analytics or inventory results.
+	// Currently, Amazon S3 supports the comma-separated value (CSV) format.
+	Format interface{} `json:"Format,omitempty"`
+
+	// The prefix that is prepended to all analytics results.
+	Prefix interface{} `json:"Prefix,omitempty"`
+}
+
+// S3BucketDestinationList represents a list of S3BucketDestination
+type S3BucketDestinationList []S3BucketDestination
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketDestinationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketDestination{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketDestinationList{item}
+		return nil
+	}
+	list := []S3BucketDestination{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketDestinationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketFilterRule represents Amazon S3 Bucket FilterRule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration-config-filter-s3key-rules.html
+type S3BucketFilterRule struct {
+	// Whether the filter matches the prefix or suffix of object key names.
+	// For valid values, see the Name request element of the PUT Bucket
+	// notification action in the Amazon Simple Storage Service API
+	// Reference.
+	Name *StringExpr `json:"Name,omitempty"`
+
+	// The value that the filter searches for in object key names.
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// S3BucketFilterRuleList represents a list of S3BucketFilterRule
+type S3BucketFilterRuleList []S3BucketFilterRule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketFilterRuleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketFilterRule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketFilterRuleList{item}
+		return nil
+	}
+	list := []S3BucketFilterRule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketFilterRuleList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketInventoryConfiguration represents Amazon S3 Bucket InventoryConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-inventoryconfiguration.html
+type S3BucketInventoryConfiguration struct {
+	// Information about where to publish the inventory results.
+	Destination *S3BucketDestination `json:"Destination,omitempty"`
+
+	// Specifies whether the inventory is enabled or disabled. If set to
+	// True, an inventory list is generated. If set to False, no inventory
+	// list is generated.
+	Enabled interface{} `json:"Enabled,omitempty"`
+
+	// The ID that identifies the inventory configuration.
+	Id interface{} `json:"Id,omitempty"`
+
+	// Object versions to include in the inventory list. If set to All, the
+	// list includes all the object versions, which adds the version related
+	// fields VersionId, IsLatest, and DeleteMarker to the list. If set to
+	// Current, the list does not contain these version related fields.
+	IncludedObjectVersions interface{} `json:"IncludedObjectVersions,omitempty"`
+
+	// The optional fields that are included in the inventory results.
+	OptionalFields interface{} `json:"OptionalFields,omitempty"`
+
+	// The prefix that is prepended to all inventory results.
+	Prefix interface{} `json:"Prefix,omitempty"`
+
+	// The frequency of inventory results generation.
+	ScheduleFrequency interface{} `json:"ScheduleFrequency,omitempty"`
+}
+
+// S3BucketInventoryConfigurationList represents a list of S3BucketInventoryConfiguration
+type S3BucketInventoryConfigurationList []S3BucketInventoryConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketInventoryConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketInventoryConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketInventoryConfigurationList{item}
+		return nil
+	}
+	list := []S3BucketInventoryConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketInventoryConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// SimpleStorageServiceBucketLambdaConfiguration represents Amazon Simple Storage Service Bucket LambdaConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfig-lambdaconfig.html
+type SimpleStorageServiceBucketLambdaConfiguration struct {
+	// The S3 bucket event for which to invoke the Lambda function. For more
+	// information, see Supported Event Types in the Amazon Simple Storage
+	// Service Developer Guide.
+	Event *StringExpr `json:"Event,omitempty"`
+
+	// The filtering rules that determine which objects invoke the Lambda
+	// function. For example, you can create a filter so that only image
+	// files with a .jpg extension invoke the function when they are added to
+	// the S3 bucket.
+	Filter *S3BucketNotificationFilter `json:"Filter,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Lambda function that Amazon S3
+	// invokes when the specified event type occurs.
+	Function *StringExpr `json:"Function,omitempty"`
+}
+
+// SimpleStorageServiceBucketLambdaConfigurationList represents a list of SimpleStorageServiceBucketLambdaConfiguration
+type SimpleStorageServiceBucketLambdaConfigurationList []SimpleStorageServiceBucketLambdaConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *SimpleStorageServiceBucketLambdaConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := SimpleStorageServiceBucketLambdaConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = SimpleStorageServiceBucketLambdaConfigurationList{item}
+		return nil
+	}
+	list := []SimpleStorageServiceBucketLambdaConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = SimpleStorageServiceBucketLambdaConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketLifecycleConfiguration represents Amazon S3 Bucket LifecycleConfiguration
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-lifecycleconfig.html
-type S3LifecycleConfiguration struct {
+type S3BucketLifecycleConfiguration struct {
 	// A lifecycle rule for individual objects in an S3 bucket.
-	Rules *S3LifecycleRuleList `json:"Rules,omitempty"`
+	Rules *S3BucketRuleList `json:"Rules,omitempty"`
 }
 
-// S3LifecycleConfigurationList represents a list of S3LifecycleConfiguration
-type S3LifecycleConfigurationList []S3LifecycleConfiguration
+// S3BucketLifecycleConfigurationList represents a list of S3BucketLifecycleConfiguration
+type S3BucketLifecycleConfigurationList []S3BucketLifecycleConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3LifecycleConfigurationList) UnmarshalJSON(buf []byte) error {
+func (l *S3BucketLifecycleConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := S3LifecycleConfiguration{}
+	item := S3BucketLifecycleConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3LifecycleConfigurationList{item}
+		*l = S3BucketLifecycleConfigurationList{item}
 		return nil
 	}
-	list := []S3LifecycleConfiguration{}
+	list := []S3BucketLifecycleConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = S3LifecycleConfigurationList(list)
+		*l = S3BucketLifecycleConfigurationList(list)
 		return nil
 	}
 	return err
 }
 
-// S3LifecycleRule represents Amazon S3 Lifecycle Rule
+// S3BucketLoggingConfiguration represents Amazon S3 Bucket LoggingConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-loggingconfig.html
+type S3BucketLoggingConfiguration struct {
+	// The name of an Amazon S3 bucket where Amazon S3 store server access
+	// log files. You can store log files in any bucket that you own. By
+	// default, logs are stored in the bucket where the LoggingConfiguration
+	// property is defined.
+	DestinationBucketName *StringExpr `json:"DestinationBucketName,omitempty"`
+
+	// A prefix for the all log object keys. If you store log files from
+	// multiple Amazon S3 buckets in a single bucket, you can use a prefix to
+	// distinguish which log files came from which bucket.
+	LogFilePrefix *StringExpr `json:"LogFilePrefix,omitempty"`
+}
+
+// S3BucketLoggingConfigurationList represents a list of S3BucketLoggingConfiguration
+type S3BucketLoggingConfigurationList []S3BucketLoggingConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketLoggingConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketLoggingConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketLoggingConfigurationList{item}
+		return nil
+	}
+	list := []S3BucketLoggingConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketLoggingConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketMetricsConfiguration represents Amazon S3 Bucket MetricsConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-metricsconfiguration.html
+type S3BucketMetricsConfiguration struct {
+	// The ID used to identify the metrics configuration.
+	Id interface{} `json:"Id,omitempty"`
+
+	// The prefix that an object must have to be included in the metrics
+	// results.
+	Prefix interface{} `json:"Prefix,omitempty"`
+
+	// Specifies a list of tag filters to use as a metrics configuration
+	// filter. The metrics configuration includes only objects that meet the
+	// filter's criteria.
+	TagFilters *S3BucketTagFilterList `json:"TagFilters,omitempty"`
+}
+
+// S3BucketMetricsConfigurationList represents a list of S3BucketMetricsConfiguration
+type S3BucketMetricsConfigurationList []S3BucketMetricsConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketMetricsConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketMetricsConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketMetricsConfigurationList{item}
+		return nil
+	}
+	list := []S3BucketMetricsConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketMetricsConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketNoncurrentVersionTransition represents Amazon S3 Bucket NoncurrentVersionTransition
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-lifecycleconfig-rule-noncurrentversiontransition.html
+type S3BucketNoncurrentVersionTransition struct {
+	// The storage class to which you want the object to transition, such as
+	// GLACIER. For valid values, see the StorageClass request element of the
+	// PUT Bucket lifecycle action in the Amazon Simple Storage Service API
+	// Reference.
+	StorageClass *StringExpr `json:"StorageClass,omitempty"`
+
+	// The number of days between the time that a new version of the object
+	// is uploaded to the bucket and when old versions of the object are
+	// transitioned to the specified storage class.
+	TransitionInDays *IntegerExpr `json:"TransitionInDays,omitempty"`
+}
+
+// S3BucketNoncurrentVersionTransitionList represents a list of S3BucketNoncurrentVersionTransition
+type S3BucketNoncurrentVersionTransitionList []S3BucketNoncurrentVersionTransition
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketNoncurrentVersionTransitionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketNoncurrentVersionTransition{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketNoncurrentVersionTransitionList{item}
+		return nil
+	}
+	list := []S3BucketNoncurrentVersionTransition{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketNoncurrentVersionTransitionList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketNotificationConfiguration represents Amazon S3 Bucket NotificationConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfig.html
+type S3BucketNotificationConfiguration struct {
+	// The AWS Lambda functions to invoke and the events for which to invoke
+	// the functions.
+	LambdaConfigurations *SimpleStorageServiceBucketLambdaConfigurationList `json:"LambdaConfigurations,omitempty"`
+
+	// The Amazon Simple Queue Service queues to publish messages to and the
+	// events for which to publish messages.
+	QueueConfigurations *SimpleStorageServiceBucketQueueConfigurationList `json:"QueueConfigurations,omitempty"`
+
+	// The topic to which notifications are sent and the events for which
+	// notification are generated.
+	TopicConfigurations *SimpleStorageServiceBucketTopicConfigurationList `json:"TopicConfigurations,omitempty"`
+}
+
+// S3BucketNotificationConfigurationList represents a list of S3BucketNotificationConfiguration
+type S3BucketNotificationConfigurationList []S3BucketNotificationConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketNotificationConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketNotificationConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketNotificationConfigurationList{item}
+		return nil
+	}
+	list := []S3BucketNotificationConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketNotificationConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketNotificationFilter represents Amazon S3 Bucket NotificationFilter
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration-config-filter.html
+type S3BucketNotificationFilter struct {
+	// Amazon S3 filtering rules that describe for which object key names to
+	// send notifications.
+	S3Key *S3BucketS3KeyFilter `json:"S3Key,omitempty"`
+}
+
+// S3BucketNotificationFilterList represents a list of S3BucketNotificationFilter
+type S3BucketNotificationFilterList []S3BucketNotificationFilter
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketNotificationFilterList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketNotificationFilter{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketNotificationFilterList{item}
+		return nil
+	}
+	list := []S3BucketNotificationFilter{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketNotificationFilterList(list)
+		return nil
+	}
+	return err
+}
+
+// SimpleStorageServiceBucketQueueConfiguration represents Amazon Simple Storage Service Bucket QueueConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfig-queueconfig.html
+type SimpleStorageServiceBucketQueueConfiguration struct {
+	// The S3 bucket event about which you want to publish messages to Amazon
+	// Simple Queue Service ( Amazon SQS). For more information, see
+	// Supported Event Types in the Amazon Simple Storage Service Developer
+	// Guide.
+	Event *StringExpr `json:"Event,omitempty"`
+
+	// The filtering rules that determine for which objects to send
+	// notifications. For example, you can create a filter so that Amazon
+	// Simple Storage Service (Amazon S3) sends notifications only when image
+	// files with a .jpg extension are added to the bucket.
+	Filter *S3BucketNotificationFilter `json:"Filter,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Amazon SQS queue that Amazon S3
+	// publishes messages to when the specified event type occurs.
+	Queue *StringExpr `json:"Queue,omitempty"`
+}
+
+// SimpleStorageServiceBucketQueueConfigurationList represents a list of SimpleStorageServiceBucketQueueConfiguration
+type SimpleStorageServiceBucketQueueConfigurationList []SimpleStorageServiceBucketQueueConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *SimpleStorageServiceBucketQueueConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := SimpleStorageServiceBucketQueueConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = SimpleStorageServiceBucketQueueConfigurationList{item}
+		return nil
+	}
+	list := []SimpleStorageServiceBucketQueueConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = SimpleStorageServiceBucketQueueConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketReplicationConfiguration represents Amazon S3 Bucket ReplicationConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-replicationconfiguration.html
+type S3BucketReplicationConfiguration struct {
+	// The Amazon Resource Name (ARN) of an AWS Identity and Access
+	// Management (IAM) role that Amazon S3 assumes when replicating objects.
+	// For more information, see How to Set Up Cross-Region Replication in
+	// the Amazon Simple Storage Service Developer Guide.
+	Role *StringExpr `json:"Role,omitempty"`
+
+	// A replication rule that specifies which objects to replicate and where
+	// they are stored.
+	Rules *S3BucketReplicationRuleList `json:"Rules,omitempty"`
+}
+
+// S3BucketReplicationConfigurationList represents a list of S3BucketReplicationConfiguration
+type S3BucketReplicationConfigurationList []S3BucketReplicationConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketReplicationConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketReplicationConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketReplicationConfigurationList{item}
+		return nil
+	}
+	list := []S3BucketReplicationConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketReplicationConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketReplicationDestination represents Amazon S3 Bucket ReplicationDestination
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-replicationconfiguration-rules-destination.html
+type S3BucketReplicationDestination struct {
+	// The Amazon resource name (ARN) of an S3 bucket where Amazon S3 stores
+	// replicated objects. This destination bucket must be in a different
+	// region than your source bucket.
+	Bucket *StringExpr `json:"Bucket,omitempty"`
+
+	// The storage class to use when replicating objects, such as standard or
+	// reduced redundancy. By default, Amazon S3 uses the storage class of
+	// the source object to create object replica. For valid values, see the
+	// StorageClass element of the PUT Bucket replication action in the
+	// Amazon Simple Storage Service API Reference.
+	StorageClass *StringExpr `json:"StorageClass,omitempty"`
+}
+
+// S3BucketReplicationDestinationList represents a list of S3BucketReplicationDestination
+type S3BucketReplicationDestinationList []S3BucketReplicationDestination
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketReplicationDestinationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketReplicationDestination{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketReplicationDestinationList{item}
+		return nil
+	}
+	list := []S3BucketReplicationDestination{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketReplicationDestinationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketReplicationRule represents Amazon S3 Bucket ReplicationRule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-replicationconfiguration-rules.html
+type S3BucketReplicationRule struct {
+	// Defines the destination where Amazon S3 stores replicated objects.
+	Destination *S3BucketReplicationDestination `json:"Destination,omitempty"`
+
+	// A unique identifier for the rule. If you don't specify a value, AWS
+	// CloudFormation generates a random ID.
+	Id *StringExpr `json:"Id,omitempty"`
+
+	// An object prefix. This rule applies to all Amazon S3 objects with this
+	// prefix. To specify all objects in an S3 bucket, specify an empty
+	// string.
+	Prefix *StringExpr `json:"Prefix,omitempty"`
+
+	// Whether the rule is enabled. For valid values, see the Status element
+	// of the PUT Bucket replication action in the Amazon Simple Storage
+	// Service API Reference.
+	Status *StringExpr `json:"Status,omitempty"`
+}
+
+// S3BucketReplicationRuleList represents a list of S3BucketReplicationRule
+type S3BucketReplicationRuleList []S3BucketReplicationRule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketReplicationRuleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketReplicationRule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketReplicationRuleList{item}
+		return nil
+	}
+	list := []S3BucketReplicationRule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketReplicationRuleList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketRule represents Amazon S3 Bucket Rule
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-lifecycleconfig-rule.html
-type S3LifecycleRule struct {
+type S3BucketRule struct {
+	// Specifies a lifecycle rule that aborts incomplete multipart uploads to
+	// an Amazon S3 bucket.
+	AbortIncompleteMultipartUpload *S3BucketAbortIncompleteMultipartUpload `json:"AbortIncompleteMultipartUpload,omitempty"`
+
 	// Indicates when objects are deleted from Amazon S3 and Amazon Glacier.
 	// The date value must be in ISO 8601 format. The time is always midnight
 	// UTC. If you specify an expiration and transition time, you must use
@@ -15477,7 +25230,7 @@ type S3LifecycleRule struct {
 	// specify a transition and expiration time, the expiration time must be
 	// later than the transition time. If you specify this property, don't
 	// specify the NoncurrentVersionTransitions property.
-	NoncurrentVersionTransitionXXDeprecatedX *S3LifecycleRuleNoncurrentVersionTransition `json:"NoncurrentVersionTransition (deprecated),omitempty"`
+	NoncurrentVersionTransitionXXDeprecatedX *S3BucketNoncurrentVersionTransition `json:"NoncurrentVersionTransition (deprecated),omitempty"`
 
 	// For buckets with versioning enabled (or suspended), one or more
 	// transition rules that specify when non-current objects transition to a
@@ -15485,7 +25238,7 @@ type S3LifecycleRule struct {
 	// time, the expiration time must be later than the transition time. If
 	// you specify this property, don't specify the
 	// NoncurrentVersionTransition property.
-	NoncurrentVersionTransitions *S3LifecycleRuleNoncurrentVersionTransitionList `json:"NoncurrentVersionTransitions,omitempty"`
+	NoncurrentVersionTransitions *S3BucketNoncurrentVersionTransitionList `json:"NoncurrentVersionTransitions,omitempty"`
 
 	// Object key prefix that identifies one or more objects to which this
 	// rule applies.
@@ -15496,12 +25249,16 @@ type S3LifecycleRule struct {
 	// ignores this rule.
 	Status *StringExpr `json:"Status,omitempty"`
 
+	// Tags to use to identify a subset of objects to which the lifecycle
+	// rule applies.
+	TagFilters *S3BucketTagFilterList `json:"TagFilters,omitempty"`
+
 	// Specifies when an object transitions to a specified storage class. If
 	// you specify an expiration and transition time, you must use the same
 	// time unit for both properties (either in days or by date). The
 	// expiration time must also be later than the transition time. If you
 	// specify this property, don't specify the Transitions property.
-	TransitionXXDeprecatedX *S3LifecycleRuleTransition `json:"Transition (deprecated),omitempty"`
+	TransitionXXDeprecatedX *S3BucketTransition `json:"Transition (deprecated),omitempty"`
 
 	// One or more transition rules that specify when an object transitions
 	// to a specified storage class. If you specify an expiration and
@@ -15509,69 +25266,162 @@ type S3LifecycleRule struct {
 	// (either in days or by date). The expiration time must also be later
 	// than the transition time. If you specify this property, don't specify
 	// the Transition property.
-	Transitions *S3LifecycleRuleTransitionList `json:"Transitions,omitempty"`
+	Transitions *S3BucketTransitionList `json:"Transitions,omitempty"`
 }
 
-// S3LifecycleRuleList represents a list of S3LifecycleRule
-type S3LifecycleRuleList []S3LifecycleRule
+// S3BucketRuleList represents a list of S3BucketRule
+type S3BucketRuleList []S3BucketRule
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3LifecycleRuleList) UnmarshalJSON(buf []byte) error {
+func (l *S3BucketRuleList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := S3LifecycleRule{}
+	item := S3BucketRule{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3LifecycleRuleList{item}
+		*l = S3BucketRuleList{item}
 		return nil
 	}
-	list := []S3LifecycleRule{}
+	list := []S3BucketRule{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = S3LifecycleRuleList(list)
+		*l = S3BucketRuleList(list)
 		return nil
 	}
 	return err
 }
 
-// S3LifecycleRuleNoncurrentVersionTransition represents Amazon S3 Lifecycle Rule NoncurrentVersionTransition
+// S3BucketS3KeyFilter represents Amazon S3 Bucket S3KeyFilter
 //
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-lifecycleconfig-rule-noncurrentversiontransition.html
-type S3LifecycleRuleNoncurrentVersionTransition struct {
-	// The storage class to which you want the object to transition, such as
-	// GLACIER. For valid values, see the StorageClass request element of the
-	// PUT Bucket lifecycle action in the Amazon Simple Storage Service API
-	// Reference.
-	StorageClass *StringExpr `json:"StorageClass,omitempty"`
-
-	// The number of days between the time that a new version of the object
-	// is uploaded to the bucket and when old versions of the object are
-	// transitioned to the specified storage class.
-	TransitionInDays *IntegerExpr `json:"TransitionInDays,omitempty"`
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration-config-filter-s3key.html
+type S3BucketS3KeyFilter struct {
+	// The object key name to filter on and whether to filter on the suffix
+	// or prefix of the key name.
+	Rules *S3BucketFilterRuleList `json:"Rules,omitempty"`
 }
 
-// S3LifecycleRuleNoncurrentVersionTransitionList represents a list of S3LifecycleRuleNoncurrentVersionTransition
-type S3LifecycleRuleNoncurrentVersionTransitionList []S3LifecycleRuleNoncurrentVersionTransition
+// S3BucketS3KeyFilterList represents a list of S3BucketS3KeyFilter
+type S3BucketS3KeyFilterList []S3BucketS3KeyFilter
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3LifecycleRuleNoncurrentVersionTransitionList) UnmarshalJSON(buf []byte) error {
+func (l *S3BucketS3KeyFilterList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := S3LifecycleRuleNoncurrentVersionTransition{}
+	item := S3BucketS3KeyFilter{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3LifecycleRuleNoncurrentVersionTransitionList{item}
+		*l = S3BucketS3KeyFilterList{item}
 		return nil
 	}
-	list := []S3LifecycleRuleNoncurrentVersionTransition{}
+	list := []S3BucketS3KeyFilter{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = S3LifecycleRuleNoncurrentVersionTransitionList(list)
+		*l = S3BucketS3KeyFilterList(list)
 		return nil
 	}
 	return err
 }
 
-// S3LifecycleRuleTransition represents Amazon S3 Lifecycle Rule Transition
+// S3BucketStorageClassAnalysis represents Amazon S3 Bucket StorageClassAnalysis
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-storageclassanalysis.html
+type S3BucketStorageClassAnalysis struct {
+	// Describes how data related to the storage class analysis should be
+	// exported.
+	DataExport *S3BucketDataExport `json:"DataExport,omitempty"`
+}
+
+// S3BucketStorageClassAnalysisList represents a list of S3BucketStorageClassAnalysis
+type S3BucketStorageClassAnalysisList []S3BucketStorageClassAnalysis
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketStorageClassAnalysisList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketStorageClassAnalysis{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketStorageClassAnalysisList{item}
+		return nil
+	}
+	list := []S3BucketStorageClassAnalysis{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketStorageClassAnalysisList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketTagFilter represents Amazon S3 Bucket TagFilter
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-tagfilter.html
+type S3BucketTagFilter struct {
+	// The tag key.
+	Key interface{} `json:"Key,omitempty"`
+
+	// The tag value.
+	Value interface{} `json:"Value,omitempty"`
+}
+
+// S3BucketTagFilterList represents a list of S3BucketTagFilter
+type S3BucketTagFilterList []S3BucketTagFilter
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *S3BucketTagFilterList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := S3BucketTagFilter{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = S3BucketTagFilterList{item}
+		return nil
+	}
+	list := []S3BucketTagFilter{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = S3BucketTagFilterList(list)
+		return nil
+	}
+	return err
+}
+
+// SimpleStorageServiceBucketTopicConfiguration represents Amazon Simple Storage Service Bucket TopicConfiguration
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfig-topicconfig.html
+type SimpleStorageServiceBucketTopicConfiguration struct {
+	// The Amazon Simple Storage Service (Amazon S3) bucket event about which
+	// to send notifications. For more information, see Supported Event Types
+	// in the Amazon Simple Storage Service Developer Guide.
+	Event *StringExpr `json:"Event,omitempty"`
+
+	// The filtering rules that determine for which objects to send
+	// notifications. For example, you can create a filter so that Amazon
+	// Simple Storage Service (Amazon S3) sends notifications only when image
+	// files with a .jpg extension are added to the bucket.
+	Filter *S3BucketNotificationFilter `json:"Filter,omitempty"`
+
+	// The Amazon SNS topic Amazon Resource Name (ARN) to which Amazon S3
+	// reports the specified events.
+	Topic *StringExpr `json:"Topic,omitempty"`
+}
+
+// SimpleStorageServiceBucketTopicConfigurationList represents a list of SimpleStorageServiceBucketTopicConfiguration
+type SimpleStorageServiceBucketTopicConfigurationList []SimpleStorageServiceBucketTopicConfiguration
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *SimpleStorageServiceBucketTopicConfigurationList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := SimpleStorageServiceBucketTopicConfiguration{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = SimpleStorageServiceBucketTopicConfigurationList{item}
+		return nil
+	}
+	list := []SimpleStorageServiceBucketTopicConfiguration{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = SimpleStorageServiceBucketTopicConfigurationList(list)
+		return nil
+	}
+	return err
+}
+
+// S3BucketTransition represents Amazon S3 Bucket Transition
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-lifecycleconfig-rule-transition.html
-type S3LifecycleRuleTransition struct {
+type S3BucketTransition struct {
 	// The storage class to which you want the object to transition, such as
 	// GLACIER. For valid values, see the StorageClass request element of the
 	// PUT Bucket lifecycle action in the Amazon Simple Storage Service API
@@ -15588,450 +25438,50 @@ type S3LifecycleRuleTransition struct {
 	TransitionInDays *IntegerExpr `json:"TransitionInDays,omitempty"`
 }
 
-// S3LifecycleRuleTransitionList represents a list of S3LifecycleRuleTransition
-type S3LifecycleRuleTransitionList []S3LifecycleRuleTransition
+// S3BucketTransitionList represents a list of S3BucketTransition
+type S3BucketTransitionList []S3BucketTransition
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3LifecycleRuleTransitionList) UnmarshalJSON(buf []byte) error {
+func (l *S3BucketTransitionList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := S3LifecycleRuleTransition{}
+	item := S3BucketTransition{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3LifecycleRuleTransitionList{item}
+		*l = S3BucketTransitionList{item}
 		return nil
 	}
-	list := []S3LifecycleRuleTransition{}
+	list := []S3BucketTransition{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = S3LifecycleRuleTransitionList(list)
+		*l = S3BucketTransitionList(list)
 		return nil
 	}
 	return err
 }
 
-// S3LoggingConfiguration represents Amazon S3 Logging Configuration
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-loggingconfig.html
-type S3LoggingConfiguration struct {
-	// The name of an Amazon S3 bucket where Amazon S3 store server access
-	// log files. You can store log files in any bucket that you own. By
-	// default, logs are stored in the bucket where the LoggingConfiguration
-	// property is defined.
-	DestinationBucketName *StringExpr `json:"DestinationBucketName,omitempty"`
-
-	// A prefix for the all log object keys. If you store log files from
-	// multiple Amazon S3 buckets in a single bucket, you can use a prefix to
-	// distinguish which log files came from which bucket.
-	LogFilePrefix *StringExpr `json:"LogFilePrefix,omitempty"`
-}
-
-// S3LoggingConfigurationList represents a list of S3LoggingConfiguration
-type S3LoggingConfigurationList []S3LoggingConfiguration
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3LoggingConfigurationList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3LoggingConfiguration{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3LoggingConfigurationList{item}
-		return nil
-	}
-	list := []S3LoggingConfiguration{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3LoggingConfigurationList(list)
-		return nil
-	}
-	return err
-}
-
-// S3NotificationConfiguration represents Amazon S3 NotificationConfiguration
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfig.html
-type S3NotificationConfiguration struct {
-	// The AWS Lambda functions to invoke and the events for which to invoke
-	// the functions.
-	LambdaConfigurations *SimpleStorageServiceNotificationConfigurationLambdaConfigurationsList `json:"LambdaConfigurations,omitempty"`
-
-	// The Amazon Simple Queue Service queues to publish messages to and the
-	// events for which to publish messages.
-	QueueConfigurations *SimpleStorageServiceNotificationConfigurationQueueConfigurationsList `json:"QueueConfigurations,omitempty"`
-
-	// The topic to which notifications are sent and the events for which
-	// notification are generated.
-	TopicConfigurations *S3NotificationConfigurationTopicConfigurationsList `json:"TopicConfigurations,omitempty"`
-}
-
-// S3NotificationConfigurationList represents a list of S3NotificationConfiguration
-type S3NotificationConfigurationList []S3NotificationConfiguration
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3NotificationConfigurationList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3NotificationConfiguration{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3NotificationConfigurationList{item}
-		return nil
-	}
-	list := []S3NotificationConfiguration{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3NotificationConfigurationList(list)
-		return nil
-	}
-	return err
-}
-
-// S3NotificationConfigurationConfigFilter represents Amazon S3 NotificationConfiguration Config Filter
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration-config-filter.html
-type S3NotificationConfigurationConfigFilter struct {
-	// Amazon S3 filtering rules that describe for which object key names to
-	// send notifications.
-	S3Key *S3NotificationConfigurationConfigFilterS3Key `json:"S3Key,omitempty"`
-}
-
-// S3NotificationConfigurationConfigFilterList represents a list of S3NotificationConfigurationConfigFilter
-type S3NotificationConfigurationConfigFilterList []S3NotificationConfigurationConfigFilter
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3NotificationConfigurationConfigFilterList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3NotificationConfigurationConfigFilter{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3NotificationConfigurationConfigFilterList{item}
-		return nil
-	}
-	list := []S3NotificationConfigurationConfigFilter{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3NotificationConfigurationConfigFilterList(list)
-		return nil
-	}
-	return err
-}
-
-// S3NotificationConfigurationConfigFilterS3Key represents Amazon S3 NotificationConfiguration Config Filter S3Key
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration-config-filter-s3key.html
-type S3NotificationConfigurationConfigFilterS3Key struct {
-	// The object key name to filter on and whether to filter on the suffix
-	// or prefix of the key name.
-	Rules *S3NotificationConfigurationConfigFilterS3KeyRulesList `json:"Rules,omitempty"`
-}
-
-// S3NotificationConfigurationConfigFilterS3KeyList represents a list of S3NotificationConfigurationConfigFilterS3Key
-type S3NotificationConfigurationConfigFilterS3KeyList []S3NotificationConfigurationConfigFilterS3Key
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3NotificationConfigurationConfigFilterS3KeyList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3NotificationConfigurationConfigFilterS3Key{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3NotificationConfigurationConfigFilterS3KeyList{item}
-		return nil
-	}
-	list := []S3NotificationConfigurationConfigFilterS3Key{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3NotificationConfigurationConfigFilterS3KeyList(list)
-		return nil
-	}
-	return err
-}
-
-// S3NotificationConfigurationConfigFilterS3KeyRules represents Amazon S3 NotificationConfiguration Config Filter S3Key Rules
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration-config-filter-s3key-rules.html
-type S3NotificationConfigurationConfigFilterS3KeyRules struct {
-	// Whether the filter matches the prefix or suffix of object key names.
-	// For valid values, see the Name request element of the PUT Bucket
-	// notification action in the Amazon Simple Storage Service API
-	// Reference.
-	Name *StringExpr `json:"Name,omitempty"`
-
-	// The value that the filter searches for in object key names.
-	Value *StringExpr `json:"Value,omitempty"`
-}
-
-// S3NotificationConfigurationConfigFilterS3KeyRulesList represents a list of S3NotificationConfigurationConfigFilterS3KeyRules
-type S3NotificationConfigurationConfigFilterS3KeyRulesList []S3NotificationConfigurationConfigFilterS3KeyRules
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3NotificationConfigurationConfigFilterS3KeyRulesList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3NotificationConfigurationConfigFilterS3KeyRules{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3NotificationConfigurationConfigFilterS3KeyRulesList{item}
-		return nil
-	}
-	list := []S3NotificationConfigurationConfigFilterS3KeyRules{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3NotificationConfigurationConfigFilterS3KeyRulesList(list)
-		return nil
-	}
-	return err
-}
-
-// SimpleStorageServiceNotificationConfigurationLambdaConfigurations represents Amazon Simple Storage Service NotificationConfiguration LambdaConfigurations
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfig-lambdaconfig.html
-type SimpleStorageServiceNotificationConfigurationLambdaConfigurations struct {
-	// The S3 bucket event for which to invoke the Lambda function. For more
-	// information, see Supported Event Types in the Amazon Simple Storage
-	// Service Developer Guide.
-	Event *StringExpr `json:"Event,omitempty"`
-
-	// The filtering rules that determine which objects invoke the Lambda
-	// function. For example, you can create a filter so that only image
-	// files with a .jpg extension invoke the function when they are added to
-	// the S3 bucket.
-	Filter *S3NotificationConfigurationConfigFilter `json:"Filter,omitempty"`
-
-	// The Amazon Resource Name (ARN) of the Lambda function that Amazon S3
-	// invokes when the specified event type occurs.
-	Function *StringExpr `json:"Function,omitempty"`
-}
-
-// SimpleStorageServiceNotificationConfigurationLambdaConfigurationsList represents a list of SimpleStorageServiceNotificationConfigurationLambdaConfigurations
-type SimpleStorageServiceNotificationConfigurationLambdaConfigurationsList []SimpleStorageServiceNotificationConfigurationLambdaConfigurations
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *SimpleStorageServiceNotificationConfigurationLambdaConfigurationsList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := SimpleStorageServiceNotificationConfigurationLambdaConfigurations{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = SimpleStorageServiceNotificationConfigurationLambdaConfigurationsList{item}
-		return nil
-	}
-	list := []SimpleStorageServiceNotificationConfigurationLambdaConfigurations{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = SimpleStorageServiceNotificationConfigurationLambdaConfigurationsList(list)
-		return nil
-	}
-	return err
-}
-
-// SimpleStorageServiceNotificationConfigurationQueueConfigurations represents Amazon Simple Storage Service NotificationConfiguration QueueConfigurations
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfig-queueconfig.html
-type SimpleStorageServiceNotificationConfigurationQueueConfigurations struct {
-	// The S3 bucket event about which you want to publish messages to Amazon
-	// Simple Queue Service ( Amazon SQS). For more information, see
-	// Supported Event Types in the Amazon Simple Storage Service Developer
-	// Guide.
-	Event *StringExpr `json:"Event,omitempty"`
-
-	// The filtering rules that determine for which objects to send
-	// notifications. For example, you can create a filter so that Amazon
-	// Simple Storage Service (Amazon S3) sends notifications only when image
-	// files with a .jpg extension are added to the bucket.
-	Filter *S3NotificationConfigurationConfigFilter `json:"Filter,omitempty"`
-
-	// The Amazon Resource Name (ARN) of the Amazon SQS queue that Amazon S3
-	// publishes messages to when the specified event type occurs.
-	Queue *StringExpr `json:"Queue,omitempty"`
-}
-
-// SimpleStorageServiceNotificationConfigurationQueueConfigurationsList represents a list of SimpleStorageServiceNotificationConfigurationQueueConfigurations
-type SimpleStorageServiceNotificationConfigurationQueueConfigurationsList []SimpleStorageServiceNotificationConfigurationQueueConfigurations
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *SimpleStorageServiceNotificationConfigurationQueueConfigurationsList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := SimpleStorageServiceNotificationConfigurationQueueConfigurations{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = SimpleStorageServiceNotificationConfigurationQueueConfigurationsList{item}
-		return nil
-	}
-	list := []SimpleStorageServiceNotificationConfigurationQueueConfigurations{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = SimpleStorageServiceNotificationConfigurationQueueConfigurationsList(list)
-		return nil
-	}
-	return err
-}
-
-// S3NotificationConfigurationTopicConfigurations represents Amazon S3 NotificationConfiguration TopicConfigurations
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfig-topicconfig.html
-type S3NotificationConfigurationTopicConfigurations struct {
-	// The Amazon Simple Storage Service (Amazon S3) bucket event about which
-	// to send notifications. For more information, see Supported Event Types
-	// in the Amazon Simple Storage Service Developer Guide.
-	Event *StringExpr `json:"Event,omitempty"`
-
-	// The filtering rules that determine for which objects to send
-	// notifications. For example, you can create a filter so that Amazon
-	// Simple Storage Service (Amazon S3) sends notifications only when image
-	// files with a .jpg extension are added to the bucket.
-	Filter *S3NotificationConfigurationConfigFilter `json:"Filter,omitempty"`
-
-	// The Amazon SNS topic Amazon Resource Name (ARN) to which Amazon S3
-	// reports the specified events.
-	Topic *StringExpr `json:"Topic,omitempty"`
-}
-
-// S3NotificationConfigurationTopicConfigurationsList represents a list of S3NotificationConfigurationTopicConfigurations
-type S3NotificationConfigurationTopicConfigurationsList []S3NotificationConfigurationTopicConfigurations
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3NotificationConfigurationTopicConfigurationsList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3NotificationConfigurationTopicConfigurations{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3NotificationConfigurationTopicConfigurationsList{item}
-		return nil
-	}
-	list := []S3NotificationConfigurationTopicConfigurations{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3NotificationConfigurationTopicConfigurationsList(list)
-		return nil
-	}
-	return err
-}
-
-// S3ReplicationConfiguration represents Amazon S3 ReplicationConfiguration
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-replicationconfiguration.html
-type S3ReplicationConfiguration struct {
-	// The Amazon Resource Name (ARN) of an AWS Identity and Access
-	// Management (IAM) role that Amazon S3 assumes when replicating objects.
-	// For more information, see How to Set Up Cross-Region Replication in
-	// the Amazon Simple Storage Service Developer Guide.
-	Role *StringExpr `json:"Role,omitempty"`
-
-	// A replication rule that specifies which objects to replicate and where
-	// they are stored.
-	Rules *S3ReplicationConfigurationRulesList `json:"Rules,omitempty"`
-}
-
-// S3ReplicationConfigurationList represents a list of S3ReplicationConfiguration
-type S3ReplicationConfigurationList []S3ReplicationConfiguration
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3ReplicationConfigurationList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3ReplicationConfiguration{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3ReplicationConfigurationList{item}
-		return nil
-	}
-	list := []S3ReplicationConfiguration{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3ReplicationConfigurationList(list)
-		return nil
-	}
-	return err
-}
-
-// S3ReplicationConfigurationRules represents Amazon S3 ReplicationConfiguration Rules
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-replicationconfiguration-rules.html
-type S3ReplicationConfigurationRules struct {
-	// Defines the destination where Amazon S3 stores replicated objects.
-	Destination *S3ReplicationConfigurationRulesDestination `json:"Destination,omitempty"`
-
-	// A unique identifier for the rule. If you don't specify a value, AWS
-	// CloudFormation generates a random ID.
-	Id *StringExpr `json:"Id,omitempty"`
-
-	// An object prefix. This rule applies to all Amazon S3 objects with this
-	// prefix. To specify all objects in an S3 bucket, specify an empty
-	// string.
-	Prefix *StringExpr `json:"Prefix,omitempty"`
-
-	// Whether the rule is enabled. For valid values, see the Status element
-	// of the PUT Bucket replication action in the Amazon Simple Storage
-	// Service API Reference.
-	Status *StringExpr `json:"Status,omitempty"`
-}
-
-// S3ReplicationConfigurationRulesList represents a list of S3ReplicationConfigurationRules
-type S3ReplicationConfigurationRulesList []S3ReplicationConfigurationRules
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3ReplicationConfigurationRulesList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3ReplicationConfigurationRules{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3ReplicationConfigurationRulesList{item}
-		return nil
-	}
-	list := []S3ReplicationConfigurationRules{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3ReplicationConfigurationRulesList(list)
-		return nil
-	}
-	return err
-}
-
-// S3ReplicationConfigurationRulesDestination represents Amazon S3 ReplicationConfiguration Rules Destination
-//
-// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-replicationconfiguration-rules-destination.html
-type S3ReplicationConfigurationRulesDestination struct {
-	// The Amazon resource name (ARN) of an S3 bucket where Amazon S3 stores
-	// replicated objects. This destination bucket must be in a different
-	// region than your source bucket.
-	Bucket *StringExpr `json:"Bucket,omitempty"`
-
-	// The storage class to use when replicating objects, such as standard or
-	// reduced redundancy. By default, Amazon S3 uses the storage class of
-	// the source object to create object replica. For valid values, see the
-	// StorageClass element of the PUT Bucket replication action in the
-	// Amazon Simple Storage Service API Reference.
-	StorageClass *StringExpr `json:"StorageClass,omitempty"`
-}
-
-// S3ReplicationConfigurationRulesDestinationList represents a list of S3ReplicationConfigurationRulesDestination
-type S3ReplicationConfigurationRulesDestinationList []S3ReplicationConfigurationRulesDestination
-
-// UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3ReplicationConfigurationRulesDestinationList) UnmarshalJSON(buf []byte) error {
-	// Cloudformation allows a single object when a list of objects is expected
-	item := S3ReplicationConfigurationRulesDestination{}
-	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3ReplicationConfigurationRulesDestinationList{item}
-		return nil
-	}
-	list := []S3ReplicationConfigurationRulesDestination{}
-	err := json.Unmarshal(buf, &list)
-	if err == nil {
-		*l = S3ReplicationConfigurationRulesDestinationList(list)
-		return nil
-	}
-	return err
-}
-
-// S3VersioningConfiguration represents Amazon S3 Versioning Configuration
+// S3BucketVersioningConfiguration represents Amazon S3 Bucket VersioningConfiguration
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-versioningconfig.html
-type S3VersioningConfiguration struct {
+type S3BucketVersioningConfiguration struct {
 	// The versioning state of an Amazon S3 bucket. If you enable versioning,
 	// you must suspend versioning to disable it.
 	Status *StringExpr `json:"Status,omitempty"`
 }
 
-// S3VersioningConfigurationList represents a list of S3VersioningConfiguration
-type S3VersioningConfigurationList []S3VersioningConfiguration
+// S3BucketVersioningConfigurationList represents a list of S3BucketVersioningConfiguration
+type S3BucketVersioningConfigurationList []S3BucketVersioningConfiguration
 
 // UnmarshalJSON sets the object from the provided JSON representation
-func (l *S3VersioningConfigurationList) UnmarshalJSON(buf []byte) error {
+func (l *S3BucketVersioningConfigurationList) UnmarshalJSON(buf []byte) error {
 	// Cloudformation allows a single object when a list of objects is expected
-	item := S3VersioningConfiguration{}
+	item := S3BucketVersioningConfiguration{}
 	if err := json.Unmarshal(buf, &item); err == nil {
-		*l = S3VersioningConfigurationList{item}
+		*l = S3BucketVersioningConfigurationList{item}
 		return nil
 	}
-	list := []S3VersioningConfiguration{}
+	list := []S3BucketVersioningConfiguration{}
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
-		*l = S3VersioningConfigurationList(list)
+		*l = S3BucketVersioningConfigurationList(list)
 		return nil
 	}
 	return err
@@ -16221,6 +25671,116 @@ func (l *S3WebsiteConfigurationRoutingRulesRoutingRuleConditionPropertyList) Unm
 	return err
 }
 
+// Route53ServiceDiscoveryDnsConfig represents Amazon Route 53 ServiceDiscovery DnsConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-servicediscovery-service-dnsconfig.html
+type Route53ServiceDiscoveryDnsConfig struct {
+	// Contains one DnsRecord element for each DNS record that you want
+	// Amazon Route 53 to create when you register an instance.
+	DnsRecords *Route53ServiceDiscoveryDnsRecordList `json:"DnsRecords,omitempty"`
+
+	// The ID of the namespace that you want to use for DNS configuration.
+	NamespaceId *StringExpr `json:"NamespaceId,omitempty"`
+}
+
+// Route53ServiceDiscoveryDnsConfigList represents a list of Route53ServiceDiscoveryDnsConfig
+type Route53ServiceDiscoveryDnsConfigList []Route53ServiceDiscoveryDnsConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *Route53ServiceDiscoveryDnsConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := Route53ServiceDiscoveryDnsConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = Route53ServiceDiscoveryDnsConfigList{item}
+		return nil
+	}
+	list := []Route53ServiceDiscoveryDnsConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = Route53ServiceDiscoveryDnsConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// Route53ServiceDiscoveryDnsRecord represents Amazon Route 53 ServiceDiscovery DnsRecord
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-servicediscovery-service-dnsrecord.html
+type Route53ServiceDiscoveryDnsRecord struct {
+	// The DNS type of the record that you want Amazon Route 53 to create.
+	// Supported record types include A, AAAA, and SRV.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// The amount of time, in seconds, that you want DNS resolvers to cache
+	// the settings for this record.
+	TTL *StringExpr `json:"TTL,omitempty"`
+}
+
+// Route53ServiceDiscoveryDnsRecordList represents a list of Route53ServiceDiscoveryDnsRecord
+type Route53ServiceDiscoveryDnsRecordList []Route53ServiceDiscoveryDnsRecord
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *Route53ServiceDiscoveryDnsRecordList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := Route53ServiceDiscoveryDnsRecord{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = Route53ServiceDiscoveryDnsRecordList{item}
+		return nil
+	}
+	list := []Route53ServiceDiscoveryDnsRecord{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = Route53ServiceDiscoveryDnsRecordList(list)
+		return nil
+	}
+	return err
+}
+
+// Route53ServiceDiscoveryHealthCheckConfig represents Amazon Route 53 ServiceDiscovery HealthCheckConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-servicediscovery-service-healthcheckconfig.html
+type Route53ServiceDiscoveryHealthCheckConfig struct {
+	// The type of health check that you want to create, which indicates how
+	// Amazon Route 53 determines whether an endpoint is healthy. Valid
+	// types include HTTP, HTTPS, and TCP.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// The path that you want Amazon Route 53 to request when performing
+	// health checks. The path can be any value for which your endpoint will
+	// return an HTTP status code of 2xx or 3xx when the endpoint is healthy,
+	// such as the file /docs/route53-health-check.html. Amazon Route 53
+	// automatically adds the DNS name for the service and a leading forward
+	// slash (/) character.
+	ResourcePath *StringExpr `json:"ResourcePath,omitempty"`
+
+	// The number of consecutive health checks that an endpoint must pass or
+	// fail for Amazon Route 53 to change the current status of the endpoint
+	// from unhealthy to healthy or vice versa. For more information, see How
+	// Amazon Route 53 Determines Whether an Endpoint Is Healthy in the
+	// Amazon Route 53 Developer Guide
+	FailureThreshold interface{} `json:"FailureThreshold,omitempty"`
+}
+
+// Route53ServiceDiscoveryHealthCheckConfigList represents a list of Route53ServiceDiscoveryHealthCheckConfig
+type Route53ServiceDiscoveryHealthCheckConfigList []Route53ServiceDiscoveryHealthCheckConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *Route53ServiceDiscoveryHealthCheckConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := Route53ServiceDiscoveryHealthCheckConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = Route53ServiceDiscoveryHealthCheckConfigList{item}
+		return nil
+	}
+	list := []Route53ServiceDiscoveryHealthCheckConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = Route53ServiceDiscoveryHealthCheckConfigList(list)
+		return nil
+	}
+	return err
+}
+
 // EC2SystemsManagerAssociationTargets represents Amazon EC2 Systems Manager Association Targets
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-association-targets.html
@@ -16233,7 +25793,7 @@ type EC2SystemsManagerAssociationTargets struct {
 	// The value of the criteria. SSM runs targeted commands on EC2 instances
 	// that match the criteria. For more information, see the Target data
 	// type in the Amazon EC2 Systems Manager API Reference.
-	Values *StringListExpr `json:"Values,omitempty"`
+	Values interface{} `json:"Values,omitempty"`
 }
 
 // EC2SystemsManagerAssociationTargetsList represents a list of EC2SystemsManagerAssociationTargets
@@ -16251,6 +25811,480 @@ func (l *EC2SystemsManagerAssociationTargetsList) UnmarshalJSON(buf []byte) erro
 	err := json.Unmarshal(buf, &list)
 	if err == nil {
 		*l = EC2SystemsManagerAssociationTargetsList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTargetTargets represents Amazon EC2 Systems Manager MaintenanceWindowTarget Targets
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtarget-targets.html
+type EC2SystemsManagerMaintenanceWindowTargetTargets struct {
+	// User-defined criteria for sending commands that target instances that
+	// meet the criteria. Key can be tag:Amazon EC2 tag or InstanceIds. For
+	// more information about how to send commands that target instances
+	// using Key,Value parameters, see Sending Commands to a Fleet in the
+	// Amazon EC2 Systems Manager User Guide.
+	Key interface{} `json:"Key,omitempty"`
+
+	// User-defined criteria that maps to Key. For example, if you specify
+	// tag:ServerRole, you can specify value:WebServer to execute a command
+	// on instances that include the Amazon EC2 tags of ServerRole,WebServer.
+	// For more information about how to send commands that target instances
+	// using Key,Value parameters, see Sending Commands to a Fleet in the
+	// Amazon EC2 Systems Manager User Guide.
+	Values interface{} `json:"Values,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTargetTargetsList represents a list of EC2SystemsManagerMaintenanceWindowTargetTargets
+type EC2SystemsManagerMaintenanceWindowTargetTargetsList []EC2SystemsManagerMaintenanceWindowTargetTargets
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTargetTargetsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTargetTargets{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTargetTargetsList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTargetTargets{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTargetTargetsList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskLoggingInfo represents Amazon EC2 Systems Manager MaintenanceWindowTask LoggingInfo
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtask-logginginfo.html
+type EC2SystemsManagerMaintenanceWindowTaskLoggingInfo struct {
+	// The name of the Amazon S3 bucket where execution logs are stored.
+	S3Bucket interface{} `json:"S3Bucket,omitempty"`
+
+	// The region where the Amazon S3 bucket is located.
+	Region interface{} `json:"Region,omitempty"`
+
+	// The Amazon S3 bucket subfolder.
+	S3Prefix interface{} `json:"S3Prefix,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskLoggingInfoList represents a list of EC2SystemsManagerMaintenanceWindowTaskLoggingInfo
+type EC2SystemsManagerMaintenanceWindowTaskLoggingInfoList []EC2SystemsManagerMaintenanceWindowTaskLoggingInfo
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTaskLoggingInfoList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTaskLoggingInfo{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskLoggingInfoList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTaskLoggingInfo{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskLoggingInfoList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParameters represents Amazon EC2 Systems Manager MaintenanceWindowTask MaintenanceWindowAutomationParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtask-maintenancewindowautomationparameters.html
+type EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParameters struct {
+	// The parameters for the AUTOMATION task.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// The version of an Automation document to use during task execution.
+	DocumentVersion interface{} `json:"DocumentVersion,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParametersList represents a list of EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParameters
+type EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParametersList []EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParametersList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParameters represents Amazon EC2 Systems Manager MaintenanceWindowTask MaintenanceWindowLambdaParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtask-maintenancewindowlambdaparameters.html
+type EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParameters struct {
+	// Client-specific information to pass to the Lambda function that you're
+	// invoking. You can then use the context variable to process the client
+	// information in your Lambda function.
+	ClientContext interface{} `json:"ClientContext,omitempty"`
+
+	// A Lambda function version or alias name. If you specify a function
+	// version, the action uses the qualified function Amazon Resource Name
+	// (ARN) to invoke a specific Lambda function. If you specify an alias
+	// name, the action uses the alias ARN to invoke the Lambda function
+	// version that the alias points to.
+	Qualifier interface{} `json:"Qualifier,omitempty"`
+
+	// JSON to provide to your Lambda function as input.
+	Payload interface{} `json:"Payload,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParametersList represents a list of EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParameters
+type EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParametersList []EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParametersList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParameters represents Amazon EC2 Systems Manager MaintenanceWindowTask MaintenanceWindowRunCommandParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtask-maintenancewindowruncommandparameters.html
+type EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParameters struct {
+	// If this time is reached and the command hasn't already started
+	// executing, it doesn't execute.
+	TimeoutSeconds interface{} `json:"TimeoutSeconds,omitempty"`
+
+	// Information about the command or commands to execute.
+	Comment interface{} `json:"Comment,omitempty"`
+
+	// The Amazon S3 bucket subfolder.
+	OutputS3KeyPrefix interface{} `json:"OutputS3KeyPrefix,omitempty"`
+
+	// The parameters for the RUN_COMMAND task execution.
+	Parameters interface{} `json:"Parameters,omitempty"`
+
+	// The SHA-256 or SHA-1 hash type. SHA-1 hashes are deprecated.
+	DocumentHashType interface{} `json:"DocumentHashType,omitempty"`
+
+	// The IAM service role that's used during task execution.
+	ServiceRoleArn interface{} `json:"ServiceRoleArn,omitempty"`
+
+	// Configurations for sending notifications about command status changes
+	// on a per-instance basis.
+	NotificationConfig *EC2SystemsManagerMaintenanceWindowTaskNotificationConfig `json:"NotificationConfig,omitempty"`
+
+	// The name of the Amazon S3 bucket.
+	OutputS3BucketName interface{} `json:"OutputS3BucketName,omitempty"`
+
+	// The SHA-256 or SHA-1 hash created by the system when the document was
+	// created. SHA-1 hashes are deprecated.
+	DocumentHash interface{} `json:"DocumentHash,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParametersList represents a list of EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParameters
+type EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParametersList []EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParametersList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParameters represents Amazon EC2 Systems Manager MaintenanceWindowTask MaintenanceWindowStepFunctionsParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtask-maintenancewindowstepfunctionsparameters.html
+type EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParameters struct {
+	// The inputs for the STEP_FUNCTION task.
+	Input interface{} `json:"Input,omitempty"`
+
+	// The name of the STEP_FUNCTION task.
+	Name interface{} `json:"Name,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParametersList represents a list of EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParameters
+type EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParametersList []EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParametersList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskNotificationConfig represents Amazon EC2 Systems Manager MaintenanceWindowTask NotificationConfig
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtask-notificationconfig.html
+type EC2SystemsManagerMaintenanceWindowTaskNotificationConfig struct {
+	// An Amazon Resource Name (ARN) for an Amazon SNS topic. Run Command
+	// pushes notifications about command status changes to this topic.
+	NotificationArn interface{} `json:"NotificationArn,omitempty"`
+
+	// The notification type.
+	NotificationType interface{} `json:"NotificationType,omitempty"`
+
+	// The different events that you can receive notifications for. These
+	// events include the following: All (events), InProgress, Success,
+	// TimedOut, Cancelled, Failed. To learn more about these events, see
+	// Setting Up Events and Notifications in the Amazon EC2 Systems Manager
+	// User Guide.
+	NotificationEvents interface{} `json:"NotificationEvents,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskNotificationConfigList represents a list of EC2SystemsManagerMaintenanceWindowTaskNotificationConfig
+type EC2SystemsManagerMaintenanceWindowTaskNotificationConfigList []EC2SystemsManagerMaintenanceWindowTaskNotificationConfig
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTaskNotificationConfigList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTaskNotificationConfig{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskNotificationConfigList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTaskNotificationConfig{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskNotificationConfigList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskTarget represents Amazon EC2 Systems Manager MaintenanceWindowTask Target
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtask-target.html
+type EC2SystemsManagerMaintenanceWindowTaskTarget struct {
+	// User-defined criteria for sending commands that target instances that
+	// meet the criteria. Key can be tag:Amazon EC2 tagor InstanceIds. For
+	// more information about how to send commands that target instances by
+	// using Key,Value parameters, see Sending Commands to a Fleet in the
+	// Amazon EC2 Systems Manager User Guide.
+	Key interface{} `json:"Key,omitempty"`
+
+	// User-defined criteria that maps to Key. For example, if you specify
+	// tag:ServerRole, you can specify value:WebServer to execute a command
+	// on instances that include Amazon EC2 tags of ServerRole,WebServer. For
+	// more information about how to send commands that target instances
+	// using Key,Value parameters, see Sending Commands to a Fleet in the
+	// Amazon EC2 Systems Manager User Guide.
+	Values interface{} `json:"Values,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskTargetList represents a list of EC2SystemsManagerMaintenanceWindowTaskTarget
+type EC2SystemsManagerMaintenanceWindowTaskTargetList []EC2SystemsManagerMaintenanceWindowTaskTarget
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTaskTargetList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTaskTarget{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskTargetList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTaskTarget{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskTargetList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParameters represents Amazon EC2 Systems Manager MaintenanceWindowTask TaskInvocationParameters
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-maintenancewindowtask-taskinvocationparameters.html
+type EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParameters struct {
+	// The parameters for a RUN_COMMAND task type.
+	MaintenanceWindowRunCommandParameters *EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowRunCommandParameters `json:"MaintenanceWindowRunCommandParameters,omitempty"`
+
+	// The parameters for an AUTOMATION task type.
+	MaintenanceWindowAutomationParameters *EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowAutomationParameters `json:"MaintenanceWindowAutomationParameters,omitempty"`
+
+	// The parameters for a STEP_FUNCTION task type.
+	MaintenanceWindowStepFunctionsParameters *EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowStepFunctionsParameters `json:"MaintenanceWindowStepFunctionsParameters,omitempty"`
+
+	// The parameters for a LAMBDA task type.
+	MaintenanceWindowLambdaParameters *EC2SystemsManagerMaintenanceWindowTaskMaintenanceWindowLambdaParameters `json:"MaintenanceWindowLambdaParameters,omitempty"`
+}
+
+// EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParametersList represents a list of EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParameters
+type EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParametersList []EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParameters
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParametersList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParameters{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParametersList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParameters{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerMaintenanceWindowTaskTaskInvocationParametersList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerPatchBaselinePatchFilterGroup represents Amazon EC2 Systems Manager PatchBaseline PatchFilterGroup
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-patchbaseline-patchfiltergroup.html
+type EC2SystemsManagerPatchBaselinePatchFilterGroup struct {
+	// The set of patch filters that make up the group.
+	PatchFilters *EC2SystemsManagerPatchBaselinePatchFilterList `json:"PatchFilters,omitempty"`
+}
+
+// EC2SystemsManagerPatchBaselinePatchFilterGroupList represents a list of EC2SystemsManagerPatchBaselinePatchFilterGroup
+type EC2SystemsManagerPatchBaselinePatchFilterGroupList []EC2SystemsManagerPatchBaselinePatchFilterGroup
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerPatchBaselinePatchFilterGroupList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerPatchBaselinePatchFilterGroup{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerPatchBaselinePatchFilterGroupList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerPatchBaselinePatchFilterGroup{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerPatchBaselinePatchFilterGroupList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerPatchBaselineRule represents Amazon EC2 Systems Manager PatchBaseline Rule
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-patchbaseline-rule.html
+type EC2SystemsManagerPatchBaselineRule struct {
+	// The patch filter group that defines the criteria for the rule.
+	PatchFilterGroup *EC2SystemsManagerPatchBaselinePatchFilterGroup `json:"PatchFilterGroup,omitempty"`
+
+	// The number of days after the release date of each patch that matches
+	// the rule to mark the patch as approved in the patch baseline. For
+	// example, a value of 7 means that patches are approved seven days after
+	// they are released.
+	ApproveAfterDays interface{} `json:"ApproveAfterDays,omitempty"`
+
+	// A compliance severity level for all approved patches in a patch
+	// baseline. Valid compliance severity levels include the following:
+	// Unspecified, Critical, High, Medium, Low, and Informational.
+	ComplianceLevel interface{} `json:"ComplianceLevel,omitempty"`
+}
+
+// EC2SystemsManagerPatchBaselineRuleList represents a list of EC2SystemsManagerPatchBaselineRule
+type EC2SystemsManagerPatchBaselineRuleList []EC2SystemsManagerPatchBaselineRule
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerPatchBaselineRuleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerPatchBaselineRule{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerPatchBaselineRuleList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerPatchBaselineRule{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerPatchBaselineRuleList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerPatchBaselinePatchFilter represents Amazon EC2 Systems Manager PatchBaseline PatchFilter
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-patchbaseline-patchfilter.html
+type EC2SystemsManagerPatchBaselinePatchFilter struct {
+	// The key for the filter. For information about valid keys, see
+	// PatchFilter in the Amazon EC2 Systems Manager API Reference.
+	Key interface{} `json:"Key,omitempty"`
+
+	// The values for the filter key.
+	Values interface{} `json:"Values,omitempty"`
+}
+
+// EC2SystemsManagerPatchBaselinePatchFilterList represents a list of EC2SystemsManagerPatchBaselinePatchFilter
+type EC2SystemsManagerPatchBaselinePatchFilterList []EC2SystemsManagerPatchBaselinePatchFilter
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerPatchBaselinePatchFilterList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerPatchBaselinePatchFilter{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerPatchBaselinePatchFilterList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerPatchBaselinePatchFilter{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerPatchBaselinePatchFilterList(list)
+		return nil
+	}
+	return err
+}
+
+// EC2SystemsManagerPatchBaselineRuleGroup represents Amazon EC2 Systems Manager PatchBaseline RuleGroup
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ssm-patchbaseline-rulegroup.html
+type EC2SystemsManagerPatchBaselineRuleGroup struct {
+	// The rules that make up the rule group.
+	PatchRules *EC2SystemsManagerPatchBaselineRuleList `json:"PatchRules,omitempty"`
+}
+
+// EC2SystemsManagerPatchBaselineRuleGroupList represents a list of EC2SystemsManagerPatchBaselineRuleGroup
+type EC2SystemsManagerPatchBaselineRuleGroupList []EC2SystemsManagerPatchBaselineRuleGroup
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *EC2SystemsManagerPatchBaselineRuleGroupList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := EC2SystemsManagerPatchBaselineRuleGroup{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = EC2SystemsManagerPatchBaselineRuleGroupList{item}
+		return nil
+	}
+	list := []EC2SystemsManagerPatchBaselineRuleGroup{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = EC2SystemsManagerPatchBaselineRuleGroupList(list)
 		return nil
 	}
 	return err
@@ -16295,13 +26329,13 @@ func (l *SNSSubscriptionPropertyList) UnmarshalJSON(buf []byte) error {
 //
 // see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sqs-queues-redrivepolicy.html
 type SQSRedrivePolicy struct {
-	// The Amazon Resource Name (ARN) of the dead letter queue to which the
-	// messages are sent to after the maxReceiveCount value has been
+	// The Amazon Resource Name (ARN) of the dead-letter queue to which
+	// Amazon SQS moves messages after the value of maxReceiveCount is
 	// exceeded.
 	DeadLetterTargetArn *StringExpr `json:"deadLetterTargetArn,omitempty"`
 
 	// The number of times a message is delivered to the source queue before
-	// being sent to the dead letter queue.
+	// being moved to the dead-letter queue.
 	MaxReceiveCount *IntegerExpr `json:"maxReceiveCount,omitempty"`
 }
 
@@ -16658,7 +26692,7 @@ type WAFXssMatchSetXssMatchTuple struct {
 	// inspecting a request for a match. Text transformations eliminate some
 	// of the unusual formatting that attackers use in web requests in an
 	// effort to bypass AWS WAF. If you specify a transformation, AWS WAF
-	// transforms theFieldToMatch parameter before inspecting a web request
+	// transforms the FieldToMatch parameter before inspecting a web request
 	// for a match.
 	TextTransformation *StringExpr `json:"TextTransformation,omitempty"`
 }
@@ -16787,6 +26821,465 @@ func (l *WAFWebACLRulesList) UnmarshalJSON(buf []byte) error {
 	return err
 }
 
+// WAFRegionalByteMatchSetByteMatchTuples represents AWS WAF Regional ByteMatchSet ByteMatchTuples
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-bytematchset-bytematchtuples.html
+type WAFRegionalByteMatchSetByteMatchTuples struct {
+	// The part of a web request that you want AWS WAF to search, such as a
+	// specific header or a query string.
+	FieldToMatch *WAFRegionalByteMatchSetByteMatchTuplesFieldToMatch `json:"FieldToMatch,omitempty"`
+
+	// How AWS WAF finds matches within the part of the web request in which
+	// you are searching. For valid values, see the PositionalConstraint
+	// content for the ByteMatchTuple data type in the AWS WAF Regional API
+	// Reference.
+	PositionalConstraint *StringExpr `json:"PositionalConstraint,omitempty"`
+
+	// The value that AWS WAF searches for. AWS CloudFormation encodes in
+	// base64 this value before sending it to AWS WAF.
+	TargetString *StringExpr `json:"TargetString,omitempty"`
+
+	// The base64-encoded value that AWS WAF searches for. AWS CloudFormation
+	// sends this value to AWS WAF without encoding it.
+	TargetStringBase64 *StringExpr `json:"TargetStringBase64,omitempty"`
+
+	// Specifies how AWS WAF processes the target string value. Text
+	// transformations eliminate some of the unusual formatting that
+	// attackers use in web requests in an effort to bypass AWS WAF. If you
+	// specify a transformation, AWS WAF transforms the target string value
+	// before inspecting a web request for a match.
+	TextTransformation *StringExpr `json:"TextTransformation,omitempty"`
+}
+
+// WAFRegionalByteMatchSetByteMatchTuplesList represents a list of WAFRegionalByteMatchSetByteMatchTuples
+type WAFRegionalByteMatchSetByteMatchTuplesList []WAFRegionalByteMatchSetByteMatchTuples
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalByteMatchSetByteMatchTuplesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalByteMatchSetByteMatchTuples{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalByteMatchSetByteMatchTuplesList{item}
+		return nil
+	}
+	list := []WAFRegionalByteMatchSetByteMatchTuples{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalByteMatchSetByteMatchTuplesList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalByteMatchSetByteMatchTuplesFieldToMatch represents AWS WAF Regional ByteMatchSet ByteMatchTuples FieldToMatch
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-bytematchset-bytematchtuples-fieldtomatch.html
+type WAFRegionalByteMatchSetByteMatchTuplesFieldToMatch struct {
+	// If you specify HEADER for the Type property, the name of the header
+	// that AWS WAF searches for, such as User-Agent or Referer. If you
+	// specify any other value for the Type property, do not specify this
+	// property.
+	Data *StringExpr `json:"Data,omitempty"`
+
+	// The part of the web request in which AWS WAF searches for the target
+	// string. For valid values, see FieldToMatch in the AWS WAF Regional API
+	// Reference.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// WAFRegionalByteMatchSetByteMatchTuplesFieldToMatchList represents a list of WAFRegionalByteMatchSetByteMatchTuplesFieldToMatch
+type WAFRegionalByteMatchSetByteMatchTuplesFieldToMatchList []WAFRegionalByteMatchSetByteMatchTuplesFieldToMatch
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalByteMatchSetByteMatchTuplesFieldToMatchList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalByteMatchSetByteMatchTuplesFieldToMatch{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalByteMatchSetByteMatchTuplesFieldToMatchList{item}
+		return nil
+	}
+	list := []WAFRegionalByteMatchSetByteMatchTuplesFieldToMatch{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalByteMatchSetByteMatchTuplesFieldToMatchList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalIPSetIPSetDescriptors represents AWS WAF Regional IPSet IPSetDescriptors
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-ipset-ipsetdescriptors.html
+type WAFRegionalIPSetIPSetDescriptors struct {
+	// The IP address type, such as IPV4. For valid values, see the Type
+	// contents of the IPSetDescriptor data type in the AWS WAF Regional API
+	// Reference.
+	Type *StringExpr `json:"Type,omitempty"`
+
+	// An IP address (in CIDR notation) that AWS WAF permits, blocks, or
+	// counts. For example, to specify a single IP address such as
+	// 192.0.2.44, specify 192.0.2.44/32. To specify a range of IP addresses
+	// such as 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24.
+	Value *StringExpr `json:"Value,omitempty"`
+}
+
+// WAFRegionalIPSetIPSetDescriptorsList represents a list of WAFRegionalIPSetIPSetDescriptors
+type WAFRegionalIPSetIPSetDescriptorsList []WAFRegionalIPSetIPSetDescriptors
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalIPSetIPSetDescriptorsList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalIPSetIPSetDescriptors{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalIPSetIPSetDescriptorsList{item}
+		return nil
+	}
+	list := []WAFRegionalIPSetIPSetDescriptors{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalIPSetIPSetDescriptorsList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalRulePredicates represents AWS WAF Regional Rule Predicates
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-rule-predicates.html
+type WAFRegionalRulePredicates struct {
+	// The unique identifier of a predicate, such as the ID of a ByteMatchSet
+	// or IPSet.
+	DataId *StringExpr `json:"DataId,omitempty"`
+
+	// Whether to use the settings or the negated settings that you specified
+	// in the ByteMatchSet, IPSet, SizeConstraintSet, SqlInjectionMatchSet,
+	// or XssMatchSet objects.
+	Negated *BoolExpr `json:"Negated,omitempty"`
+
+	// The type of predicate in a rule, such as an IPSet (IPMatch). For valid
+	// values, see the Type contents of the Predicate data type in the AWS
+	// WAF Regional API Reference.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// WAFRegionalRulePredicatesList represents a list of WAFRegionalRulePredicates
+type WAFRegionalRulePredicatesList []WAFRegionalRulePredicates
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalRulePredicatesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalRulePredicates{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalRulePredicatesList{item}
+		return nil
+	}
+	list := []WAFRegionalRulePredicates{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalRulePredicatesList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalSizeConstraintSetSizeConstraint represents AWS WAF Regional SizeConstraintSet SizeConstraint
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-sizeconstraintset-sizeconstraint.html
+type WAFRegionalSizeConstraintSetSizeConstraint struct {
+	// The type of comparison that you want AWS WAF to perform. AWS WAF uses
+	// this value in combination with the Size and FieldToMatch property
+	// values to check if the size constraint is a match. For more
+	// information and valid values, see the ComparisonOperator content for
+	// the SizeConstraint data type in the AWS WAF Regional API Reference.
+	ComparisonOperator *StringExpr `json:"ComparisonOperator,omitempty"`
+
+	// The part of a web request that you want AWS WAF to search, such as a
+	// specific header or a query string.
+	FieldToMatch *WAFRegionalSizeConstraintSetSizeConstraintFieldToMatch `json:"FieldToMatch,omitempty"`
+
+	// The size in bytes that you want AWS WAF to compare against the size of
+	// the specified FieldToMatch. AWS WAF uses Size in combination with the
+	// ComparisonOperator and FieldToMatch property values to check if the
+	// size constraint of a web request is a match. For more information and
+	// valid values, see the Size content for the SizeConstraint data type in
+	// the AWS WAF Regional API Reference.
+	Size *IntegerExpr `json:"Size,omitempty"`
+
+	// Specifies how AWS WAF processes the FieldToMatch property before
+	// inspecting a request for a match. Text transformations eliminate some
+	// of the unusual formatting that attackers use in web requests in an
+	// effort to bypass AWS WAF. If you specify a transformation, AWS WAF
+	// transforms the FieldToMatch before inspecting a web request for a
+	// match.
+	TextTransformation *StringExpr `json:"TextTransformation,omitempty"`
+}
+
+// WAFRegionalSizeConstraintSetSizeConstraintList represents a list of WAFRegionalSizeConstraintSetSizeConstraint
+type WAFRegionalSizeConstraintSetSizeConstraintList []WAFRegionalSizeConstraintSetSizeConstraint
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalSizeConstraintSetSizeConstraintList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalSizeConstraintSetSizeConstraint{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalSizeConstraintSetSizeConstraintList{item}
+		return nil
+	}
+	list := []WAFRegionalSizeConstraintSetSizeConstraint{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalSizeConstraintSetSizeConstraintList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalSizeConstraintSetSizeConstraintFieldToMatch represents AWS WAF Regional SizeConstraintSet SizeConstraint FieldToMatch
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-sizeconstraintset-sizeconstraint-fieldtomatch.html
+type WAFRegionalSizeConstraintSetSizeConstraintFieldToMatch struct {
+	// If you specify HEADER for the Type property, the name of the header
+	// that AWS WAF searches for, such as User-Agent or Referer. If you
+	// specify any other value for the Type property, do not specify this
+	// property.
+	Data *StringExpr `json:"Data,omitempty"`
+
+	// The part of the web request in which AWS WAF searches for the target
+	// string. For valid values, see FieldToMatch in the AWS WAF Regional API
+	// Reference.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// WAFRegionalSizeConstraintSetSizeConstraintFieldToMatchList represents a list of WAFRegionalSizeConstraintSetSizeConstraintFieldToMatch
+type WAFRegionalSizeConstraintSetSizeConstraintFieldToMatchList []WAFRegionalSizeConstraintSetSizeConstraintFieldToMatch
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalSizeConstraintSetSizeConstraintFieldToMatchList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalSizeConstraintSetSizeConstraintFieldToMatch{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalSizeConstraintSetSizeConstraintFieldToMatchList{item}
+		return nil
+	}
+	list := []WAFRegionalSizeConstraintSetSizeConstraintFieldToMatch{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalSizeConstraintSetSizeConstraintFieldToMatchList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuples represents AWS WAF Regional SqlInjectionMatchSet SqlInjectionMatchTuples
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-sqlinjectionmatchset-sqlinjectionmatchtuples.html
+type WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuples struct {
+	// The part of a web request that you want AWS WAF to search, such as a
+	// specific header or a query string.
+	FieldToMatch *WAFRegionalByteMatchSetByteMatchTuplesFieldToMatch `json:"FieldToMatch,omitempty"`
+
+	// Specifies how AWS WAF processes the FieldToMatch property before
+	// inspecting a request for a match.
+	TextTransformation *StringExpr `json:"TextTransformation,omitempty"`
+}
+
+// WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesList represents a list of WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuples
+type WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesList []WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuples
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuples{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesList{item}
+		return nil
+	}
+	list := []WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuples{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatch represents AWS WAF Regional SqlInjectionMatchSet SqlInjectionMatchTuples FieldToMatch
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-sqlinjectionmatchset-sqlinjectionmatchtuples-fieldtomatch.html
+type WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatch struct {
+	// If you specify HEADER for the Type property, the name of the header
+	// that AWS WAF searches for, such as User-Agent or Referer. If you
+	// specify any other value for the Type property, do not specify this
+	// property.
+	Data *StringExpr `json:"Data,omitempty"`
+
+	// The part of the web request in which AWS WAF searches for the target
+	// string. For valid values, see FieldToMatch in the AWS WAF Regional API
+	// Reference.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatchList represents a list of WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatch
+type WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatchList []WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatch
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatchList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatch{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatchList{item}
+		return nil
+	}
+	list := []WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatch{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalSqlInjectionMatchSetSqlInjectionMatchTuplesFieldToMatchList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalXssMatchSetXssMatchTuple represents AWS WAF Regional XssMatchSet XssMatchTuple
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-xssmatchset-xssmatchtuple.html
+type WAFRegionalXssMatchSetXssMatchTuple struct {
+	// The part of a web request that you want AWS WAF to search, such as a
+	// specific header or a query string.
+	FieldToMatch *WAFRegionalXssMatchSetXssMatchTupleFieldToMatch `json:"FieldToMatch,omitempty"`
+
+	// Specifies how AWS WAF processes the FieldToMatch property before
+	// inspecting a request for a match. Text transformations eliminate some
+	// of the unusual formatting that attackers use in web requests in an
+	// effort to bypass AWS WAF. If you specify a transformation, AWS WAF
+	// transforms theFieldToMatch parameter before inspecting a web request
+	// for a match.
+	TextTransformation *StringExpr `json:"TextTransformation,omitempty"`
+}
+
+// WAFRegionalXssMatchSetXssMatchTupleList represents a list of WAFRegionalXssMatchSetXssMatchTuple
+type WAFRegionalXssMatchSetXssMatchTupleList []WAFRegionalXssMatchSetXssMatchTuple
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalXssMatchSetXssMatchTupleList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalXssMatchSetXssMatchTuple{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalXssMatchSetXssMatchTupleList{item}
+		return nil
+	}
+	list := []WAFRegionalXssMatchSetXssMatchTuple{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalXssMatchSetXssMatchTupleList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalXssMatchSetXssMatchTupleFieldToMatch represents AWS WAF Regional XssMatchSet XssMatchTuple FieldToMatch
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-xssmatchset-xssmatchtuple-fieldtomatch.html
+type WAFRegionalXssMatchSetXssMatchTupleFieldToMatch struct {
+	// If you specify HEADER for the Type property, the name of the header
+	// that AWS WAF searches for, such as User-Agent or Referer. If you
+	// specify any other value for the Type property, do not specify this
+	// property.
+	Data *StringExpr `json:"Data,omitempty"`
+
+	// The part of the web request in which AWS WAF searches for the target
+	// string. For valid values, see FieldToMatch in the AWS WAF Regional API
+	// Reference.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// WAFRegionalXssMatchSetXssMatchTupleFieldToMatchList represents a list of WAFRegionalXssMatchSetXssMatchTupleFieldToMatch
+type WAFRegionalXssMatchSetXssMatchTupleFieldToMatchList []WAFRegionalXssMatchSetXssMatchTupleFieldToMatch
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalXssMatchSetXssMatchTupleFieldToMatchList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalXssMatchSetXssMatchTupleFieldToMatch{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalXssMatchSetXssMatchTupleFieldToMatchList{item}
+		return nil
+	}
+	list := []WAFRegionalXssMatchSetXssMatchTupleFieldToMatch{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalXssMatchSetXssMatchTupleFieldToMatchList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalWebACLAction represents AWS WAF Regional WebACL Action
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-webacl-action.html
+type WAFRegionalWebACLAction struct {
+	// For actions that are associated with a rule, the action that AWS WAF
+	// takes when a web request matches all conditions in a rule.
+	Type *StringExpr `json:"Type,omitempty"`
+}
+
+// WAFRegionalWebACLActionList represents a list of WAFRegionalWebACLAction
+type WAFRegionalWebACLActionList []WAFRegionalWebACLAction
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalWebACLActionList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalWebACLAction{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalWebACLActionList{item}
+		return nil
+	}
+	list := []WAFRegionalWebACLAction{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalWebACLActionList(list)
+		return nil
+	}
+	return err
+}
+
+// WAFRegionalWebACLRules represents AWS WAF Regional WebACL Rules
+//
+// see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafregional-webacl-rules.html
+type WAFRegionalWebACLRules struct {
+	// The action that Amazon CloudFront (CloudFront) or AWS WAF takes when a
+	// web request matches all conditions in the rule, such as allow, block,
+	// or count the request.
+	Action *WAFRegionalWebACLAction `json:"Action,omitempty"`
+
+	// The order in which AWS WAF evaluates the rules in a web ACL. AWS WAF
+	// evaluates rules with a lower value before rules with a higher value.
+	// The value must be a unique integer. If you have multiple rules in a
+	// web ACL, the priority numbers do not need to be consecutive.
+	Priority *IntegerExpr `json:"Priority,omitempty"`
+
+	// The ID of an AWS WAF Regional rule to associate with a web ACL.
+	RuleId *StringExpr `json:"RuleId,omitempty"`
+}
+
+// WAFRegionalWebACLRulesList represents a list of WAFRegionalWebACLRules
+type WAFRegionalWebACLRulesList []WAFRegionalWebACLRules
+
+// UnmarshalJSON sets the object from the provided JSON representation
+func (l *WAFRegionalWebACLRulesList) UnmarshalJSON(buf []byte) error {
+	// Cloudformation allows a single object when a list of objects is expected
+	item := WAFRegionalWebACLRules{}
+	if err := json.Unmarshal(buf, &item); err == nil {
+		*l = WAFRegionalWebACLRulesList{item}
+		return nil
+	}
+	list := []WAFRegionalWebACLRules{}
+	err := json.Unmarshal(buf, &list)
+	if err == nil {
+		*l = WAFRegionalWebACLRulesList(list)
+		return nil
+	}
+	return err
+}
+
 // NewResourceByType returns a new resource object correspoding with the provided type
 func NewResourceByType(typeName string) ResourceProperties {
 	switch typeName {
@@ -16802,10 +27295,20 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &ApiGatewayClientCertificate{}
 	case "AWS::ApiGateway::Deployment":
 		return &ApiGatewayDeployment{}
+	case "AWS::ApiGateway::DocumentationPart":
+		return &ApiGatewayDocumentationPart{}
+	case "AWS::ApiGateway::DocumentationVersion":
+		return &ApiGatewayDocumentationVersion{}
+	case "AWS::ApiGateway::DomainName":
+		return &ApiGatewayDomainName{}
+	case "AWS::ApiGateway::GatewayResponse":
+		return &ApiGatewayGatewayResponse{}
 	case "AWS::ApiGateway::Method":
 		return &ApiGatewayMethod{}
 	case "AWS::ApiGateway::Model":
 		return &ApiGatewayModel{}
+	case "AWS::ApiGateway::RequestValidator":
+		return &ApiGatewayRequestValidator{}
 	case "AWS::ApiGateway::Resource":
 		return &ApiGatewayResource{}
 	case "AWS::ApiGateway::RestApi":
@@ -16820,6 +27323,8 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &ApplicationAutoScalingScalableTarget{}
 	case "AWS::ApplicationAutoScaling::ScalingPolicy":
 		return &ApplicationAutoScalingScalingPolicy{}
+	case "AWS::Athena::NamedQuery":
+		return &AthenaNamedQuery{}
 	case "AWS::AutoScaling::AutoScalingGroup":
 		return &AutoScalingAutoScalingGroup{}
 	case "AWS::AutoScaling::LaunchConfiguration":
@@ -16830,8 +27335,16 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &AutoScalingScalingPolicy{}
 	case "AWS::AutoScaling::ScheduledAction":
 		return &AutoScalingScheduledAction{}
+	case "AWS::Batch::ComputeEnvironment":
+		return &BatchComputeEnvironment{}
+	case "AWS::Batch::JobDefinition":
+		return &BatchJobDefinition{}
+	case "AWS::Batch::JobQueue":
+		return &BatchJobQueue{}
 	case "AWS::CertificateManager::Certificate":
 		return &CertificateManagerCertificate{}
+	case "AWS::Cloud9::EnvironmentEC2":
+		return &Cloud9EnvironmentEC2{}
 	case "AWS::CloudFormation::Authentication":
 		return &CloudFormationAuthentication{}
 	case "AWS::CloudFormation::CustomResource":
@@ -16848,10 +27361,16 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &CloudFormationWaitConditionHandle{}
 	case "AWS::CloudFront::Distribution":
 		return &CloudFrontDistribution{}
+	case "AWS::CloudFront::CloudFrontOriginAccessIdentity":
+		return &CloudFrontCloudFrontOriginAccessIdentity{}
+	case "AWS::CloudFront::StreamingDistribution":
+		return &CloudFrontStreamingDistribution{}
 	case "AWS::CloudTrail::Trail":
 		return &CloudTrailTrail{}
 	case "AWS::CloudWatch::Alarm":
 		return &CloudWatchAlarm{}
+	case "AWS::CloudWatch::Dashboard":
+		return &CloudWatchDashboard{}
 	case "AWS::CodeBuild::Project":
 		return &CodeBuildProject{}
 	case "AWS::CodeCommit::Repository":
@@ -16866,6 +27385,20 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &CodePipelineCustomAction{}
 	case "AWS::CodePipeline::Pipeline":
 		return &CodePipelinePipeline{}
+	case "AWS::Cognito::IdentityPool":
+		return &CognitoIdentityPool{}
+	case "AWS::Cognito::IdentityPoolRoleAttachment":
+		return &CognitoIdentityPoolRoleAttachment{}
+	case "AWS::Cognito::UserPool":
+		return &CognitoUserPool{}
+	case "AWS::Cognito::UserPoolClient":
+		return &CognitoUserPoolClient{}
+	case "AWS::Cognito::UserPoolGroup":
+		return &CognitoUserPoolGroup{}
+	case "AWS::Cognito::UserPoolUser":
+		return &CognitoUserPoolUser{}
+	case "AWS::Cognito::UserPoolUserToGroupAttachment":
+		return &CognitoUserPoolUserToGroupAttachment{}
 	case "AWS::Config::ConfigRule":
 		return &ConfigConfigRule{}
 	case "AWS::Config::ConfigurationRecorder":
@@ -16874,16 +27407,36 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &ConfigDeliveryChannel{}
 	case "AWS::DataPipeline::Pipeline":
 		return &DataPipelinePipeline{}
+	case "AWS::DAX::Cluster":
+		return &DAXCluster{}
+	case "AWS::DAX::ParameterGroup":
+		return &DAXParameterGroup{}
+	case "AWS::DAX::SubnetGroup":
+		return &DAXSubnetGroup{}
 	case "AWS::DirectoryService::MicrosoftAD":
 		return &DirectoryServiceMicrosoftAD{}
 	case "AWS::DirectoryService::SimpleAD":
 		return &DirectoryServiceSimpleAD{}
+	case "AWS::DMS::Certificate":
+		return &DMSCertificate{}
+	case "AWS::DMS::Endpoint":
+		return &DMSEndpoint{}
+	case "AWS::DMS::EventSubscription":
+		return &DMSEventSubscription{}
+	case "AWS::DMS::ReplicationInstance":
+		return &DMSReplicationInstance{}
+	case "AWS::DMS::ReplicationSubnetGroup":
+		return &DMSReplicationSubnetGroup{}
+	case "AWS::DMS::ReplicationTask":
+		return &DMSReplicationTask{}
 	case "AWS::DynamoDB::Table":
 		return &DynamoDBTable{}
 	case "AWS::EC2::CustomerGateway":
 		return &EC2CustomerGateway{}
 	case "AWS::EC2::DHCPOptions":
 		return &EC2DHCPOptions{}
+	case "AWS::EC2::EgressOnlyInternetGateway":
+		return &EC2EgressOnlyInternetGateway{}
 	case "AWS::EC2::EIP":
 		return &EC2EIP{}
 	case "AWS::EC2::EIPAssociation":
@@ -16906,6 +27459,8 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &EC2NetworkInterface{}
 	case "AWS::EC2::NetworkInterfaceAttachment":
 		return &EC2NetworkInterfaceAttachment{}
+	case "AWS::EC2::NetworkInterfacePermission":
+		return &EC2NetworkInterfacePermission{}
 	case "AWS::EC2::PlacementGroup":
 		return &EC2PlacementGroup{}
 	case "AWS::EC2::Route":
@@ -16988,6 +27543,8 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &ElasticLoadBalancingLoadBalancer{}
 	case "AWS::ElasticLoadBalancingV2::Listener":
 		return &ElasticLoadBalancingV2Listener{}
+	case "AWS::ElasticLoadBalancingV2::ListenerCertificate":
+		return &ElasticLoadBalancingV2ListenerCertificate{}
 	case "AWS::ElasticLoadBalancingV2::ListenerRule":
 		return &ElasticLoadBalancingV2ListenerRule{}
 	case "AWS::ElasticLoadBalancingV2::LoadBalancer":
@@ -16998,8 +27555,12 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &ElasticsearchDomain{}
 	case "AWS::EMR::Cluster":
 		return &EMRCluster{}
+	case "AWS::EMR::InstanceFleetConfig":
+		return &EMRInstanceFleetConfig{}
 	case "AWS::EMR::InstanceGroupConfig":
 		return &EMRInstanceGroupConfig{}
+	case "AWS::EMR::SecurityConfiguration":
+		return &EMRSecurityConfiguration{}
 	case "AWS::EMR::Step":
 		return &EMRStep{}
 	case "AWS::Events::Rule":
@@ -17010,6 +27571,30 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &GameLiftBuild{}
 	case "AWS::GameLift::Fleet":
 		return &GameLiftFleet{}
+	case "AWS::Glue::Classifier":
+		return &GlueClassifier{}
+	case "AWS::Glue::Connection":
+		return &GlueConnection{}
+	case "AWS::Glue::Crawler":
+		return &GlueCrawler{}
+	case "AWS::Glue::Database":
+		return &GlueDatabase{}
+	case "AWS::Glue::DevEndpoint":
+		return &GlueDevEndpoint{}
+	case "AWS::Glue::Job":
+		return &GlueJob{}
+	case "AWS::Glue::Partition":
+		return &GluePartition{}
+	case "AWS::Glue::Table":
+		return &GlueTable{}
+	case "AWS::Glue::Trigger":
+		return &GlueTrigger{}
+	case "AWS::GuardDuty::Detector":
+		return &GuardDutyDetector{}
+	case "AWS::GuardDuty::IPSet":
+		return &GuardDutyIPSet{}
+	case "AWS::GuardDuty::ThreatIntelSet":
+		return &GuardDutyThreatIntelSet{}
 	case "AWS::IAM::AccessKey":
 		return &IAMAccessKey{}
 	case "AWS::IAM::Group":
@@ -17024,6 +27609,12 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &IAMRole{}
 	case "AWS::IAM::User":
 		return &IAMUser{}
+	case "AWS::Inspector::AssessmentTarget":
+		return &InspectorAssessmentTarget{}
+	case "AWS::Inspector::AssessmentTemplate":
+		return &InspectorAssessmentTemplate{}
+	case "AWS::Inspector::ResourceGroup":
+		return &InspectorResourceGroup{}
 	case "AWS::IAM::UserToGroupAddition":
 		return &IAMUserToGroupAddition{}
 	case "AWS::IoT::Certificate":
@@ -17040,6 +27631,12 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &IoTTopicRule{}
 	case "AWS::Kinesis::Stream":
 		return &KinesisStream{}
+	case "AWS::KinesisAnalytics::Application":
+		return &KinesisAnalyticsApplication{}
+	case "AWS::KinesisAnalytics::ApplicationOutput":
+		return &KinesisAnalyticsApplicationOutput{}
+	case "AWS::KinesisAnalytics::ApplicationReferenceDataSource":
+		return &KinesisAnalyticsApplicationReferenceDataSource{}
 	case "AWS::KinesisFirehose::DeliveryStream":
 		return &KinesisFirehoseDeliveryStream{}
 	case "AWS::KMS::Alias":
@@ -17122,6 +27719,14 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &S3BucketPolicy{}
 	case "AWS::SDB::Domain":
 		return &SDBDomain{}
+	case "AWS::ServiceDiscovery::Instance":
+		return &ServiceDiscoveryInstance{}
+	case "AWS::ServiceDiscovery::PrivateDnsNamespace":
+		return &ServiceDiscoveryPrivateDnsNamespace{}
+	case "AWS::ServiceDiscovery::PublicDnsNamespace":
+		return &ServiceDiscoveryPublicDnsNamespace{}
+	case "AWS::ServiceDiscovery::Service":
+		return &ServiceDiscoveryService{}
 	case "AWS::SNS::Subscription":
 		return &SNSSubscription{}
 	case "AWS::SNS::Topic":
@@ -17136,8 +27741,16 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &SSMAssociation{}
 	case "AWS::SSM::Document":
 		return &SSMDocument{}
+	case "AWS::SSM::MaintenanceWindow":
+		return &SSMMaintenanceWindow{}
+	case "AWS::SSM::MaintenanceWindowTarget":
+		return &SSMMaintenanceWindowTarget{}
+	case "AWS::SSM::MaintenanceWindowTask":
+		return &SSMMaintenanceWindowTask{}
 	case "AWS::SSM::Parameter":
 		return &SSMParameter{}
+	case "AWS::SSM::PatchBaseline":
+		return &SSMPatchBaseline{}
 	case "AWS::StepFunctions::Activity":
 		return &StepFunctionsActivity{}
 	case "AWS::StepFunctions::StateMachine":
@@ -17156,6 +27769,22 @@ func NewResourceByType(typeName string) ResourceProperties {
 		return &WAFWebACL{}
 	case "AWS::WAF::XssMatchSet":
 		return &WAFXssMatchSet{}
+	case "AWS::WAFRegional::ByteMatchSet":
+		return &WAFRegionalByteMatchSet{}
+	case "AWS::WAFRegional::IPSet":
+		return &WAFRegionalIPSet{}
+	case "AWS::WAFRegional::Rule":
+		return &WAFRegionalRule{}
+	case "AWS::WAFRegional::SizeConstraintSet":
+		return &WAFRegionalSizeConstraintSet{}
+	case "AWS::WAFRegional::SqlInjectionMatchSet":
+		return &WAFRegionalSqlInjectionMatchSet{}
+	case "AWS::WAFRegional::WebACL":
+		return &WAFRegionalWebACL{}
+	case "AWS::WAFRegional::WebACLAssociation":
+		return &WAFRegionalWebACLAssociation{}
+	case "AWS::WAFRegional::XssMatchSet":
+		return &WAFRegionalXssMatchSet{}
 	case "AWS::WorkSpaces::Workspace":
 		return &WorkSpacesWorkspace{}
 
